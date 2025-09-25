@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Collection, Request, TestResult, User } from '../database/DatabaseManager';
 import { TestExplorer } from './TestExplorer';
+import { ModernButton, CollectionIcon, TestIcon, AddIcon } from './ModernButton';
 
 interface EnhancedSidebarProps {
   user: User;
@@ -106,13 +107,17 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
           >
             📁+
           </button>
-          <button
-            className="header-action-button"
+          <ModernButton
             onClick={onNewRequest}
-            title="New Request"
-          >
-            ➕
-          </button>
+            variant="primary"
+            size="small"
+            icon={<AddIcon />}
+            style={{ 
+              padding: '6px 8px',
+              minWidth: '32px',
+              minHeight: '32px'
+            }}
+          />
         </div>
       </div>
 
@@ -121,7 +126,9 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
         <button
           className={`sidebar-tab ${activeTab === 'collections' ? 'active' : ''}`}
           onClick={() => setActiveTab('collections')}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
         >
+          <CollectionIcon />
           Collections
           <span className="tab-count">{collections.length}</span>
         </button>
@@ -130,7 +137,9 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
           <button
             className={`sidebar-tab ${activeTab === 'tests' ? 'active' : ''}`}
             onClick={() => setActiveTab('tests')}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           >
+            <TestIcon />
             Tests
             <span className="tab-count">{allRequests.length}</span>
           </button>
@@ -148,9 +157,14 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                 <p className="text-small text-muted">
                   Create your first collection to organize your requests
                 </p>
-                <button className="create-collection-button" onClick={onNewCollection}>
+                <ModernButton
+                  onClick={onNewCollection}
+                  variant="success"
+                  icon={<CollectionIcon />}
+                  style={{ marginTop: '12px' }}
+                >
                   Create Collection
-                </button>
+                </ModernButton>
               </div>
             ) : (
               collections.map(collection => (
