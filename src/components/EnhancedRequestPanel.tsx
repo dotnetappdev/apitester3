@@ -159,6 +159,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
             value={request.method}
             onChange={(e) => updateRequest({ method: e.target.value })}
             style={{ borderColor: getMethodColor(request.method) }}
+            disabled={!request.url}
           >
             <option value="GET">GET</option>
             <option value="POST">POST</option>

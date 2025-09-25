@@ -116,6 +116,7 @@ export const RequestPanel: React.FC<RequestPanelProps> = ({
           className="form-select method-select"
           value={request.method}
           onChange={(e) => updateRequest({ method: e.target.value as ApiRequest['method'] })}
+          disabled={!request.url}
         >
           <option value="GET">GET</option>
           <option value="POST">POST</option>
