@@ -7,10 +7,12 @@ import { EnhancedSidebar } from './EnhancedSidebar';
 import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
 import { SettingsDialog } from './SettingsDialog';
+import { ImportExportDialog } from './ImportExportDialog';
 import { DocumentationDialog } from './DocumentationDialog';
 import { Splitter } from './Splitter';
 import { ApiClient } from '../utils/api';
 import { ApiResponse } from '../types';
+import { TestSuite } from '../testing/TestRunner';
 
 export const EnhancedApp: React.FC = () => {
   // Core state
@@ -23,6 +25,7 @@ export const EnhancedApp: React.FC = () => {
   
   // UI state
   const [showSettings, setShowSettings] = useState(false);
+  const [showImportExport, setShowImportExport] = useState<'import' | 'export' | null>(null);
   const [showDocumentation, setShowDocumentation] = useState(false);
   const [documentationType, setDocumentationType] = useState<'overview' | 'unit-testing' | null>(null);
   const [splitterPosition, setSplitterPosition] = useState(50);
@@ -30,8 +33,9 @@ export const EnhancedApp: React.FC = () => {
   const [enableSyntaxHighlighting, setEnableSyntaxHighlighting] = useState(true);
   const [enableTestExplorer, setEnableTestExplorer] = useState(true);
   
-  // Test results
+  // Test results and test suites
   const [testResults, setTestResults] = useState<Map<number, TestResult[]>>(new Map());
+  const [testSuites] = useState<TestSuite[]>([]);
   
   // Managers
   const [dbManager] = useState(() => new DatabaseManager());
@@ -96,24 +100,37 @@ export const EnhancedApp: React.FC = () => {
 
   // Listen for menu events from Electron
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.electronAPI) {
+    if (typeof window !== 'undefined' && (window as any).electronAPI) {
+      // Menu event handlers for import/export
+      const handleMenuImportCollection = () => setShowImportExport('import');
+      const handleMenuExportCollection = () => setShowImportExport('export');
+      const handleMenuNewCollection = () => handleNewCollection();
+
       // Handle documentation menu events
-      window.electronAPI.onMenuShowOverview(() => {
+      const handleMenuShowOverview = () => {
         setDocumentationType('overview');
         setShowDocumentation(true);
-      });
+      };
 
-      window.electronAPI.onMenuShowUnitTesting(() => {
+      const handleMenuShowUnitTesting = () => {
         setDocumentationType('unit-testing');
         setShowDocumentation(true);
-      });
+      };
 
-      // Cleanup listeners on unmount
+      // Set up listeners
+      (window as any).electronAPI.onMenuImportCollection?.(handleMenuImportCollection);
+      (window as any).electronAPI.onMenuExportCollection?.(handleMenuExportCollection);
+      (window as any).electronAPI.onMenuNewCollection?.(handleMenuNewCollection);
+      (window as any).electronAPI.onMenuShowOverview?.(handleMenuShowOverview);
+      (window as any).electronAPI.onMenuShowUnitTesting?.(handleMenuShowUnitTesting);
+
+      // Cleanup
       return () => {
-        if (window.electronAPI) {
-          window.electronAPI.removeAllListeners('menu-show-overview');
-          window.electronAPI.removeAllListeners('menu-show-unit-testing');
-        }
+        (window as any).electronAPI.removeAllListeners?.('menu-import-collection');
+        (window as any).electronAPI.removeAllListeners?.('menu-export-collection');
+        (window as any).electronAPI.removeAllListeners?.('menu-new-collection');
+        (window as any).electronAPI.removeAllListeners?.('menu-show-overview');
+        (window as any).electronAPI.removeAllListeners?.('menu-show-unit-testing');
       };
     }
   }, []);
@@ -296,6 +313,62 @@ export const EnhancedApp: React.FC = () => {
     return results;
   };
 
+  const handleExportCollections = async (selectedCollections: Collection[], selectedTestSuites: TestSuite[]) => {
+    if (!currentUser) return;
+
+    try {
+      const result = await (window as any).electronAPI.exportCollection({
+        collections: selectedCollections,
+        testSuites: selectedTestSuites,
+        exportedBy: currentUser.username
+      });
+
+      if (result.success) {
+        console.log('Export successful:', result.stats);
+        // Could show a success notification here
+      } else if (result.error) {
+        console.error('Export failed:', result.error);
+        // Could show an error notification here
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const handleImportCollections = async (importData: any, _options: any) => {
+    if (!currentUser) return;
+
+    try {
+      // Create collections in the database
+      for (const collection of importData.collections) {
+        const collectionId = await dbManager.createCollection(
+          collection.name,
+          collection.description || '',
+          collection.ownerId
+        );
+
+        // Create requests for this collection
+        if (collection.requests) {
+          for (const request of collection.requests) {
+            await dbManager.createRequest({
+              ...request,
+              collectionId: collectionId
+            });
+          }
+        }
+      }
+
+      // Reload collections to show imported data
+      await loadUserCollections(currentUser.id);
+      
+      console.log('Import successful');
+      // Could show a success notification here
+    } catch (error) {
+      console.error('Import failed:', error);
+      // Could show an error notification here
+    }
+  };
+
   if (!isInitialized) {
     return (
       <div className="app-loading">
@@ -379,6 +452,19 @@ export const EnhancedApp: React.FC = () => {
           isOpen={showSettings}
           onClose={() => setShowSettings(false)}
           settingsManager={settingsManager}
+        />
+      )}
+
+      {showImportExport && currentUser && (
+        <ImportExportDialog
+          isOpen={true}
+          mode={showImportExport}
+          currentUser={currentUser}
+          collections={collections}
+          testSuites={testSuites}
+          onClose={() => setShowImportExport(null)}
+          onImport={handleImportCollections}
+          onExport={handleExportCollections}
         />
       )}
 
