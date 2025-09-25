@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ApiRequest, ApiResponse } from '../types';
+import { ApiRequest, ApiResponse, Environment } from '../types';
+import { EnvironmentVariableManager } from './environmentVariables';
 
 // Remove the imports since we'll call the main process instead
 // import { SoapClient } from './soapClient';
@@ -16,15 +17,20 @@ declare global {
 }
 
 export class ApiClient {
-  static async makeRequest(request: ApiRequest): Promise<ApiResponse> {
+  static async makeRequest(request: ApiRequest, environment?: Environment | null): Promise<ApiResponse> {
+    // Process environment variables first
+    const processedRequest = environment 
+      ? EnvironmentVariableManager.processRequest(request, environment)
+      : request;
+
     // Route to appropriate client based on method type
-    switch (request.method) {
+    switch (processedRequest.method) {
       case 'SOAP':
-        return this.makeSoapRequest(request);
+        return this.makeSoapRequest(processedRequest);
       case 'GRPC':
-        return this.makeGrpcRequest(request);
+        return this.makeGrpcRequest(processedRequest);
       default:
-        return this.makeHttpRequest(request);
+        return this.makeHttpRequest(processedRequest);
     }
   }
 

@@ -45,11 +45,19 @@ export interface ApiResponse {
   size: number;
 }
 
+export interface Environment {
+  id: string;
+  name: string;
+  variables: Record<string, string>;
+  isActive?: boolean;
+}
+
 export interface Collection {
   id: string;
   name: string;
   requests: ApiRequest[];
   folders: Folder[];
+  environment?: Environment;
 }
 
 export interface Folder {
@@ -59,10 +67,21 @@ export interface Folder {
   folders: Folder[];
 }
 
+export interface RequestHistory {
+  id: string;
+  request: ApiRequest;
+  response: ApiResponse;
+  timestamp: string;
+  isFavorite?: boolean;
+}
+
 export interface AppState {
   activeRequest: ApiRequest | null;
   collections: Collection[];
+  environments: Environment[];
+  activeEnvironment: Environment | null;
   response: ApiResponse | null;
   isLoading: boolean;
   sidebarWidth: number;
+  requestHistory: RequestHistory[];
 }
