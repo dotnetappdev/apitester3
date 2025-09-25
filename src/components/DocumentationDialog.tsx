@@ -1,5 +1,4 @@
 import React from 'react';
-import { join } from 'path';
 
 interface DocumentationDialogProps {
   isOpen: boolean;
@@ -36,156 +35,142 @@ export const DocumentationDialog: React.FC<DocumentationDialogProps> = ({
     }
   };
 
+  // Style definitions
+  const dialogOverlayStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    backdropFilter: 'blur(3px)'
+  };
+
+  const dialogStyle: React.CSSProperties = {
+    backgroundColor: '#252526',
+    borderRadius: '8px',
+    width: '90vw',
+    height: '90vh',
+    maxWidth: '1400px',
+    maxHeight: '1000px',
+    display: 'flex',
+    flexDirection: 'column',
+    border: '1px solid #404040',
+    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
+  };
+
+  const headerStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '16px 20px',
+    borderBottom: '1px solid #404040',
+    backgroundColor: '#2d2d30',
+    borderRadius: '8px 8px 0 0'
+  };
+
+  const titleStyle: React.CSSProperties = {
+    margin: 0,
+    color: '#4fc3f7',
+    fontSize: '1.2em',
+    fontWeight: 600
+  };
+
+  const closeButtonStyle: React.CSSProperties = {
+    background: 'none',
+    border: 'none',
+    color: '#d4d4d4',
+    fontSize: '24px',
+    cursor: 'pointer',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    transition: 'all 0.2s ease'
+  };
+
+  const contentStyle: React.CSSProperties = {
+    flex: 1,
+    padding: 0,
+    overflow: 'hidden'
+  };
+
+  const iframeStyle: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    border: 'none',
+    backgroundColor: '#1e1e1e'
+  };
+
+  const footerStyle: React.CSSProperties = {
+    padding: '16px 20px',
+    borderTop: '1px solid #404040',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    backgroundColor: '#2d2d30',
+    borderRadius: '0 0 8px 8px'
+  };
+
+  const buttonStyle: React.CSSProperties = {
+    padding: '8px 16px',
+    borderRadius: '4px',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: 500,
+    transition: 'all 0.2s ease',
+    backgroundColor: '#404040',
+    color: '#d4d4d4'
+  };
+
   return (
-    <div className="dialog-overlay" onClick={handleOverlayClick}>
-      <div className="documentation-dialog">
-        <div className="dialog-header">
-          <h2>{getDocumentTitle(documentType)}</h2>
+    <div style={dialogOverlayStyle} onClick={handleOverlayClick}>
+      <div style={dialogStyle}>
+        <div style={headerStyle}>
+          <h2 style={titleStyle}>{getDocumentTitle(documentType)}</h2>
           <button 
-            className="dialog-close-btn"
+            style={closeButtonStyle}
             onClick={onClose}
             aria-label="Close documentation"
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.backgroundColor = '#404040';
+              (e.target as HTMLElement).style.color = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.backgroundColor = 'transparent';
+              (e.target as HTMLElement).style.color = '#d4d4d4';
+            }}
           >
             ×
           </button>
         </div>
-        <div className="dialog-content">
+        <div style={contentStyle}>
           <iframe
             src={getDocumentPath(documentType)}
             title={getDocumentTitle(documentType)}
-            className="documentation-iframe"
+            style={iframeStyle}
             sandbox="allow-same-origin allow-scripts"
           />
         </div>
-        <div className="dialog-footer">
-          <button className="btn btn-secondary" onClick={onClose}>
+        <div style={footerStyle}>
+          <button 
+            style={buttonStyle} 
+            onClick={onClose}
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.backgroundColor = '#505050';
+              (e.target as HTMLElement).style.color = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.backgroundColor = '#404040';
+              (e.target as HTMLElement).style.color = '#d4d4d4';
+            }}
+          >
             Close
           </button>
         </div>
       </div>
-      
-      <style jsx>{`
-        .dialog-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: rgba(0, 0, 0, 0.8);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-          backdrop-filter: blur(3px);
-        }
-        
-        .documentation-dialog {
-          background-color: #252526;
-          border-radius: 8px;
-          width: 90vw;
-          height: 90vh;
-          max-width: 1400px;
-          max-height: 1000px;
-          display: flex;
-          flex-direction: column;
-          border: 1px solid #404040;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-        
-        .dialog-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 16px 20px;
-          border-bottom: 1px solid #404040;
-          background-color: #2d2d30;
-          border-radius: 8px 8px 0 0;
-        }
-        
-        .dialog-header h2 {
-          margin: 0;
-          color: #4fc3f7;
-          font-size: 1.2em;
-          font-weight: 600;
-        }
-        
-        .dialog-close-btn {
-          background: none;
-          border: none;
-          color: #d4d4d4;
-          font-size: 24px;
-          cursor: pointer;
-          padding: 4px 8px;
-          border-radius: 4px;
-          transition: all 0.2s ease;
-        }
-        
-        .dialog-close-btn:hover {
-          background-color: #404040;
-          color: #ffffff;
-        }
-        
-        .dialog-content {
-          flex: 1;
-          padding: 0;
-          overflow: hidden;
-        }
-        
-        .documentation-iframe {
-          width: 100%;
-          height: 100%;
-          border: none;
-          background-color: #1e1e1e;
-        }
-        
-        .dialog-footer {
-          padding: 16px 20px;
-          border-top: 1px solid #404040;
-          display: flex;
-          justify-content: flex-end;
-          background-color: #2d2d30;
-          border-radius: 0 0 8px 8px;
-        }
-        
-        .btn {
-          padding: 8px 16px;
-          border-radius: 4px;
-          border: none;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 500;
-          transition: all 0.2s ease;
-        }
-        
-        .btn-secondary {
-          background-color: #404040;
-          color: #d4d4d4;
-        }
-        
-        .btn-secondary:hover {
-          background-color: #505050;
-          color: #ffffff;
-        }
-        
-        @media (max-width: 768px) {
-          .documentation-dialog {
-            width: 95vw;
-            height: 95vh;
-          }
-          
-          .dialog-header {
-            padding: 12px 16px;
-          }
-          
-          .dialog-header h2 {
-            font-size: 1.1em;
-          }
-          
-          .dialog-footer {
-            padding: 12px 16px;
-          }
-        }
-      `}</style>
     </div>
   );
 };
