@@ -8,6 +8,7 @@ import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
 import { SettingsDialog } from './SettingsDialog';
 import { ImportExportDialog } from './ImportExportDialog';
+import { DocumentationDialog } from './DocumentationDialog';
 import { Splitter } from './Splitter';
 import { ApiClient } from '../utils/api';
 import { ApiResponse } from '../types';
@@ -25,6 +26,8 @@ export const EnhancedApp: React.FC = () => {
   // UI state
   const [showSettings, setShowSettings] = useState(false);
   const [showImportExport, setShowImportExport] = useState<'import' | 'export' | null>(null);
+  const [showDocumentation, setShowDocumentation] = useState(false);
+  const [documentationType, setDocumentationType] = useState<'overview' | 'unit-testing' | null>(null);
   const [splitterPosition, setSplitterPosition] = useState(50);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [enableSyntaxHighlighting, setEnableSyntaxHighlighting] = useState(true);
@@ -95,24 +98,39 @@ export const EnhancedApp: React.FC = () => {
     return unsubscribe;
   }, [settingsManager]);
 
-  // Listen for menu events from electron
+  // Listen for menu events from Electron
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).electronAPI) {
-      // Menu event handlers
+      // Menu event handlers for import/export
       const handleMenuImportCollection = () => setShowImportExport('import');
       const handleMenuExportCollection = () => setShowImportExport('export');
       const handleMenuNewCollection = () => handleNewCollection();
 
+      // Handle documentation menu events
+      const handleMenuShowOverview = () => {
+        setDocumentationType('overview');
+        setShowDocumentation(true);
+      };
+
+      const handleMenuShowUnitTesting = () => {
+        setDocumentationType('unit-testing');
+        setShowDocumentation(true);
+      };
+
       // Set up listeners
-      (window as any).electronAPI.onMenuImportCollection(handleMenuImportCollection);
-      (window as any).electronAPI.onMenuExportCollection(handleMenuExportCollection);
-      (window as any).electronAPI.onMenuNewCollection(handleMenuNewCollection);
+      (window as any).electronAPI.onMenuImportCollection?.(handleMenuImportCollection);
+      (window as any).electronAPI.onMenuExportCollection?.(handleMenuExportCollection);
+      (window as any).electronAPI.onMenuNewCollection?.(handleMenuNewCollection);
+      (window as any).electronAPI.onMenuShowOverview?.(handleMenuShowOverview);
+      (window as any).electronAPI.onMenuShowUnitTesting?.(handleMenuShowUnitTesting);
 
       // Cleanup
       return () => {
-        (window as any).electronAPI.removeAllListeners('menu-import-collection');
-        (window as any).electronAPI.removeAllListeners('menu-export-collection');
-        (window as any).electronAPI.removeAllListeners('menu-new-collection');
+        (window as any).electronAPI.removeAllListeners?.('menu-import-collection');
+        (window as any).electronAPI.removeAllListeners?.('menu-export-collection');
+        (window as any).electronAPI.removeAllListeners?.('menu-new-collection');
+        (window as any).electronAPI.removeAllListeners?.('menu-show-overview');
+        (window as any).electronAPI.removeAllListeners?.('menu-show-unit-testing');
       };
     }
   }, []);
@@ -447,6 +465,14 @@ export const EnhancedApp: React.FC = () => {
           onClose={() => setShowImportExport(null)}
           onImport={handleImportCollections}
           onExport={handleExportCollections}
+        />
+      )}
+
+      {showDocumentation && (
+        <DocumentationDialog
+          isOpen={showDocumentation}
+          onClose={() => setShowDocumentation(false)}
+          documentType={documentationType}
         />
       )}
     </div>

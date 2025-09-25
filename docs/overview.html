@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester 3 - Application Overview</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: #569cd6;
+            border-bottom: 2px solid #404040;
+            padding-bottom: 10px;
+        }
+        h1 {
+            color: #4fc3f7;
+            text-align: center;
+            font-size: 2.5em;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #252526;
+            border-radius: 8px;
+            border-left: 4px solid #007acc;
+        }
+        .highlight {
+            background-color: #264f78;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 4px solid #007acc;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            background-color: #2d2d30;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #404040;
+        }
+        .feature-card h3 {
+            margin-top: 0;
+            color: #4fc3f7;
+            border-bottom: 1px solid #404040;
+        }
+        .toc {
+            background-color: #2d2d30;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #404040;
+            margin-bottom: 30px;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        .toc a {
+            color: #4fc3f7;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .tech-item {
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #404040;
+            text-align: center;
+        }
+        .tech-item h4 {
+            margin: 0 0 10px 0;
+            color: #4fc3f7;
+        }
+        .workflow-step {
+            background-color: #2d2d30;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4caf50;
+            border-radius: 0 4px 4px 0;
+        }
+        .workflow-step h4 {
+            margin: 0 0 10px 0;
+            color: #4caf50;
+        }
+        .shortcut-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: #2d2d30;
+        }
+        .shortcut-table th,
+        .shortcut-table td {
+            border: 1px solid #404040;
+            padding: 12px;
+            text-align: left;
+        }
+        .shortcut-table th {
+            background-color: #1e1e1e;
+            color: #4fc3f7;
+            font-weight: bold;
+        }
+        .shortcut-table tr:nth-child(even) {
+            background-color: #252526;
+        }
+        .kbd {
+            background-color: #1e1e1e;
+            border: 1px solid #404040;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 API Tester 3 - Application Overview</h1>
+        
+        <div class="toc">
+            <h2>📋 Table of Contents</h2>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#key-features">Key Features</a></li>
+                <li><a href="#interface-overview">Interface Overview</a></li>
+                <li><a href="#workflow">Typical Workflow</a></li>
+                <li><a href="#tech-stack">Technology Stack</a></li>
+                <li><a href="#keyboard-shortcuts">Keyboard Shortcuts</a></li>
+                <li><a href="#security">Security Features</a></li>
+                <li><a href="#getting-help">Getting Help</a></li>
+            </ul>
+        </div>
+
+        <div id="introduction" class="section">
+            <h2>📋 Introduction</h2>
+            <p>API Tester 3 is a professional, local-first desktop API testing tool inspired by Postman, built with Electron, React, and TypeScript. It provides a comprehensive solution for testing REST APIs with enterprise-level security and advanced testing capabilities.</p>
+            
+            <div class="highlight">
+                <strong>🎯 Mission:</strong> Provide developers with a powerful, secure, and user-friendly tool for API testing that keeps data local and prioritizes privacy while offering professional-grade features.
+            </div>
+        </div>
+
+        <div id="key-features" class="section">
+            <h2>⭐ Key Features</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>🖥️ Desktop Application</h3>
+                    <p>Cross-platform Electron app for Windows, macOS, and Linux with native performance and features.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🎨 Modern UI</h3>
+                    <p>React + TypeScript frontend with Visual Studio Code inspired design and dark theme support.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📱 Two-Pane Layout</h3>
+                    <p>Familiar Postman-style interface with request and response panels for efficient workflow.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🌐 HTTP Methods</h3>
+                    <p>Support for GET, POST, PUT, DELETE, PATCH, HEAD, and OPTIONS requests.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔐 Authentication</h3>
+                    <p>Bearer token, Basic auth, and API key authentication with secure storage.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📂 Organization</h3>
+                    <p>Collections and folders to organize your API requests with sharing capabilities.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📊 Response Analysis</h3>
+                    <p>JSON formatting, headers inspection, response metrics, and performance tracking.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🧪 Advanced Testing</h3>
+                    <p>Visual Studio-style test runner with comprehensive assertion framework.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔒 Enterprise Security</h3>
+                    <p>Local-first approach with AES-256 encryption and secure request handling.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="interface-overview" class="section">
+            <h2>🖼️ Interface Overview</h2>
+            
+            <h3>Main Interface Components</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>📄 Sidebar (Left Panel)</h3>
+                    <ul>
+                        <li>Collections and folder tree</li>
+                        <li>Request history</li>
+                        <li>Test Explorer</li>
+                        <li>User profile and settings</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>⚙️ Request Panel (Center)</h3>
+                    <ul>
+                        <li>HTTP method and URL input</li>
+                        <li>Headers configuration</li>
+                        <li>Request body editor</li>
+                        <li>Authentication settings</li>
+                        <li>Tests tab for test scripts</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>📊 Response Panel (Right)</h3>
+                    <ul>
+                        <li>Response status and time</li>
+                        <li>Response headers</li>
+                        <li>JSON formatted body</li>
+                        <li>Response size and metrics</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Navigation Elements</h3>
+            <ul>
+                <li><strong>Menu Bar:</strong> File, Edit, View, and Help menus with standard shortcuts</li>
+                <li><strong>Toolbar:</strong> Quick access to common actions like Send, Save, and New Request</li>
+                <li><strong>Tabs:</strong> Multiple request tabs for working with several APIs simultaneously</li>
+                <li><strong>Status Bar:</strong> Connection status, authentication state, and app information</li>
+            </ul>
+        </div>
+
+        <div id="workflow" class="section">
+            <h2>🔄 Typical Workflow</h2>
+            
+            <div class="workflow-step">
+                <h4>1. Authentication & Setup</h4>
+                <p>Login with your credentials or create a new account. The app uses secure local authentication with encrypted password storage.</p>
+            </div>
+            
+            <div class="workflow-step">
+                <h4>2. Create Collections</h4>
+                <p>Organize your API requests by creating collections for different projects or API endpoints. Use folders for further organization.</p>
+            </div>
+            
+            <div class="workflow-step">
+                <h4>3. Build Requests</h4>
+                <p>Create new HTTP requests by specifying the method, URL, headers, and body. Configure authentication as needed.</p>
+            </div>
+            
+            <div class="workflow-step">
+                <h4>4. Send & Analyze</h4>
+                <p>Send requests and analyze responses. Review status codes, headers, response times, and JSON data formatting.</p>
+            </div>
+            
+            <div class="workflow-step">
+                <h4>5. Write Tests</h4>
+                <p>Add test scripts to validate API responses automatically. Use the Visual Studio-style assertion framework.</p>
+            </div>
+            
+            <div class="workflow-step">
+                <h4>6. Run Test Suites</h4>
+                <p>Execute individual tests or entire test suites. Review detailed test results and performance metrics.</p>
+            </div>
+        </div>
+
+        <div id="tech-stack" class="section">
+            <h2>💻 Technology Stack</h2>
+            <p>API Tester 3 is built using modern, reliable technologies:</p>
+            
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <h4>Frontend</h4>
+                    <p>React 18 + TypeScript</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Desktop</h4>
+                    <p>Electron 25</p>
+                </div>
+                <div class="tech-item">
+                    <h4>HTTP Client</h4>
+                    <p>Axios</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Database</h4>
+                    <p>SQLite</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Build System</h4>
+                    <p>Vite + TypeScript</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Styling</h4>
+                    <p>Custom CSS + VS Code Theme</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Code Editor</h4>
+                    <p>Monaco Editor</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Security</h4>
+                    <p>AES-256 + bcrypt</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="keyboard-shortcuts" class="section">
+            <h2>⌨️ Keyboard Shortcuts</h2>
+            <p>Speed up your workflow with these keyboard shortcuts:</p>
+            
+            <table class="shortcut-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Windows/Linux</th>
+                        <th>macOS</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>New Request</td>
+                        <td><span class="kbd">Ctrl+N</span></td>
+                        <td><span class="kbd">Cmd+N</span></td>
+                        <td>Create a new HTTP request</td>
+                    </tr>
+                    <tr>
+                        <td>Open Collection</td>
+                        <td><span class="kbd">Ctrl+O</span></td>
+                        <td><span class="kbd">Cmd+O</span></td>
+                        <td>Open an existing collection</td>
+                    </tr>
+                    <tr>
+                        <td>Send Request</td>
+                        <td><span class="kbd">Ctrl+Enter</span></td>
+                        <td><span class="kbd">Cmd+Enter</span></td>
+                        <td>Send the current HTTP request</td>
+                    </tr>
+                    <tr>
+                        <td>Save Request</td>
+                        <td><span class="kbd">Ctrl+S</span></td>
+                        <td><span class="kbd">Cmd+S</span></td>
+                        <td>Save the current request</td>
+                    </tr>
+                    <tr>
+                        <td>Toggle Dev Tools</td>
+                        <td><span class="kbd">F12</span></td>
+                        <td><span class="kbd">Cmd+Opt+I</span></td>
+                        <td>Open developer tools</td>
+                    </tr>
+                    <tr>
+                        <td>Reload</td>
+                        <td><span class="kbd">Ctrl+R</span></td>
+                        <td><span class="kbd">Cmd+R</span></td>
+                        <td>Reload the application</td>
+                    </tr>
+                    <tr>
+                        <td>Quit</td>
+                        <td><span class="kbd">Ctrl+Q</span></td>
+                        <td><span class="kbd">Cmd+Q</span></td>
+                        <td>Quit the application</td>
+                    </tr>
+                    <tr>
+                        <td>Zoom In</td>
+                        <td><span class="kbd">Ctrl++</span></td>
+                        <td><span class="kbd">Cmd++</span></td>
+                        <td>Increase interface size</td>
+                    </tr>
+                    <tr>
+                        <td>Zoom Out</td>
+                        <td><span class="kbd">Ctrl+-</span></td>
+                        <td><span class="kbd">Cmd+-</span></td>
+                        <td>Decrease interface size</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="security" class="section">
+            <h2>🔒 Security Features</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>🏠 Local-First Architecture</h3>
+                    <p>All data is stored locally on your machine. No cloud dependencies or data transmission to external servers.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔐 AES-256 Encryption</h3>
+                    <p>Passwords and sensitive data are encrypted using industry-standard AES-256 encryption with secure key management.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🛡️ Context Isolation</h3>
+                    <p>The renderer process is isolated from Node.js for enhanced security. Communication happens through secure IPC channels.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📝 Secure Authentication</h3>
+                    <p>User authentication with bcrypt password hashing, secure session management, and automatic timeout.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔍 SSL/TLS Validation</h3>
+                    <p>Proper SSL/TLS certificate validation for all HTTPS requests to ensure secure communication.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🏦 Enterprise Ready</h3>
+                    <p>Role-based access control, secure data sharing, and audit trails for enterprise environments.</p>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <strong>⚠️ Security Note:</strong> For production deployment, ensure you change default encryption keys, use environment variables for sensitive configuration, and implement proper key rotation mechanisms.
+            </div>
+        </div>
+
+        <div id="getting-help" class="section">
+            <h2>❓ Getting Help</h2>
+            
+            <h3>Documentation Resources</h3>
+            <ul>
+                <li><strong>Unit Testing Guide:</strong> Comprehensive documentation on writing and running API tests</li>
+                <li><strong>README.md:</strong> Basic setup and feature overview</li>
+                <li><strong>SETUP.md:</strong> Detailed development environment setup guide</li>
+                <li><strong>GitHub Repository:</strong> Issues, discussions, and source code</li>
+            </ul>
+
+            <h3>Getting Support</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>📚 Built-in Help</h3>
+                    <p>Access documentation directly from the Help menu in the application.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🐛 Issue Reporting</h3>
+                    <p>Report bugs and request features through the GitHub repository issue tracker.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>💬 Community</h3>
+                    <p>Join discussions and get help from other users in the GitHub discussions section.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔧 Troubleshooting</h3>
+                    <p>Check the troubleshooting section in SETUP.md for common issues and solutions.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer style="text-align: center; margin-top: 50px; padding: 20px; border-top: 1px solid #404040;">
+            <p>API Tester 3 - Professional API Testing Tool</p>
+            <p style="color: #808080;">Version 1.0.0 | Built with ❤️ for developers</p>
+        </footer>
+    </div>
+</body>
+</html>
