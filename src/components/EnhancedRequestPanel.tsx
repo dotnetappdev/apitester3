@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Request } from '../database/DatabaseManager';
 import { MonacoEditor } from './MonacoEditor';
+import TestScriptEditor from './TestScriptEditor';
+import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
+import { ApiResponse } from '../types';
 
 interface EnhancedRequestPanelProps {
   request: Request;
@@ -9,6 +12,10 @@ interface EnhancedRequestPanelProps {
   isLoading: boolean;
   enableSyntaxHighlighting: boolean;
   theme: 'dark' | 'light';
+  testSuite?: TestSuite;
+  onTestSuiteChange?: (testSuite: TestSuite) => void;
+  onRunTests?: (testSuite: TestSuite, response: ApiResponse, request: any) => Promise<TestExecutionResult[]>;
+  testResults?: TestExecutionResult[];
 }
 
 export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
@@ -17,7 +24,11 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
   onSendRequest,
   isLoading,
   enableSyntaxHighlighting,
-  theme
+  theme,
+  testSuite,
+  onTestSuiteChange,
+  onRunTests,
+  testResults = []
 }) => {
   const [activeTab, setActiveTab] = useState<'params' | 'headers' | 'body' | 'auth' | 'tests'>('params');
 
@@ -375,39 +386,39 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
         )}
 
         {activeTab === 'tests' && (
-          <div className="tab-panel">
-            <div className="panel-header">
-              <h4>Test Scripts</h4>
-              <p className="panel-description">
-                JavaScript code to validate the response
-              </p>
-            </div>
-            
-            <div className="tests-editor">
-              {enableSyntaxHighlighting ? (
-                <MonacoEditor
-                  value={request.tests || ''}
-                  onChange={(value) => updateRequest({ tests: value })}
-                  language="javascript"
-                  height="300px"
-                  theme={theme === 'dark' ? 'vs-dark' : 'light'}
-                  placeholder="// Test script example:
-// pm.test('Status code is 200', function () {
-//     pm.response.to.have.status(200);
-// });"
-                />
-              ) : (
-                <textarea
-                  className="form-input form-textarea tests-textarea"
-                  value={request.tests || ''}
-                  onChange={(e) => updateRequest({ tests: e.target.value })}
-                  placeholder="Write test scripts here..."
-                />
-              )}
-            </div>
+          <div className="tab-panel tests-panel">
+            {onTestSuiteChange && onRunTests ? (
+              <TestScriptEditor
+                requestId={request.id}
+                requestName={request.name}
+                onTestSuiteChange={onTestSuiteChange}
+                onRunTests={onRunTests}
+                testResults={testResults}
+              />
+            ) : (
+              <div className="panel-header">
+                <h4>Test Scripts</h4>
+                <p className="panel-description">
+                  Advanced test runner is not available in this context
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .tests-panel {
+          padding: 0;
+          height: 100%;
+        }
+        
+        .tests-panel .panel-header {
+          padding: 16px;
+          background: var(--bg-secondary);
+          border-bottom: 1px solid var(--border-color);
+        }
+      `}</style>
     </div>
   );
 };
