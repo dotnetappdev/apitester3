@@ -17,6 +17,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('menu-open-collection', callback),
   onMenuAbout: (callback: () => void) => 
     ipcRenderer.on('menu-about', callback),
+  onMenuShowOverview: (callback: () => void) => 
+    ipcRenderer.on('menu-show-overview', callback),
+  onMenuShowUnitTesting: (callback: () => void) => 
+    ipcRenderer.on('menu-show-unit-testing', callback),
   
   // Remove listeners
   removeAllListeners: (channel: string) => 
@@ -37,6 +41,8 @@ declare global {
       onMenuNewRequest: (callback: () => void) => void;
       onMenuOpenCollection: (callback: () => void) => void;
       onMenuAbout: (callback: () => void) => void;
+      onMenuShowOverview: (callback: () => void) => void;
+      onMenuShowUnitTesting: (callback: () => void) => void;
       removeAllListeners: (channel: string) => void;
       platform: string;
       version: string;

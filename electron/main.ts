@@ -130,6 +130,19 @@ class AppManager {
         label: 'Help',
         submenu: [
           {
+            label: 'Application Overview',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-show-overview');
+            }
+          },
+          {
+            label: 'Unit Testing Documentation',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-show-unit-testing');
+            }
+          },
+          { type: 'separator' },
+          {
             label: 'About API Tester 3',
             click: () => {
               this.mainWindow?.webContents.send('menu-about');

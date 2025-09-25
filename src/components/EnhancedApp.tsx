@@ -7,6 +7,7 @@ import { EnhancedSidebar } from './EnhancedSidebar';
 import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
 import { SettingsDialog } from './SettingsDialog';
+import { DocumentationDialog } from './DocumentationDialog';
 import { Splitter } from './Splitter';
 import { ApiClient } from '../utils/api';
 import { ApiResponse } from '../types';
@@ -22,6 +23,8 @@ export const EnhancedApp: React.FC = () => {
   
   // UI state
   const [showSettings, setShowSettings] = useState(false);
+  const [showDocumentation, setShowDocumentation] = useState(false);
+  const [documentationType, setDocumentationType] = useState<'overview' | 'unit-testing' | null>(null);
   const [splitterPosition, setSplitterPosition] = useState(50);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [enableSyntaxHighlighting, setEnableSyntaxHighlighting] = useState(true);
@@ -90,6 +93,30 @@ export const EnhancedApp: React.FC = () => {
 
     return unsubscribe;
   }, [settingsManager]);
+
+  // Listen for menu events from Electron
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.electronAPI) {
+      // Handle documentation menu events
+      window.electronAPI.onMenuShowOverview(() => {
+        setDocumentationType('overview');
+        setShowDocumentation(true);
+      });
+
+      window.electronAPI.onMenuShowUnitTesting(() => {
+        setDocumentationType('unit-testing');
+        setShowDocumentation(true);
+      });
+
+      // Cleanup listeners on unmount
+      return () => {
+        if (window.electronAPI) {
+          window.electronAPI.removeAllListeners('menu-show-overview');
+          window.electronAPI.removeAllListeners('menu-show-unit-testing');
+        }
+      };
+    }
+  }, []);
 
   const loadUserCollections = async (userId: number) => {
     try {
@@ -352,6 +379,17 @@ export const EnhancedApp: React.FC = () => {
           isOpen={showSettings}
           onClose={() => setShowSettings(false)}
           settingsManager={settingsManager}
+        />
+      )}
+
+      {showDocumentation && (
+        <DocumentationDialog
+          isOpen={showDocumentation}
+          onClose={() => {
+            setShowDocumentation(false);
+            setDocumentationType(null);
+          }}
+          documentType={documentationType}
         />
       )}
     </div>
