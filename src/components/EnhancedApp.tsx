@@ -7,9 +7,11 @@ import { EnhancedSidebar } from './EnhancedSidebar';
 import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
 import { SettingsDialog } from './SettingsDialog';
+import { ImportExportDialog } from './ImportExportDialog';
 import { Splitter } from './Splitter';
 import { ApiClient } from '../utils/api';
 import { ApiResponse } from '../types';
+import { TestSuite } from '../testing/TestRunner';
 
 export const EnhancedApp: React.FC = () => {
   // Core state
@@ -22,13 +24,15 @@ export const EnhancedApp: React.FC = () => {
   
   // UI state
   const [showSettings, setShowSettings] = useState(false);
+  const [showImportExport, setShowImportExport] = useState<'import' | 'export' | null>(null);
   const [splitterPosition, setSplitterPosition] = useState(50);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [enableSyntaxHighlighting, setEnableSyntaxHighlighting] = useState(true);
   const [enableTestExplorer, setEnableTestExplorer] = useState(true);
   
-  // Test results
+  // Test results and test suites
   const [testResults, setTestResults] = useState<Map<number, TestResult[]>>(new Map());
+  const [testSuites] = useState<TestSuite[]>([]);
   
   // Managers
   const [dbManager] = useState(() => new DatabaseManager());
@@ -90,6 +94,28 @@ export const EnhancedApp: React.FC = () => {
 
     return unsubscribe;
   }, [settingsManager]);
+
+  // Listen for menu events from electron
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).electronAPI) {
+      // Menu event handlers
+      const handleMenuImportCollection = () => setShowImportExport('import');
+      const handleMenuExportCollection = () => setShowImportExport('export');
+      const handleMenuNewCollection = () => handleNewCollection();
+
+      // Set up listeners
+      (window as any).electronAPI.onMenuImportCollection(handleMenuImportCollection);
+      (window as any).electronAPI.onMenuExportCollection(handleMenuExportCollection);
+      (window as any).electronAPI.onMenuNewCollection(handleMenuNewCollection);
+
+      // Cleanup
+      return () => {
+        (window as any).electronAPI.removeAllListeners('menu-import-collection');
+        (window as any).electronAPI.removeAllListeners('menu-export-collection');
+        (window as any).electronAPI.removeAllListeners('menu-new-collection');
+      };
+    }
+  }, []);
 
   const loadUserCollections = async (userId: number) => {
     try {
@@ -269,6 +295,62 @@ export const EnhancedApp: React.FC = () => {
     return results;
   };
 
+  const handleExportCollections = async (selectedCollections: Collection[], selectedTestSuites: TestSuite[]) => {
+    if (!currentUser) return;
+
+    try {
+      const result = await (window as any).electronAPI.exportCollection({
+        collections: selectedCollections,
+        testSuites: selectedTestSuites,
+        exportedBy: currentUser.username
+      });
+
+      if (result.success) {
+        console.log('Export successful:', result.stats);
+        // Could show a success notification here
+      } else if (result.error) {
+        console.error('Export failed:', result.error);
+        // Could show an error notification here
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const handleImportCollections = async (importData: any, _options: any) => {
+    if (!currentUser) return;
+
+    try {
+      // Create collections in the database
+      for (const collection of importData.collections) {
+        const collectionId = await dbManager.createCollection(
+          collection.name,
+          collection.description || '',
+          collection.ownerId
+        );
+
+        // Create requests for this collection
+        if (collection.requests) {
+          for (const request of collection.requests) {
+            await dbManager.createRequest({
+              ...request,
+              collectionId: collectionId
+            });
+          }
+        }
+      }
+
+      // Reload collections to show imported data
+      await loadUserCollections(currentUser.id);
+      
+      console.log('Import successful');
+      // Could show a success notification here
+    } catch (error) {
+      console.error('Import failed:', error);
+      // Could show an error notification here
+    }
+  };
+
   if (!isInitialized) {
     return (
       <div className="app-loading">
@@ -352,6 +434,19 @@ export const EnhancedApp: React.FC = () => {
           isOpen={showSettings}
           onClose={() => setShowSettings(false)}
           settingsManager={settingsManager}
+        />
+      )}
+
+      {showImportExport && currentUser && (
+        <ImportExportDialog
+          isOpen={true}
+          mode={showImportExport}
+          currentUser={currentUser}
+          collections={collections}
+          testSuites={testSuites}
+          onClose={() => setShowImportExport(null)}
+          onImport={handleImportCollections}
+          onExport={handleExportCollections}
         />
       )}
     </div>
