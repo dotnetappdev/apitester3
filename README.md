@@ -11,6 +11,9 @@ A professional, local-first desktop API testing tool inspired by Postman, built 
 - **Authentication**: Bearer token, Basic auth, and API key authentication
 - **Request Organization**: Collections and folders to organize your API requests
 - **Response Visualization**: JSON formatting, headers inspection, and response metrics
+- **Import/Export Collections**: Share collections and tests in binary format (.at3) with team members
+- **User ID Remapping**: Seamlessly import collections with automatic user ownership mapping
+- **Test Suites**: Advanced test runner with Visual Studio-style assertions
 - **Enterprise Security**: Local-first approach with secure request handling
 
 ## Tech Stack
@@ -69,16 +72,41 @@ src/
 ├── components/          # React components
 │   ├── Sidebar.tsx     # Request organization sidebar
 │   ├── RequestPanel.tsx # HTTP request configuration
-│   └── ResponsePanel.tsx # Response display
+│   ├── ResponsePanel.tsx # Response display
+│   └── ImportExportDialog.tsx # Import/Export functionality
 ├── types/              # TypeScript type definitions
 ├── utils/              # Utility functions and API client
+│   └── ImportExportManager.ts # Binary format handler
+├── testing/            # Test runner and assertions
 └── styles/             # CSS styling
 
 electron/
 ├── main.ts             # Electron main process
 ├── preload.ts          # Preload script for security
 └── utils.ts            # Electron utilities
+
+docs/
+└── IMPORT_EXPORT.md    # Import/Export documentation
 ```
+
+## Import/Export Collections
+
+API Tester 3 includes a powerful import/export system for sharing collections and tests between team members:
+
+### Key Features
+- **Binary Format (.at3)**: Secure, encrypted binary files for portability
+- **User ID Remapping**: Automatic handling of user ownership during import
+- **Team Collaboration**: Easy sharing of API collections across teams
+- **Test Suite Inclusion**: Exports include all associated test cases
+- **Import Options**: Choose to import as your own collections or preserve original ownership
+
+### Quick Start
+1. **Export**: File → Export Collection (Ctrl+E)
+2. **Import**: File → Import Collection (Ctrl+I)
+3. **Share**: Send the `.at3` file to team members
+4. **Import Options**: Choose user mapping strategy during import
+
+For detailed documentation, see [docs/IMPORT_EXPORT.md](docs/IMPORT_EXPORT.md)
 
 ## Seed Data & Test Accounts
 

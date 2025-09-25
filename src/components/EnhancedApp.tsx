@@ -32,7 +32,7 @@ export const EnhancedApp: React.FC = () => {
   
   // Test results and test suites
   const [testResults, setTestResults] = useState<Map<number, TestResult[]>>(new Map());
-  const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
+  const [testSuites] = useState<TestSuite[]>([]);
   
   // Managers
   const [dbManager] = useState(() => new DatabaseManager());
@@ -97,22 +97,22 @@ export const EnhancedApp: React.FC = () => {
 
   // Listen for menu events from electron
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.electronAPI) {
+    if (typeof window !== 'undefined' && (window as any).electronAPI) {
       // Menu event handlers
       const handleMenuImportCollection = () => setShowImportExport('import');
       const handleMenuExportCollection = () => setShowImportExport('export');
       const handleMenuNewCollection = () => handleNewCollection();
 
       // Set up listeners
-      window.electronAPI.onMenuImportCollection(handleMenuImportCollection);
-      window.electronAPI.onMenuExportCollection(handleMenuExportCollection);
-      window.electronAPI.onMenuNewCollection(handleMenuNewCollection);
+      (window as any).electronAPI.onMenuImportCollection(handleMenuImportCollection);
+      (window as any).electronAPI.onMenuExportCollection(handleMenuExportCollection);
+      (window as any).electronAPI.onMenuNewCollection(handleMenuNewCollection);
 
       // Cleanup
       return () => {
-        window.electronAPI.removeAllListeners('menu-import-collection');
-        window.electronAPI.removeAllListeners('menu-export-collection');
-        window.electronAPI.removeAllListeners('menu-new-collection');
+        (window as any).electronAPI.removeAllListeners('menu-import-collection');
+        (window as any).electronAPI.removeAllListeners('menu-export-collection');
+        (window as any).electronAPI.removeAllListeners('menu-new-collection');
       };
     }
   }, []);
@@ -299,7 +299,7 @@ export const EnhancedApp: React.FC = () => {
     if (!currentUser) return;
 
     try {
-      const result = await window.electronAPI.exportCollection({
+      const result = await (window as any).electronAPI.exportCollection({
         collections: selectedCollections,
         testSuites: selectedTestSuites,
         exportedBy: currentUser.username
@@ -317,7 +317,7 @@ export const EnhancedApp: React.FC = () => {
     }
   };
 
-  const handleImportCollections = async (importData: any, options: any) => {
+  const handleImportCollections = async (importData: any, _options: any) => {
     if (!currentUser) return;
 
     try {

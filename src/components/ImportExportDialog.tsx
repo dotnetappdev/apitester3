@@ -72,7 +72,7 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
     setError(null);
     
     try {
-      const result = await window.electronAPI.previewImport();
+      const result = await (window as any).electronAPI.previewImport();
       if (result.success) {
         setImportPreview(result);
       } else if (result.error) {
@@ -97,7 +97,7 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
         importForAllUsers: importOptions.importForAllUsers
       };
       
-      const result = await window.electronAPI.importCollection(options);
+      const result = await (window as any).electronAPI.importCollection(options);
       if (result.success) {
         await onImport(result.data, options);
         onClose();
@@ -299,7 +299,7 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
           )}
         </div>
 
-        <style jsx>{`
+        <style>{`
           .import-export-dialog {
             width: 700px;
             max-height: 80vh;
