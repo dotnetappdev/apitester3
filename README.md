@@ -42,6 +42,8 @@ npm install
 npm run dev
 ```
 
+📋 **For comprehensive setup instructions including Node.js requirements, development environment configuration, and SQLite database setup, see [SETUP.md](SETUP.md)**
+
 ### Available Scripts
 
 - `npm run dev` - Start development server with hot reload
