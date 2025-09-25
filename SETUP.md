@@ -105,6 +105,48 @@ npm run package
 
 This creates distributable files in the `release/` directory.
 
+### Starting the Windows Desktop Version
+
+After building and packaging the desktop application, you can start the Windows desktop version in several ways:
+
+#### Method 1: Using the Executable (Recommended)
+1. Navigate to the `release/` directory after running `npm run package`
+2. Find the Windows executable: `API Tester 3.exe` or `apitester3.exe`
+3. Double-click the executable to launch the application
+
+#### Method 2: Using NPM Scripts (Development)
+```bash
+# Start in development mode with hot reloading
+npm run dev
+
+# Or start individual components
+npm run dev-react    # Start React frontend
+npm run dev-electron # Start Electron desktop app
+```
+
+#### Method 3: Running Built Application
+```bash
+# After building for production
+npm run build
+
+# Start the built application
+npm start
+# or directly run the Electron app
+npx electron dist/electron/main.js
+```
+
+#### Windows Installation Notes
+- **First Run**: On first launch, Windows Defender may show a warning since the app isn't signed with a certificate
+- **Permissions**: The app may request permissions to access network resources for API testing
+- **Storage Location**: Application data is stored in `%APPDATA%/apitester3/`
+- **System Requirements**: Windows 10/11 (64-bit) with Visual C++ Redistributable
+
+#### Troubleshooting Windows Desktop Version
+- **App won't start**: Ensure Node.js 18+ is installed and all dependencies are built
+- **Network errors**: Check Windows Firewall settings for the application
+- **Database issues**: Delete `%APPDATA%/apitester3/database.db` to reset to defaults
+- **Performance issues**: Close other Electron apps and ensure 4GB+ RAM available
+
 ## Available Scripts
 
 | Script | Description |

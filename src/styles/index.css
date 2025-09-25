@@ -227,6 +227,13 @@ body.light-theme :root {
   min-width: 100px;
 }
 
+.method-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg-secondary);
+  color: var(--text-disabled);
+}
+
 .url-input {
   flex: 1;
 }
@@ -1690,6 +1697,13 @@ body.light-theme :root {
 .method-selector:focus {
   outline: none;
   border-color: var(--input-focus);
+}
+
+.method-selector:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg-secondary);
+  color: var(--text-disabled);
 }
 
 .url-input {
