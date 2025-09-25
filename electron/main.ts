@@ -2,6 +2,8 @@ import { app, BrowserWindow, Menu, shell, ipcMain, dialog } from 'electron';
 import { join } from 'path';
 import { promises as fs } from 'fs';
 import { isDev } from './utils';
+import { ElectronSoapClient } from './soapClient';
+import { ElectronGrpcClient } from './grpcClient';
 
 class AppManager {
   private mainWindow: BrowserWindow | null = null;
@@ -185,6 +187,46 @@ class AppManager {
     ipcMain.handle('make-api-request', async (event, requestData) => {
       // This will be implemented to handle API requests securely
       return { success: true, data: requestData };
+    });
+
+    // Handle SOAP requests
+    ipcMain.handle('make-soap-request', async (event, requestData) => {
+      try {
+        return await ElectronSoapClient.makeRequest(requestData);
+      } catch (error) {
+        console.error('SOAP request failed:', error);
+        return {
+          status: 500,
+          statusText: 'Internal Server Error',
+          headers: {},
+          data: {
+            error: true,
+            message: error instanceof Error ? error.message : 'Unknown SOAP error'
+          },
+          responseTime: 0,
+          size: 0
+        };
+      }
+    });
+
+    // Handle gRPC requests
+    ipcMain.handle('make-grpc-request', async (event, requestData) => {
+      try {
+        return await ElectronGrpcClient.makeRequest(requestData);
+      } catch (error) {
+        console.error('gRPC request failed:', error);
+        return {
+          status: 500,
+          statusText: 'Internal Server Error',
+          headers: {},
+          data: {
+            error: true,
+            message: error instanceof Error ? error.message : 'Unknown gRPC error'
+          },
+          responseTime: 0,
+          size: 0
+        };
+      }
     });
 
     // Handle file operations

@@ -2112,3 +2112,77 @@ textarea:focus-visible {
 .test-explorer-content::-webkit-scrollbar-thumb:hover {
   background: var(--border-light);
 }
+
+/* SOAP and gRPC specific styles */
+.soap-section,
+.grpc-section {
+  padding: 16px;
+}
+
+.soap-section .form-group,
+.grpc-section .form-group {
+  margin-bottom: 16px;
+}
+
+.soap-section .form-help,
+.grpc-section .form-help {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.form-actions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.form-actions .btn {
+  margin-right: 8px;
+}
+
+/* Method selector colors for SOAP and gRPC */
+.method-selector option[value="SOAP"] {
+  color: #6f42c1;
+}
+
+.method-selector option[value="GRPC"] {
+  color: #fd7e14;
+}
+
+/* Tab labels for protocol-specific tabs */
+.request-tab .tab-label {
+  font-weight: 500;
+}
+
+.request-tab:hover .tab-label {
+  color: var(--text-primary);
+}
+
+.request-tab.active .tab-label {
+  color: var(--accent-light);
+}
+
+/* Form textarea for proto files */
+.form-textarea {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 8px;
+  resize: vertical;
+  width: 100%;
+}
+
+.form-textarea:focus {
+  border-color: var(--input-focus);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.3);
+}
+
+.form-textarea::placeholder {
+  color: var(--text-muted);
+}
