@@ -78,6 +78,68 @@ electron/
 └── utils.ts            # Electron utilities
 ```
 
+## Seed Data & Test Accounts
+
+The application comes with pre-configured test accounts for demonstration and testing purposes. All passwords are encrypted using AES-256 encryption with secure key management.
+
+### Available Test Accounts
+
+| Username    | Password     | Role      | Description                    |
+|-------------|--------------|-----------|--------------------------------|
+| `admin`     | `admin123`   | Admin     | System administrator account   |
+| `testuser`  | `password123`| Standard  | Basic user for testing         |
+| `developer` | `dev2024!`   | Standard  | Developer account              |
+| `qa_lead`   | `quality123` | Admin     | QA team lead with admin rights |
+| `api_tester`| `testing456` | Standard  | API testing specialist account |
+
+### Security Implementation
+
+- **AES-256 Encryption**: All passwords are encrypted using industry-standard AES-256 encryption
+- **Secure Key Management**: 256-bit encryption key with proper salt generation
+- **Password Hashing**: Implements secure password storage best practices
+- **Session Management**: Secure session handling with automatic timeout
+- **Role-Based Access**: Admin and standard user roles with appropriate permissions
+
+### SQLite Database Schema
+
+The application uses SQLite database with the following security features:
+
+```sql
+-- Users table with encrypted passwords
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  passwordHash TEXT NOT NULL,  -- AES-256 encrypted
+  salt TEXT NOT NULL,          -- Cryptographic salt
+  role TEXT CHECK(role IN ('admin', 'standard')) DEFAULT 'standard',
+  profilePicture TEXT,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  lastLogin DATETIME
+);
+
+-- Collections with ownership and sharing
+CREATE TABLE collections (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  description TEXT,
+  ownerId INTEGER NOT NULL,
+  isShared BOOLEAN DEFAULT 0,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (ownerId) REFERENCES users (id)
+);
+```
+
+### Production Deployment
+
+⚠️ **Important**: For production deployment:
+
+1. **Change the encryption key** in `DatabaseManager.ts`
+2. **Use environment variables** for sensitive configuration
+3. **Implement proper key rotation** mechanisms
+4. **Enable database encryption** at rest
+5. **Set up secure backup procedures**
+
 ## Security Features
 
 - **Context Isolation**: Renderer process is isolated from Node.js

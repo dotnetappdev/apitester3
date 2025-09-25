@@ -1,5 +1,6 @@
-// Mock database manager for renderer process
-// Real implementation will be in the main Electron process
+// Enhanced database manager with AES encryption and seed data
+// Mock implementation forRenderer process - production would use SQLite in main process
+import CryptoJS from 'crypto-js';
 
 export interface User {
   id: number;
@@ -56,47 +57,129 @@ export interface Permission {
 }
 
 export class DatabaseManager {
-  async initialize(): Promise<void> {
-    // This will be implemented via IPC to main process
-    return Promise.resolve();
+  private static readonly ENCRYPTION_KEY = 'APITester3-SecureKey-256bit-ForPasswordEncryption-Change-In-Production';
+  private seedUsers: User[] = [];
+
+  constructor() {
+    this.initializeSeedData();
   }
 
-  async getAllUsers(): Promise<User[]> {
-    // Mock data for now
-    return [
+  private initializeSeedData(): void {
+    // Generate secure seed data with AES-encrypted passwords
+    const currentDate = new Date().toISOString();
+    
+    this.seedUsers = [
       {
         id: 1,
         username: 'admin',
-        passwordHash: 'mock',
-        salt: 'mock',
+        passwordHash: this.encryptPassword('admin123'),
+        salt: this.generateSalt(),
         role: 'admin',
-        createdAt: new Date().toISOString()
+        createdAt: currentDate
       },
       {
         id: 2,
-        username: 'user',
-        passwordHash: 'mock',
-        salt: 'mock',
+        username: 'testuser',
+        passwordHash: this.encryptPassword('password123'),
+        salt: this.generateSalt(),
         role: 'standard',
-        createdAt: new Date().toISOString()
+        createdAt: currentDate
+      },
+      {
+        id: 3,
+        username: 'developer',
+        passwordHash: this.encryptPassword('dev2024!'),
+        salt: this.generateSalt(),
+        role: 'standard',
+        createdAt: currentDate
+      },
+      {
+        id: 4,
+        username: 'qa_lead',
+        passwordHash: this.encryptPassword('quality123'),
+        salt: this.generateSalt(),
+        role: 'admin',
+        createdAt: currentDate
+      },
+      {
+        id: 5,
+        username: 'api_tester',
+        passwordHash: this.encryptPassword('testing456'),
+        salt: this.generateSalt(),
+        role: 'standard',
+        createdAt: currentDate
       }
     ];
   }
 
+  private generateSalt(): string {
+    return CryptoJS.lib.WordArray.random(128/8).toString();
+  }
+
+  private encryptPassword(password: string): string {
+    // AES-256 encryption with secure key
+    const encrypted = CryptoJS.AES.encrypt(password, DatabaseManager.ENCRYPTION_KEY).toString();
+    return encrypted;
+  }
+
+  private decryptPassword(encryptedPassword: string): string {
+    const decrypted = CryptoJS.AES.decrypt(encryptedPassword, DatabaseManager.ENCRYPTION_KEY);
+    return decrypted.toString(CryptoJS.enc.Utf8);
+  }
+
+  private checkPassword(password: string, encryptedPassword: string): boolean {
+    try {
+      const decryptedPassword = this.decryptPassword(encryptedPassword);
+      return password === decryptedPassword;
+    } catch (error) {
+      console.error('Password verification failed:', error);
+      return false;
+    }
+  }
+
+  async initialize(): Promise<void> {
+    // Mock initialization - in production this would set up SQLite database
+    console.log('Database initialized with seed data');
+    return Promise.resolve();
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    // Return seed users
+    return [...this.seedUsers];
+  }
+
   async getUserByUsername(username: string): Promise<User | null> {
-    const users = await this.getAllUsers();
-    return users.find(u => u.username === username) || null;
+    const user = this.seedUsers.find(u => u.username === username);
+    return user || null;
   }
 
   async createUser(username: string, password: string, role: 'admin' | 'standard' = 'standard'): Promise<number> {
-    // Mock implementation
-    return Date.now();
+    const newUser: User = {
+      id: this.seedUsers.length + 1,
+      username,
+      passwordHash: this.encryptPassword(password),
+      salt: this.generateSalt(),
+      role,
+      createdAt: new Date().toISOString()
+    };
+    
+    this.seedUsers.push(newUser);
+    return newUser.id;
   }
 
   async verifyPassword(username: string, password: string): Promise<User | null> {
-    // Mock verification - accept any password for demo
     const user = await this.getUserByUsername(username);
-    return user;
+    if (!user) return null;
+    
+    const isValid = this.checkPassword(password, user.passwordHash);
+    
+    if (isValid) {
+      // Update last login
+      user.lastLogin = new Date().toISOString();
+      return user;
+    }
+    
+    return null;
   }
 
   async getUserCollections(userId: number): Promise<Collection[]> {

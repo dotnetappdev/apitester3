@@ -650,6 +650,19 @@ body.light-theme :root {
   margin-right: 12px;
 }
 
+.user-avatar.main-ui {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+}
+
+.user-avatar.main-ui .avatar-placeholder.main-ui {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .user-info {
   flex: 1;
   min-width: 0;

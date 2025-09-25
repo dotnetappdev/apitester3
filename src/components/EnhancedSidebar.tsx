@@ -71,11 +71,11 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
       {/* User Profile Header */}
       <div className="sidebar-header">
         <div className="user-profile" onClick={onUserProfile}>
-          <div className="user-avatar">
+          <div className="user-avatar main-ui">
             {user.profilePicture ? (
               <img src={user.profilePicture} alt={user.username} />
             ) : (
-              <div className="avatar-placeholder">
+              <div className="avatar-placeholder main-ui">
                 {user.username.charAt(0).toUpperCase()}
               </div>
             )}
