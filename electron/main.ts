@@ -1,5 +1,6 @@
-import { app, BrowserWindow, Menu, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, Menu, shell, ipcMain, dialog } from 'electron';
 import { join } from 'path';
+import { promises as fs } from 'fs';
 import { isDev } from './utils';
 
 class AppManager {
@@ -85,6 +86,29 @@ class AppManager {
             }
           },
           {
+            label: 'New Collection',
+            accelerator: 'CmdOrCtrl+Shift+N',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-new-collection');
+            }
+          },
+          { type: 'separator' },
+          {
+            label: 'Import Collection',
+            accelerator: 'CmdOrCtrl+I',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-import-collection');
+            }
+          },
+          {
+            label: 'Export Collection',
+            accelerator: 'CmdOrCtrl+E',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-export-collection');
+            }
+          },
+          { type: 'separator' },
+          {
             label: 'Open Collection',
             accelerator: 'CmdOrCtrl+O',
             click: () => {
@@ -160,6 +184,219 @@ class AppManager {
       // This will be implemented to load collections
       return { success: true };
     });
+
+    // Handle export collection
+    ipcMain.handle('export-collection', async (event, { collections, testSuites, exportedBy }) => {
+      try {
+        const result = await dialog.showSaveDialog(this.mainWindow!, {
+          title: 'Export Collections',
+          defaultPath: `api-collections-${new Date().toISOString().split('T')[0]}.at3`,
+          filters: [
+            { name: 'API Tester 3 Collection', extensions: ['at3'] },
+            { name: 'All Files', extensions: ['*'] }
+          ]
+        });
+
+        if (result.canceled || !result.filePath) {
+          return { success: false, canceled: true };
+        }
+
+        // Import the ImportExportManager functionality here
+        // For now, we'll create a simple binary format
+        const exportData = {
+          version: '1.0.0',
+          exportedAt: new Date().toISOString(),
+          collections,
+          testSuites,
+          exportedBy,
+          metadata: {
+            totalCollections: collections.length,
+            totalRequests: collections.reduce((sum: number, col: any) => sum + (col.requests?.length || 0), 0),
+            totalTestSuites: testSuites.length,
+            exportedBy
+          }
+        };
+
+        // Simple binary format: magic header + JSON data
+        const jsonData = JSON.stringify(exportData);
+        const header = Buffer.from('AT3EXPORT', 'utf8');
+        const data = Buffer.from(jsonData, 'utf8');
+        const binary = Buffer.concat([header, Buffer.from([data.length >> 24, data.length >> 16, data.length >> 8, data.length]), data]);
+
+        await fs.writeFile(result.filePath, binary);
+
+        return { 
+          success: true, 
+          filePath: result.filePath,
+          stats: exportData.metadata
+        };
+      } catch (error) {
+        console.error('Export failed:', error);
+        return { 
+          success: false, 
+          error: error instanceof Error ? error.message : 'Unknown error' 
+        };
+      }
+    });
+
+    // Handle import collection
+    ipcMain.handle('import-collection', async (event, options = {}) => {
+      try {
+        const result = await dialog.showOpenDialog(this.mainWindow!, {
+          title: 'Import Collections',
+          filters: [
+            { name: 'API Tester 3 Collection', extensions: ['at3'] },
+            { name: 'All Files', extensions: ['*'] }
+          ],
+          properties: ['openFile']
+        });
+
+        if (result.canceled || !result.filePaths.length) {
+          return { success: false, canceled: true };
+        }
+
+        const filePath = result.filePaths[0];
+        const binaryData = await fs.readFile(filePath);
+
+        // Validate magic header
+        const header = binaryData.slice(0, 9).toString('utf8');
+        if (header !== 'AT3EXPORT') {
+          return { 
+            success: false, 
+            error: 'Invalid file format: Not an API Tester 3 collection file' 
+          };
+        }
+
+        // Read data length and content
+        const dataLength = (binaryData[9] << 24) | (binaryData[10] << 16) | (binaryData[11] << 8) | binaryData[12];
+        const jsonData = binaryData.slice(13, 13 + dataLength).toString('utf8');
+        const exportData = JSON.parse(jsonData);
+
+        // Process import data based on options
+        const processedData = this.processImportData(exportData, options);
+
+        return { 
+          success: true, 
+          data: processedData,
+          stats: {
+            collectionsImported: processedData.collections.length,
+            requestsImported: processedData.collections.reduce((sum: number, col: any) => sum + (col.requests?.length || 0), 0),
+            testSuitesImported: processedData.testSuites.length
+          }
+        };
+      } catch (error) {
+        console.error('Import failed:', error);
+        return { 
+          success: false, 
+          error: error instanceof Error ? error.message : 'Unknown error' 
+        };
+      }
+    });
+
+    // Get import preview
+    ipcMain.handle('preview-import', async (event) => {
+      try {
+        const result = await dialog.showOpenDialog(this.mainWindow!, {
+          title: 'Preview Collection Import',
+          filters: [
+            { name: 'API Tester 3 Collection', extensions: ['at3'] },
+            { name: 'All Files', extensions: ['*'] }
+          ],
+          properties: ['openFile']
+        });
+
+        if (result.canceled || !result.filePaths.length) {
+          return { success: false, canceled: true };
+        }
+
+        const filePath = result.filePaths[0];
+        const binaryData = await fs.readFile(filePath);
+
+        // Validate and extract metadata
+        const header = binaryData.slice(0, 9).toString('utf8');
+        if (header !== 'AT3EXPORT') {
+          return { 
+            success: false, 
+            error: 'Invalid file format' 
+          };
+        }
+
+        const dataLength = (binaryData[9] << 24) | (binaryData[10] << 16) | (binaryData[11] << 8) | binaryData[12];
+        const jsonData = binaryData.slice(13, 13 + dataLength).toString('utf8');
+        const exportData = JSON.parse(jsonData);
+
+        return { 
+          success: true, 
+          metadata: exportData.metadata,
+          collections: exportData.collections.map((col: any) => ({ 
+            id: col.id, 
+            name: col.name, 
+            description: col.description,
+            ownerId: col.ownerId,
+            requestCount: col.requests?.length || 0
+          })),
+          filePath
+        };
+      } catch (error) {
+        console.error('Preview failed:', error);
+        return { 
+          success: false, 
+          error: error instanceof Error ? error.message : 'Unknown error' 
+        };
+      }
+    });
+  }
+
+  private processImportData(exportData: any, options: any) {
+    const processedData = { ...exportData };
+    
+    // Generate new IDs to avoid conflicts
+    processedData.collections = exportData.collections.map((collection: any) => {
+      const newCollection = { ...collection };
+      
+      // Remap user ID if specified
+      if (options.targetUserId !== undefined) {
+        newCollection.ownerId = options.targetUserId;
+      }
+      
+      // Generate new IDs
+      newCollection.id = Date.now() + Math.floor(Math.random() * 1000);
+      newCollection.createdAt = new Date().toISOString();
+      newCollection.updatedAt = new Date().toISOString();
+      
+      // Process requests
+      if (newCollection.requests) {
+        newCollection.requests = newCollection.requests.map((request: any) => ({
+          ...request,
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          collectionId: newCollection.id,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }));
+      }
+      
+      return newCollection;
+    });
+    
+    // Update test suites
+    const requestIdMap = new Map();
+    exportData.collections.forEach((originalCol: any, colIndex: number) => {
+      const newCol = processedData.collections[colIndex];
+      originalCol.requests?.forEach((originalReq: any, reqIndex: number) => {
+        const newReq = newCol.requests?.[reqIndex];
+        if (newReq) {
+          requestIdMap.set(originalReq.id, newReq.id);
+        }
+      });
+    });
+    
+    processedData.testSuites = exportData.testSuites.map((testSuite: any) => ({
+      ...testSuite,
+      id: `suite_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      requestId: requestIdMap.get(testSuite.requestId) || testSuite.requestId
+    }));
+    
+    return processedData;
   }
 }
 

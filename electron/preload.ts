@@ -10,11 +10,23 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveCollection: (collectionData: any) => ipcRenderer.invoke('save-collection', collectionData),
   loadCollection: (filePath: string) => ipcRenderer.invoke('load-collection', filePath),
   
+  // Import/Export operations
+  exportCollection: (data: { collections: any[], testSuites: any[], exportedBy: string }) => 
+    ipcRenderer.invoke('export-collection', data),
+  importCollection: (options?: any) => ipcRenderer.invoke('import-collection', options),
+  previewImport: () => ipcRenderer.invoke('preview-import'),
+  
   // Menu event listeners
   onMenuNewRequest: (callback: () => void) => 
     ipcRenderer.on('menu-new-request', callback),
+  onMenuNewCollection: (callback: () => void) =>
+    ipcRenderer.on('menu-new-collection', callback),
   onMenuOpenCollection: (callback: () => void) => 
     ipcRenderer.on('menu-open-collection', callback),
+  onMenuImportCollection: (callback: () => void) =>
+    ipcRenderer.on('menu-import-collection', callback),
+  onMenuExportCollection: (callback: () => void) =>
+    ipcRenderer.on('menu-export-collection', callback),
   onMenuAbout: (callback: () => void) => 
     ipcRenderer.on('menu-about', callback),
   
@@ -27,15 +39,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
   version: process.versions.electron
 });
 
-// Define TypeScript interfaces for the exposed API
+// Type definitions for the renderer process
 declare global {
   interface Window {
     electronAPI: {
       makeApiRequest: (requestData: any) => Promise<any>;
       saveCollection: (collectionData: any) => Promise<any>;
       loadCollection: (filePath: string) => Promise<any>;
+      exportCollection: (data: { collections: any[], testSuites: any[], exportedBy: string }) => Promise<any>;
+      importCollection: (options?: any) => Promise<any>;
+      previewImport: () => Promise<any>;
       onMenuNewRequest: (callback: () => void) => void;
+      onMenuNewCollection: (callback: () => void) => void;
       onMenuOpenCollection: (callback: () => void) => void;
+      onMenuImportCollection: (callback: () => void) => void;
+      onMenuExportCollection: (callback: () => void) => void;
       onMenuAbout: (callback: () => void) => void;
       removeAllListeners: (channel: string) => void;
       platform: string;
