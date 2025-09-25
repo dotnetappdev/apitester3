@@ -177,7 +177,7 @@ export const ImportExportDialog: React.FC<ImportExportDialogProps> = ({
             <div className="import-content">
               <div className="section">
                 <h3>Select Collection File</h3>
-                <p>Choose an API Tester 3 collection file (.at3) to import.</p>
+                <p>Choose an API Tester collection file (.apit) to import.</p>
                 <button 
                   className="button primary" 
                   onClick={handleImportPreview}

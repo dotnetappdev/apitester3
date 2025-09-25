@@ -33,7 +33,7 @@ export interface ImportResult {
 }
 
 export class ImportExportManager {
-  private static readonly MAGIC_HEADER = 'AT3EXPORT'; // API Tester 3 Export
+  private static readonly MAGIC_HEADER = 'APITEXPORT'; // API Tester Export
   private static readonly VERSION = '1.0.0';
   private static readonly ENCRYPTION_KEY = 'apitester3-export-key-2024';
 
@@ -72,16 +72,16 @@ export class ImportExportManager {
     const version = new TextEncoder().encode(this.VERSION);
     const data = new TextEncoder().encode(encrypted);
     
-    // Create final binary with structure: header(8) + version_length(1) + version + data_length(4) + data
+    // Create final binary with structure: header(10) + version_length(1) + version + data_length(4) + data
     const versionLength = version.length;
     const dataLength = data.length;
     
-    const binary = new Uint8Array(8 + 1 + versionLength + 4 + dataLength);
+    const binary = new Uint8Array(10 + 1 + versionLength + 4 + dataLength);
     let offset = 0;
     
-    // Magic header (8 bytes)
+    // Magic header (10 bytes)
     binary.set(header, offset);
-    offset += 8;
+    offset += 10;
     
     // Version length (1 byte)
     binary[offset] = versionLength;
@@ -121,13 +121,13 @@ export class ImportExportManager {
 
     try {
       // Validate magic header
-      const header = new TextDecoder().decode(binaryData.slice(0, 8));
+      const header = new TextDecoder().decode(binaryData.slice(0, 10));
       if (header !== this.MAGIC_HEADER) {
         result.errors.push('Invalid file format: Magic header mismatch');
         return { data: {} as ExportData, result };
       }
 
-      let offset = 8;
+      let offset = 10;
       
       // Read version
       const versionLength = binaryData[offset];
@@ -267,11 +267,11 @@ export class ImportExportManager {
    * Validate binary file format
    */
   static validateExportFile(binaryData: Uint8Array): { valid: boolean; error?: string } {
-    if (binaryData.length < 8) {
+    if (binaryData.length < 10) {
       return { valid: false, error: 'File too small' };
     }
     
-    const header = new TextDecoder().decode(binaryData.slice(0, 8));
+    const header = new TextDecoder().decode(binaryData.slice(0, 10));
     if (header !== this.MAGIC_HEADER) {
       return { valid: false, error: 'Invalid file format' };
     }

@@ -11,7 +11,7 @@ A professional, local-first desktop API testing tool inspired by Postman, built 
 - **Authentication**: Bearer token, Basic auth, and API key authentication
 - **Request Organization**: Collections and folders to organize your API requests
 - **Response Visualization**: JSON formatting, headers inspection, and response metrics
-- **Import/Export Collections**: Share collections and tests in binary format (.at3) with team members
+- **Import/Export Collections**: Share collections and tests in binary format (.apit) with team members
 - **User ID Remapping**: Seamlessly import collections with automatic user ownership mapping
 - **Test Suites**: Advanced test runner with Visual Studio-style assertions
 - **Enterprise Security**: Local-first approach with secure request handling
@@ -94,7 +94,7 @@ docs/
 API Tester 3 includes a powerful import/export system for sharing collections and tests between team members:
 
 ### Key Features
-- **Binary Format (.at3)**: Secure, encrypted binary files for portability
+- **Binary Format (.apit)**: Secure, encrypted binary files for portability
 - **User ID Remapping**: Automatic handling of user ownership during import
 - **Team Collaboration**: Easy sharing of API collections across teams
 - **Test Suite Inclusion**: Exports include all associated test cases
@@ -103,7 +103,7 @@ API Tester 3 includes a powerful import/export system for sharing collections an
 ### Quick Start
 1. **Export**: File → Export Collection (Ctrl+E)
 2. **Import**: File → Import Collection (Ctrl+I)
-3. **Share**: Send the `.at3` file to team members
+3. **Share**: Send the `.apit` file to team members
 4. **Import Options**: Choose user mapping strategy during import
 
 For detailed documentation, see [docs/IMPORT_EXPORT.md](docs/IMPORT_EXPORT.md)

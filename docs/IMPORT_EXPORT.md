@@ -6,16 +6,16 @@ API Tester 3 provides a robust import/export system that allows teams to share c
 
 The import/export functionality allows you to:
 - Export collections with their associated requests and test suites
-- Share collections as portable binary files (`.at3` format)
+- Share collections as portable binary files (`.apit` format)
 - Import collections with automatic user ID remapping
 - Preserve or remap ownership when importing
 - Handle team member transitions seamlessly
 
 ## File Format
 
-API Tester 3 uses a custom binary format with the `.at3` extension:
+API Tester 3 uses a custom binary format with the `.apit` extension:
 
-- **Magic Header**: `AT3EXPORT` (identifies the file type)
+- **Magic Header**: `APITEXPORT` (identifies the file type)
 - **Version Info**: Ensures compatibility across different versions
 - **Encrypted Data**: JSON payload containing collections, requests, and test suites
 - **Metadata**: Export information including date, author, and statistics
@@ -46,7 +46,7 @@ API Tester 3 uses a custom binary format with the `.at3` extension:
 
 ### Via Menu
 1. Go to **File > Import Collection** (or press `Ctrl+I`)
-2. Click **Browse Collection File** to select an `.at3` file
+2. Click **Browse Collection File** to select an `.apit` file
 3. Review the import preview
 4. Choose import options
 5. Click **Import Collections**
@@ -99,7 +99,7 @@ When importing collections, the system handles user ID conflicts automatically:
 ### Scenario 1: Individual Developer Sharing
 ```
 Developer A exports their collections → 
-Sends .at3 file to Developer B → 
+Sends .apit file to Developer B → 
 Developer B imports as their own collections
 ```
 
@@ -150,7 +150,7 @@ Maintain collection structure across environments
 4. **Plan User Mapping**: Understand how ownership will be handled
 
 ### File Management
-- Use descriptive filenames: `api-collections-v2.1-2024-01-15.at3`
+- Use descriptive filenames: `api-collections-v2.1-2024-01-15.apit`
 - Store in secure, shared locations
 - Maintain version history of exports
 - Document what each export contains
@@ -160,7 +160,7 @@ Maintain collection structure across environments
 ### Common Issues
 
 #### Import Fails - Invalid File Format
-- **Cause**: File is corrupted or not a valid `.at3` file
+- **Cause**: File is corrupted or not a valid `.apit` file
 - **Solution**: Re-export the original file or obtain a new copy
 
 #### Import Fails - Decryption Error
@@ -185,7 +185,7 @@ Maintain collection structure across environments
 
 ### File Structure
 ```
-AT3EXPORT (8 bytes) - Magic header
+APITEXPORT (10 bytes) - Magic header
 Version length (1 byte) - Length of version string
 Version string (variable) - Version information
 Data length (4 bytes) - Length of encrypted data

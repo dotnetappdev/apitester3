@@ -190,9 +190,9 @@ class AppManager {
       try {
         const result = await dialog.showSaveDialog(this.mainWindow!, {
           title: 'Export Collections',
-          defaultPath: `api-collections-${new Date().toISOString().split('T')[0]}.at3`,
+          defaultPath: `api-collections-${new Date().toISOString().split('T')[0]}.apit`,
           filters: [
-            { name: 'API Tester 3 Collection', extensions: ['at3'] },
+            { name: 'API Tester Collection', extensions: ['apit'] },
             { name: 'All Files', extensions: ['*'] }
           ]
         });
@@ -219,7 +219,7 @@ class AppManager {
 
         // Simple binary format: magic header + JSON data
         const jsonData = JSON.stringify(exportData);
-        const header = Buffer.from('AT3EXPORT', 'utf8');
+        const header = Buffer.from('APITEXPORT', 'utf8');
         const data = Buffer.from(jsonData, 'utf8');
         const binary = Buffer.concat([header, Buffer.from([data.length >> 24, data.length >> 16, data.length >> 8, data.length]), data]);
 
@@ -245,7 +245,7 @@ class AppManager {
         const result = await dialog.showOpenDialog(this.mainWindow!, {
           title: 'Import Collections',
           filters: [
-            { name: 'API Tester 3 Collection', extensions: ['at3'] },
+            { name: 'API Tester Collection', extensions: ['apit'] },
             { name: 'All Files', extensions: ['*'] }
           ],
           properties: ['openFile']
@@ -259,17 +259,17 @@ class AppManager {
         const binaryData = await fs.readFile(filePath);
 
         // Validate magic header
-        const header = binaryData.slice(0, 9).toString('utf8');
-        if (header !== 'AT3EXPORT') {
+        const header = binaryData.slice(0, 10).toString('utf8');
+        if (header !== 'APITEXPORT') {
           return { 
             success: false, 
-            error: 'Invalid file format: Not an API Tester 3 collection file' 
+            error: 'Invalid file format: Not an API Tester collection file' 
           };
         }
 
         // Read data length and content
-        const dataLength = (binaryData[9] << 24) | (binaryData[10] << 16) | (binaryData[11] << 8) | binaryData[12];
-        const jsonData = binaryData.slice(13, 13 + dataLength).toString('utf8');
+        const dataLength = (binaryData[10] << 24) | (binaryData[11] << 16) | (binaryData[12] << 8) | binaryData[13];
+        const jsonData = binaryData.slice(14, 14 + dataLength).toString('utf8');
         const exportData = JSON.parse(jsonData);
 
         // Process import data based on options
@@ -299,7 +299,7 @@ class AppManager {
         const result = await dialog.showOpenDialog(this.mainWindow!, {
           title: 'Preview Collection Import',
           filters: [
-            { name: 'API Tester 3 Collection', extensions: ['at3'] },
+            { name: 'API Tester Collection', extensions: ['apit'] },
             { name: 'All Files', extensions: ['*'] }
           ],
           properties: ['openFile']
@@ -313,16 +313,16 @@ class AppManager {
         const binaryData = await fs.readFile(filePath);
 
         // Validate and extract metadata
-        const header = binaryData.slice(0, 9).toString('utf8');
-        if (header !== 'AT3EXPORT') {
+        const header = binaryData.slice(0, 10).toString('utf8');
+        if (header !== 'APITEXPORT') {
           return { 
             success: false, 
             error: 'Invalid file format' 
           };
         }
 
-        const dataLength = (binaryData[9] << 24) | (binaryData[10] << 16) | (binaryData[11] << 8) | binaryData[12];
-        const jsonData = binaryData.slice(13, 13 + dataLength).toString('utf8');
+        const dataLength = (binaryData[10] << 24) | (binaryData[11] << 16) | (binaryData[12] << 8) | binaryData[13];
+        const jsonData = binaryData.slice(14, 14 + dataLength).toString('utf8');
         const exportData = JSON.parse(jsonData);
 
         return { 
