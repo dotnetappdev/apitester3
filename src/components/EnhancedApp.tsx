@@ -9,6 +9,8 @@ import { ResponsePanel } from './ResponsePanel';
 import { SettingsDialog } from './SettingsDialog';
 import { ImportExportDialog } from './ImportExportDialog';
 import { DocumentationDialog } from './DocumentationDialog';
+import { InputDialog } from './InputDialog';
+import { CollectionIcon } from './ModernButton';
 import { Splitter } from './Splitter';
 import { ApiClient } from '../utils/api';
 import { ApiResponse } from '../types';
@@ -27,6 +29,7 @@ export const EnhancedApp: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showImportExport, setShowImportExport] = useState<'import' | 'export' | null>(null);
   const [showDocumentation, setShowDocumentation] = useState(false);
+  const [showNewCollectionDialog, setShowNewCollectionDialog] = useState(false);
   const [documentationType, setDocumentationType] = useState<'overview' | 'unit-testing' | null>(null);
   const [splitterPosition, setSplitterPosition] = useState(50);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -259,16 +262,23 @@ export const EnhancedApp: React.FC = () => {
 
   const handleNewCollection = async () => {
     if (!currentUser) return;
+    setShowNewCollectionDialog(true);
+  };
 
-    const name = prompt('Collection name:');
-    if (!name) return;
+  const handleNewCollectionConfirm = async (name: string) => {
+    if (!currentUser) return;
 
     try {
       const collectionId = await dbManager.createCollection(name, '', currentUser.id);
       await loadUserCollections(currentUser.id);
+      setShowNewCollectionDialog(false);
     } catch (error) {
       console.error('Failed to create collection:', error);
     }
+  };
+
+  const handleNewCollectionCancel = () => {
+    setShowNewCollectionDialog(false);
   };
 
   const loadTestResults = async (requestId: number) => {
@@ -475,6 +485,21 @@ export const EnhancedApp: React.FC = () => {
           documentType={documentationType}
         />
       )}
+
+      <InputDialog
+        isOpen={showNewCollectionDialog}
+        title="Create New Collection"
+        message="Enter a name for your new collection:"
+        placeholder="Collection name..."
+        onConfirm={handleNewCollectionConfirm}
+        onCancel={handleNewCollectionCancel}
+        icon={<CollectionIcon />}
+        validation={(value) => {
+          if (value.length < 2) return 'Collection name must be at least 2 characters';
+          if (value.length > 50) return 'Collection name must be less than 50 characters';
+          return null;
+        }}
+      />
     </div>
   );
 };

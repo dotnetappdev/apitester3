@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AppSettings, SettingsManager } from '../settings/SettingsManager';
+import { ConfirmDialog } from './ConfirmDialog';
+import { FileBrowserDialog } from './FileBrowserDialog';
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -16,6 +18,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   const [activeTab, setActiveTab] = useState<'general' | 'appearance' | 'network' | 'advanced'>('general');
   const [errors, setErrors] = useState<string[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showFileBrowser, setShowFileBrowser] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -48,30 +53,36 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   };
 
   const handleReset = () => {
-    if (confirm('Are you sure you want to reset all settings to defaults?')) {
-      settingsManager.resetToDefaults();
-      setSettings(settingsManager.getSettings());
-      setHasChanges(false);
-    }
+    setShowResetConfirm(true);
+  };
+
+  const handleResetConfirm = () => {
+    settingsManager.resetToDefaults();
+    setSettings(settingsManager.getSettings());
+    setHasChanges(false);
+    setShowResetConfirm(false);
   };
 
   const handleCancel = () => {
     if (hasChanges) {
-      if (confirm('You have unsaved changes. Are you sure you want to cancel?')) {
-        onClose();
-      }
+      setShowCancelConfirm(true);
     } else {
       onClose();
     }
   };
 
+  const handleCancelConfirm = () => {
+    setShowCancelConfirm(false);
+    onClose();
+  };
+
   const selectDatabasePath = () => {
-    // This would typically use Electron's dialog API
-    // For now, just show an input
-    const path = prompt('Enter database path:', settings.databasePath);
-    if (path !== null) {
-      handleSettingChange('databasePath', path);
-    }
+    setShowFileBrowser(true);
+  };
+
+  const handleDatabasePathSelect = (path: string) => {
+    handleSettingChange('databasePath', path);
+    setShowFileBrowser(false);
   };
 
   if (!isOpen) return null;
@@ -368,6 +379,38 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </button>
         </div>
       </div>
+      
+      <ConfirmDialog
+        isOpen={showResetConfirm}
+        title="Reset Settings"
+        message="Are you sure you want to reset all settings to their default values? This action cannot be undone."
+        confirmText="Reset"
+        cancelText="Cancel"
+        variant="danger"
+        onConfirm={handleResetConfirm}
+        onCancel={() => setShowResetConfirm(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={showCancelConfirm}
+        title="Unsaved Changes"
+        message="You have unsaved changes. Are you sure you want to cancel without saving?"
+        confirmText="Discard Changes"
+        cancelText="Continue Editing"
+        variant="danger"
+        onConfirm={handleCancelConfirm}
+        onCancel={() => setShowCancelConfirm(false)}
+      />
+
+      <FileBrowserDialog
+        isOpen={showFileBrowser}
+        title="Select Database Path"
+        currentPath={settings.databasePath}
+        mode="file"
+        fileExtensions={['.db', '.sqlite', '.sqlite3']}
+        onConfirm={handleDatabasePathSelect}
+        onCancel={() => setShowFileBrowser(false)}
+      />
     </div>
   );
 };
