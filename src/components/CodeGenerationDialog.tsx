@@ -70,7 +70,7 @@ export const CodeGenerationDialog: React.FC<CodeGenerationDialogProps> = ({
           language: options.language
         });
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to download files');
     }
   };
@@ -90,7 +90,7 @@ export const CodeGenerationDialog: React.FC<CodeGenerationDialogProps> = ({
           alert(`Files saved successfully to: ${result.path}`);
         }
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to save files to directory');
     }
   };
