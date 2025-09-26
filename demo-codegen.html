@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester 3 - Code Generation Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #1e1e1e;
+            color: #cccccc;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            color: #4fc3f7;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            color: #969696;
+        }
+        
+        .demo-section {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .demo-section h2 {
+            color: #4fc3f7;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .feature-card {
+            background: #2d2d30;
+            border: 1px solid #464647;
+            border-radius: 6px;
+            padding: 20px;
+        }
+        
+        .feature-card h3 {
+            color: #4fc3f7;
+            margin-bottom: 10px;
+        }
+        
+        .feature-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .feature-card li {
+            padding: 5px 0;
+            color: #cccccc;
+        }
+        
+        .feature-card li:before {
+            content: "✓ ";
+            color: #4cc9f0;
+            font-weight: bold;
+        }
+        
+        .code-preview {
+            background: #1e1e1e;
+            border: 1px solid #464647;
+            border-radius: 6px;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        .code-preview h4 {
+            color: #4fc3f7;
+            margin-bottom: 15px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; }
+        .type { color: #4ec9b0; }
+        .method { color: #dcdcaa; }
+        
+        .workflow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .workflow-step {
+            background: #2d2d30;
+            border: 2px solid #007acc;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #4fc3f7;
+            position: relative;
+        }
+        
+        .workflow-step::after {
+            content: attr(data-step);
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #cccccc;
+            white-space: nowrap;
+            width: 120px;
+            text-align: center;
+        }
+        
+        .btn-demo {
+            display: inline-block;
+            background: linear-gradient(45deg, #007acc, #0066aa);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .btn-demo:hover {
+            background: linear-gradient(45deg, #106ebe, #007acc);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 122, 204, 0.4);
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(76, 201, 240, 0.1);
+            border: 1px solid #4cc9f0;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        
+        .status-indicator::before {
+            content: "✓";
+            color: #4cc9f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ API Tester 3 - Code Generation</h1>
+            <p>Generate production-ready client and server code from Swagger/OpenAPI specifications</p>
+            <div class="status-indicator">Feature Successfully Implemented</div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🚀 Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>🔧 Multi-Language Support</h3>
+                    <ul>
+                        <li>C# ASP.NET Core Controllers</li>
+                        <li>TypeScript Service Classes</li>
+                        <li>Template-based Generation</li>
+                        <li>Customizable Output</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>🔐 Authentication Options</h3>
+                    <ul>
+                        <li>No Authentication</li>
+                        <li>JWT Bearer Tokens</li>
+                        <li>Configurable Security</li>
+                        <li>Production-ready Code</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>💻 Monaco Editor Integration</h3>
+                    <ul>
+                        <li>Syntax Highlighting</li>
+                        <li>IntelliSense Support</li>
+                        <li>Real-time Editing</li>
+                        <li>Professional Interface</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>📦 Export Options</h3>
+                    <ul>
+                        <li>Download as ZIP</li>
+                        <li>Save to Directory</li>
+                        <li>Multiple File Support</li>
+                        <li>Organized Structure</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>📋 How It Works</h2>
+            <div class="workflow">
+                <div class="workflow-step" data-step="Enter Swagger URL">1</div>
+                <div class="workflow-step" data-step="Select Language">2</div>
+                <div class="workflow-step" data-step="Configure Options">3</div>
+                <div class="workflow-step" data-step="Generate Code">4</div>
+                <div class="workflow-step" data-step="Review & Export">5</div>
+            </div>
+            <p style="text-align: center; margin-top: 40px; color: #969696;">
+                Access via <strong>File → Code Generation (Ctrl+G)</strong> in the API Tester 3 application
+            </p>
+        </div>
+
+        <div class="demo-section">
+            <h2>💡 Generated Code Examples</h2>
+            
+            <div class="code-preview">
+                <h4>C# ASP.NET Core Controller</h4>
+<pre><code><span class="keyword">using</span> <span class="type">Microsoft.AspNetCore.Mvc</span>;
+<span class="keyword">using</span> <span class="type">Microsoft.AspNetCore.Authorization</span>;
+
+<span class="keyword">namespace</span> <span class="type">GeneratedApi.Controllers</span>
+{
+    [<span class="type">ApiController</span>]
+    [<span class="type">Route</span>(<span class="string">"api/[controller]"</span>)]
+    <span class="keyword">public class</span> <span class="type">ApiController</span> : <span class="type">ControllerBase</span>
+    {
+        <span class="keyword">private readonly</span> <span class="type">ILogger&lt;ApiController&gt;</span> _logger;
+
+        <span class="comment">/// &lt;summary&gt;</span>
+        <span class="comment">/// Generated API endpoint</span>
+        <span class="comment">/// &lt;/summary&gt;</span>
+        [<span class="type">HttpGet</span>]
+        <span class="keyword">public async</span> <span class="type">Task&lt;ActionResult&lt;object&gt;&gt;</span> <span class="method">Get</span>()
+        {
+            <span class="comment">// TODO: Implement your API logic here</span>
+            <span class="keyword">var</span> result = <span class="keyword">new</span> { message = <span class="string">"API endpoint working"</span> };
+            <span class="keyword">return</span> <span class="method">Ok</span>(result);
+        }
+    }
+}</code></pre>
+            </div>
+
+            <div class="code-preview">
+                <h4>TypeScript Service Class with Axios</h4>
+<pre><code><span class="keyword">import</span> axios, { <span class="type">AxiosInstance</span> } <span class="keyword">from</span> <span class="string">'axios'</span>;
+<span class="keyword">import</span> { <span class="type">ApiResponse</span>, <span class="type">ExampleModel</span> } <span class="keyword">from</span> <span class="string">'./interfaces'</span>;
+
+<span class="keyword">export class</span> <span class="type">ApiService</span> {
+    <span class="keyword">private</span> client: <span class="type">AxiosInstance</span>;
+
+    <span class="method">constructor</span>(baseURL: <span class="type">string</span>, <span class="keyword">private</span> getToken?: () => <span class="type">string</span> | <span class="keyword">null</span>) {
+        <span class="keyword">this</span>.client = axios.<span class="method">create</span>({
+            baseURL,
+            timeout: <span class="string">10000</span>,
+            headers: { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> }
+        });
+    }
+
+    <span class="comment">/**</span>
+    <span class="comment"> * Get all items</span>
+    <span class="comment"> */</span>
+    <span class="keyword">async</span> <span class="method">getAll</span>(): <span class="type">Promise&lt;ExampleModel[]&gt;</span> {
+        <span class="keyword">const</span> response = <span class="keyword">await this</span>.client.<span class="method">get</span>&lt;<span class="type">ExampleModel[]</span>&gt;(<span class="string">'/api/examples'</span>);
+        <span class="keyword">return</span> response.data;
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🛠️ Implementation Details</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>🏗️ Architecture</h3>
+                    <ul>
+                        <li>Template-based code generation</li>
+                        <li>Electron IPC communication</li>
+                        <li>Monaco Editor integration</li>
+                        <li>File system operations</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>📁 File Structure</h3>
+                    <ul>
+                        <li>/src/templates/ - Code templates</li>
+                        <li>/src/utils/codeGeneration.ts - Core logic</li>
+                        <li>/src/components/CodeGenerationDialog.tsx - UI</li>
+                        <li>Electron main/preload integration</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>🔧 Menu Integration</h3>
+                    <ul>
+                        <li>File → Code Generation (Ctrl+G)</li>
+                        <li>IPC event handling</li>
+                        <li>Modal dialog interface</li>
+                        <li>Seamless workflow integration</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>✨ User Experience</h3>
+                    <ul>
+                        <li>Step-by-step wizard interface</li>
+                        <li>Real-time code preview</li>
+                        <li>Error handling and validation</li>
+                        <li>Multiple export options</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🎯 Next Steps</h2>
+            <p style="margin-bottom: 20px;">The Code Generation feature is now fully integrated into API Tester 3. To use it:</p>
+            <ol style="color: #cccccc; padding-left: 20px;">
+                <li style="margin: 10px 0;">Launch API Tester 3 application</li>
+                <li style="margin: 10px 0;">Go to <strong>File → Code Generation</strong> or press <strong>Ctrl+G</strong></li>
+                <li style="margin: 10px 0;">Enter a Swagger URL (try: <code style="background: #3c3c3c; padding: 2px 6px; border-radius: 3px;">https://api.example.com/test</code> for demo)</li>
+                <li style="margin: 10px 0;">Select your preferred language and options</li>
+                <li style="margin: 10px 0;">Generate and export your code!</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
