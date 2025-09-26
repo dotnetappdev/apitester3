@@ -25,7 +25,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
   isLoading,
   enableSyntaxHighlighting,
   theme,
-  testSuite,
+  testSuite: _testSuite,
   onTestSuiteChange,
   onRunTests,
   testResults = []
@@ -777,7 +777,7 @@ message SampleResponse {
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .tests-panel {
           padding: 0;
           height: 100%;

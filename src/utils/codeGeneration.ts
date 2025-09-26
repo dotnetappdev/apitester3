@@ -202,13 +202,23 @@ export class CodeGenerator {
     const files: GeneratedFile[] = [];
     const namespace = options.namespace || 'ApiClient';
     const useJwtAuth = options.authentication === 'jwt';
+    
+    const services = this.extractServices(spec);
+    const models = this.extractModels(spec);
 
     // Generate Program.cs
     const programTemplate = this.templates.get('csharp-program');
     if (programTemplate) {
+      const programContent = this.processTemplate(programTemplate, {
+        namespace,
+        useJwtAuth,
+        services,
+        models
+      });
+      
       files.push({
         name: 'Program.cs',
-        content: programTemplate,
+        content: programContent,
         language: 'csharp'
       });
     }
@@ -217,7 +227,13 @@ export class CodeGenerator {
     const serviceTemplate = this.templates.get('csharp-service');
     if (serviceTemplate) {
       // Replace namespace placeholder in the template
-      const serviceContent = serviceTemplate
+      const serviceContent = this.processTemplate(serviceTemplate, {
+        namespace,
+        useJwtAuth,
+        services,
+        models,
+        title: spec.info.title
+      })
         .replace(/GeneratedApi/g, namespace)
         .replace(/ApiController/g, `${spec.info.title.replace(/\s+/g, '')}Controller`);
 
@@ -235,13 +251,23 @@ export class CodeGenerator {
     const files: GeneratedFile[] = [];
     const useJwtAuth = options.authentication === 'jwt';
     const httpClient = options.httpClient || 'axios';
+    
+    const services = this.extractServices(spec);
+    const models = this.extractModels(spec);
+    const imports = this.extractTypeScriptImports(spec);
 
     // Generate interfaces
     const interfaceTemplate = this.templates.get('typescript-interfaces');
     if (interfaceTemplate) {
+      const interfaceContent = this.processTemplate(interfaceTemplate, {
+        models,
+        imports,
+        enums: this.extractEnums(spec)
+      });
+      
       files.push({
         name: 'interfaces.ts',
-        content: interfaceTemplate,
+        content: interfaceContent,
         language: 'typescript'
       });
     }
@@ -250,7 +276,13 @@ export class CodeGenerator {
     const serviceTemplate = this.templates.get(`typescript-${httpClient}`);
     if (serviceTemplate) {
       const serviceName = spec.info.title.replace(/\s+/g, '');
-      const serviceContent = serviceTemplate
+      const serviceContent = this.processTemplate(serviceTemplate, {
+        serviceName,
+        services,
+        models,
+        useJwtAuth,
+        httpClient
+      })
         .replace(/ApiService/g, `${serviceName}Service`);
 
       files.push({
@@ -268,17 +300,17 @@ export class CodeGenerator {
     let result = template;
     
     // Handle simple variable replacement
-    result = result.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-      return data[key] !== undefined ? String(data[key]) : match;
+    result = result.replace(/\{\{(\w+)\}\}/g, (_match, key) => {
+      return data[key] !== undefined ? String(data[key]) : _match;
     });
 
     // Handle conditional blocks {{#if condition}}...{{/if}}
-    result = result.replace(/\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, condition, content) => {
+    result = result.replace(/\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (_match, condition, content) => {
       return data[condition] ? content : '';
     });
 
     // Handle loops {{#each array}}...{{/each}}
-    result = result.replace(/\{\{#each\s+(\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (match, arrayName, content) => {
+    result = result.replace(/\{\{#each\s+(\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (_match, arrayName, content) => {
       const array = data[arrayName];
       if (Array.isArray(array)) {
         return array.map((item, index) => {
@@ -298,21 +330,6 @@ export class CodeGenerator {
     return result;
   }
 
-  private extractServiceNames(spec: OpenAPISpec): string[] {
-    const services = new Set<string>();
-    
-    for (const [path, methods] of Object.entries(spec.paths)) {
-      const pathSegments = path.split('/').filter(Boolean);
-      if (pathSegments.length > 0) {
-        // Use the first segment as service name, capitalize it
-        const serviceName = pathSegments[0].charAt(0).toUpperCase() + pathSegments[0].slice(1);
-        services.add(serviceName);
-      }
-    }
-
-    return Array.from(services);
-  }
-
   private extractServices(spec: OpenAPISpec): Array<{ name: string; operations: any[] }> {
     const serviceMap = new Map<string, any[]>();
 
@@ -327,7 +344,7 @@ export class CodeGenerator {
       }
 
       for (const [method, operation] of Object.entries(methods)) {
-        if (method.toLowerCase() in ['get', 'post', 'put', 'delete', 'patch']) {
+        if (['get', 'post', 'put', 'delete', 'patch'].includes(method.toLowerCase())) {
           const operationName = operation.operationId || 
             `${method.toLowerCase()}${serviceName}`;
 
@@ -430,7 +447,7 @@ export class CodeGenerator {
   }
 
   private mapTypeToLanguage(type: string, language: 'csharp' | 'typescript'): string {
-    const typeMapping = {
+    const typeMapping: Record<'csharp' | 'typescript', Record<string, string>> = {
       csharp: {
         string: 'string',
         integer: 'int',

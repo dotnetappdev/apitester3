@@ -110,10 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         borderBottom: '1px solid var(--border-color)',
                         backgroundColor: activeRequest?.id === request.id 
                           ? 'var(--bg-tertiary)' 
-                          : 'transparent',
-                        ':hover': {
-                          backgroundColor: 'var(--bg-tertiary)'
-                        }
+                          : 'transparent'
                       }}
                       onClick={() => onRequestSelect(request)}
                       onMouseEnter={(e) => {

@@ -214,7 +214,7 @@ export const RequestPanel: React.FC<RequestPanelProps> = ({
                 className="form-select"
                 value={request.auth?.type || 'none'}
                 onChange={(e) => updateRequest({
-                  auth: { ...request.auth, type: e.target.value as ApiRequest['auth']['type'] }
+                  auth: { ...request.auth, type: e.target.value as ('none' | 'bearer' | 'basic' | 'api-key' | 'ws-security') }
                 })}
               >
                 <option value="none">No Auth</option>
@@ -232,7 +232,7 @@ export const RequestPanel: React.FC<RequestPanelProps> = ({
                   className="form-input"
                   value={request.auth.token || ''}
                   onChange={(e) => updateRequest({
-                    auth: { ...request.auth, token: e.target.value }
+                    auth: { type: request.auth?.type || 'bearer', token: e.target.value }
                   })}
                   placeholder="Your bearer token"
                 />
@@ -248,7 +248,7 @@ export const RequestPanel: React.FC<RequestPanelProps> = ({
                     className="form-input"
                     value={request.auth.username || ''}
                     onChange={(e) => updateRequest({
-                      auth: { ...request.auth, username: e.target.value }
+                      auth: { type: request.auth?.type || 'basic', username: e.target.value }
                     })}
                     placeholder="Username"
                   />
@@ -260,7 +260,7 @@ export const RequestPanel: React.FC<RequestPanelProps> = ({
                     className="form-input"
                     value={request.auth.password || ''}
                     onChange={(e) => updateRequest({
-                      auth: { ...request.auth, password: e.target.value }
+                      auth: { type: request.auth?.type || 'basic', password: e.target.value }
                     })}
                     placeholder="Password"
                   />
@@ -277,7 +277,7 @@ export const RequestPanel: React.FC<RequestPanelProps> = ({
                     className="form-input"
                     value={request.auth.key || ''}
                     onChange={(e) => updateRequest({
-                      auth: { ...request.auth, key: e.target.value }
+                      auth: { type: request.auth?.type || 'api-key', key: e.target.value }
                     })}
                     placeholder="API key name (e.g., X-API-Key)"
                   />
@@ -289,7 +289,7 @@ export const RequestPanel: React.FC<RequestPanelProps> = ({
                     className="form-input"
                     value={request.auth.value || ''}
                     onChange={(e) => updateRequest({
-                      auth: { ...request.auth, value: e.target.value }
+                      auth: { type: request.auth?.type || 'api-key', value: e.target.value }
                     })}
                     placeholder="API key value"
                   />

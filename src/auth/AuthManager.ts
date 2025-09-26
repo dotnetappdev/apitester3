@@ -66,7 +66,7 @@ export class AuthManager {
     return this.currentSession?.user.role === 'admin';
   }
 
-  canAccessCollection(collectionId: number, ownerId: number): boolean {
+  canAccessCollection(_collectionId: number, ownerId: number): boolean {
     const user = this.getCurrentUser();
     if (!user) return false;
     
@@ -80,7 +80,7 @@ export class AuthManager {
     return false;
   }
 
-  canModifyCollection(collectionId: number, ownerId: number): boolean {
+  canModifyCollection(_collectionId: number, ownerId: number): boolean {
     const user = this.getCurrentUser();
     if (!user) return false;
     

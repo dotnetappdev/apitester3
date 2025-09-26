@@ -78,7 +78,7 @@ export class ApiClient {
       return {
         status: response.status,
         statusText: response.statusText,
-        headers: response.headers,
+        headers: response.headers as Record<string, string>,
         data: response.data,
         responseTime: endTime - startTime,
         size: this.calculateResponseSize(response)
