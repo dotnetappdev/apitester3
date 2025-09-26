@@ -121,7 +121,7 @@ API Tester 3 includes a powerful code generation feature that creates client and
 
 1. **Access Code Generation**: File → Code Generation (Ctrl+G) or use the menu
 2. **Select Language**: Choose between C# or TypeScript
-3. **Enter Swagger URL**: Provide the URL to your OpenAPI/Swagger JSON specification
+3. **Enter Swagger JSON**: Paste the content of your swagger.json file
 4. **Configure Options**: 
    - Choose authentication type (None or JWT Bearer)
    - For TypeScript: Select HTTP client (Axios or Fetch)
@@ -154,7 +154,7 @@ API Tester 3 includes a powerful code generation feature that creates client and
 
 ### Example Usage
 
-For testing, you can use the test URL: `https://api.example.com/test` which will generate sample code with basic CRUD operations.
+For testing, you can enter "test" in the JSON content area, which will generate sample code with basic CRUD operations.
 
 ## Seed Data & Test Accounts
 

@@ -1,6 +1,6 @@
 export interface CodeGenerationOptions {
   language: 'csharp' | 'typescript';
-  swaggerUrl: string;
+  swaggerJson: string;
   authentication: 'none' | 'jwt';
   httpClient?: 'axios' | 'fetch'; // For TypeScript only
   namespace?: string; // For C# only
@@ -91,10 +91,10 @@ export class CodeGenerator {
     }
   }
 
-  async fetchSwaggerSpec(url: string): Promise<OpenAPISpec> {
+  parseSwaggerSpec(jsonContent: string): OpenAPISpec {
     try {
-      // For testing, if the URL is a test URL, return a mock spec
-      if (url.includes('test') || url.includes('example')) {
+      // For testing, if the content includes 'test' or 'example', return a mock spec
+      if (jsonContent.includes('test') || jsonContent.includes('example')) {
         return {
           openapi: '3.0.0',
           info: {
@@ -174,44 +174,19 @@ export class CodeGenerator {
         };
       }
 
-      // Remove trailing slash if present
-      const cleanUrl = url.endsWith('/') ? url.slice(0, -1) : url;
-      
-      // Try different common swagger endpoints
-      const possibleUrls = [
-        cleanUrl,
-        `${cleanUrl}/swagger.json`,
-        `${cleanUrl}/v1/swagger.json`,
-        `${cleanUrl}/api/swagger.json`,
-        `${cleanUrl}/swagger/v1/swagger.json`
-      ];
-
-      let lastError: Error | null = null;
-      
-      for (const swaggerUrl of possibleUrls) {
-        try {
-          const response = await fetch(swaggerUrl);
-          if (response.ok) {
-            const spec = await response.json();
-            return spec as OpenAPISpec;
-          }
-        } catch (error) {
-          lastError = error as Error;
-          continue;
-        }
-      }
-
-      throw lastError || new Error('Failed to fetch OpenAPI specification from any of the attempted URLs');
+      // Parse the actual JSON content
+      const spec = JSON.parse(jsonContent);
+      return spec as OpenAPISpec;
     } catch (error) {
-      console.error('Error fetching Swagger spec:', error);
-      throw new Error(`Failed to fetch OpenAPI specification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error parsing Swagger JSON:', error);
+      throw new Error(`Failed to parse Swagger JSON: ${error instanceof Error ? error.message : 'Invalid JSON format'}`);
     }
   }
 
   async generateCode(options: CodeGenerationOptions): Promise<GeneratedFile[]> {
     await this.loadTemplates();
     
-    const spec = await this.fetchSwaggerSpec(options.swaggerUrl);
+    const spec = this.parseSwaggerSpec(options.swaggerJson);
     const files: GeneratedFile[] = [];
 
     if (options.language === 'csharp') {

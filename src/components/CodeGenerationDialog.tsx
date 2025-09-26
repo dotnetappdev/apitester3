@@ -13,7 +13,7 @@ export const CodeGenerationDialog: React.FC<CodeGenerationDialogProps> = ({
 }) => {
   const [options, setOptions] = useState<CodeGenerationOptions>({
     language: 'csharp',
-    swaggerUrl: '',
+    swaggerJson: '',
     authentication: 'none',
     httpClient: 'axios',
     namespace: 'ApiClient'
@@ -39,8 +39,8 @@ export const CodeGenerationDialog: React.FC<CodeGenerationDialogProps> = ({
   }, [isOpen]);
 
   const handleGenerate = async () => {
-    if (!options.swaggerUrl.trim()) {
-      setError('Please provide a Swagger endpoint URL');
+    if (!options.swaggerJson.trim()) {
+      setError('Please provide a Swagger JSON content');
       return;
     }
 
@@ -148,16 +148,28 @@ export const CodeGenerationDialog: React.FC<CodeGenerationDialogProps> = ({
               </div>
 
               <div className="form-section">
-                <label className="form-label">Swagger Endpoint URL</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="https://api.example.com/swagger.json"
-                  value={options.swaggerUrl}
-                  onChange={(e) => setOptions(prev => ({ ...prev, swaggerUrl: e.target.value }))}
+                <label className="form-label">Swagger JSON Content</label>
+                <textarea
+                  className="form-textarea"
+                  rows={8}
+                  placeholder={`Paste your swagger.json content here, for example:
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Your API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    ...
+  }
+}
+
+Or enter "test" for a demo example.`}
+                  value={options.swaggerJson}
+                  onChange={(e) => setOptions(prev => ({ ...prev, swaggerJson: e.target.value }))}
                 />
                 <div className="form-hint">
-                  Enter the URL to your Swagger/OpenAPI JSON specification
+                  Paste the content of your swagger.json file or enter "test" for a demo
                 </div>
               </div>
 
@@ -259,7 +271,7 @@ export const CodeGenerationDialog: React.FC<CodeGenerationDialogProps> = ({
               <button 
                 className="btn btn-primary" 
                 onClick={handleGenerate}
-                disabled={isGenerating || !options.swaggerUrl.trim()}
+                disabled={isGenerating || !options.swaggerJson.trim()}
               >
                 {isGenerating ? (
                   <>
