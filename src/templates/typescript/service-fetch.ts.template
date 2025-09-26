@@ -1,0 +1,120 @@
+import { ApiResponse, ApiError, ExampleModel, CreateExampleRequest, UpdateExampleRequest } from './interfaces';
+
+export class ApiService {
+  private baseURL: string;
+  private getToken?: () => string | null;
+
+  constructor(baseURL: string, getToken?: () => string | null) {
+    this.baseURL = baseURL;
+    this.getToken = getToken;
+  }
+
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
+
+    const token = this.getToken?.();
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      ...options,
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    }
+
+    return response.text() as any;
+  }
+
+  /**
+   * Get all items
+   * @returns Promise<ExampleModel[]>
+   */
+  async getAll(): Promise<ExampleModel[]> {
+    try {
+      return await this.request<ExampleModel[]>('/api/examples');
+    } catch (error) {
+      console.error('Error in getAll:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get item by ID
+   * @param id Item ID
+   * @returns Promise<ExampleModel>
+   */
+  async getById(id: number): Promise<ExampleModel> {
+    try {
+      return await this.request<ExampleModel>(`/api/examples/${id}`);
+    } catch (error) {
+      console.error('Error in getById:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create new item
+   * @param data Item data
+   * @returns Promise<ExampleModel>
+   */
+  async create(data: CreateExampleRequest): Promise<ExampleModel> {
+    try {
+      return await this.request<ExampleModel>('/api/examples', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.error('Error in create:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update existing item
+   * @param id Item ID
+   * @param data Update data
+   * @returns Promise<ExampleModel>
+   */
+  async update(id: number, data: UpdateExampleRequest): Promise<ExampleModel> {
+    try {
+      return await this.request<ExampleModel>(`/api/examples/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.error('Error in update:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete item
+   * @param id Item ID
+   * @returns Promise<void>
+   */
+  async delete(id: number): Promise<void> {
+    try {
+      await this.request<void>(`/api/examples/${id}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error('Error in delete:', error);
+      throw error;
+    }
+  }
+}

@@ -10,6 +10,7 @@ import { SettingsDialog } from './SettingsDialog';
 import { ImportExportDialog } from './ImportExportDialog';
 import { DocumentationDialog } from './DocumentationDialog';
 import { InputDialog } from './InputDialog';
+import { CodeGenerationDialog } from './CodeGenerationDialog';
 import { CollectionIcon } from './ModernButton';
 import { Splitter } from './Splitter';
 import { ApiClient } from '../utils/api';
@@ -30,6 +31,7 @@ export const EnhancedApp: React.FC = () => {
   const [showImportExport, setShowImportExport] = useState<'import' | 'export' | null>(null);
   const [showDocumentation, setShowDocumentation] = useState(false);
   const [showNewCollectionDialog, setShowNewCollectionDialog] = useState(false);
+  const [showCodeGeneration, setShowCodeGeneration] = useState(false);
   const [documentationType, setDocumentationType] = useState<'overview' | 'unit-testing' | null>(null);
   const [splitterPosition, setSplitterPosition] = useState(50);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -120,12 +122,17 @@ export const EnhancedApp: React.FC = () => {
         setShowDocumentation(true);
       };
 
+      const handleMenuCodeGeneration = () => {
+        setShowCodeGeneration(true);
+      };
+
       // Set up listeners
       (window as any).electronAPI.onMenuImportCollection?.(handleMenuImportCollection);
       (window as any).electronAPI.onMenuExportCollection?.(handleMenuExportCollection);
       (window as any).electronAPI.onMenuNewCollection?.(handleMenuNewCollection);
       (window as any).electronAPI.onMenuShowOverview?.(handleMenuShowOverview);
       (window as any).electronAPI.onMenuShowUnitTesting?.(handleMenuShowUnitTesting);
+      (window as any).electronAPI.onMenuCodeGeneration?.(handleMenuCodeGeneration);
 
       // Cleanup
       return () => {
@@ -134,6 +141,7 @@ export const EnhancedApp: React.FC = () => {
         (window as any).electronAPI.removeAllListeners?.('menu-new-collection');
         (window as any).electronAPI.removeAllListeners?.('menu-show-overview');
         (window as any).electronAPI.removeAllListeners?.('menu-show-unit-testing');
+        (window as any).electronAPI.removeAllListeners?.('menu-code-generation');
       };
     }
   }, []);
@@ -483,6 +491,13 @@ export const EnhancedApp: React.FC = () => {
           isOpen={showDocumentation}
           onClose={() => setShowDocumentation(false)}
           documentType={documentationType}
+        />
+      )}
+
+      {showCodeGeneration && (
+        <CodeGenerationDialog
+          isOpen={showCodeGeneration}
+          onClose={() => setShowCodeGeneration(false)}
         />
       )}
 

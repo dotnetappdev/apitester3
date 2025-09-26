@@ -1,0 +1,110 @@
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { ApiResponse, ApiError, ExampleModel, CreateExampleRequest, UpdateExampleRequest } from './interfaces';
+
+export class ApiService {
+  private client: AxiosInstance;
+
+  constructor(baseURL: string, private getToken?: () => string | null) {
+    this.client = axios.create({
+      baseURL,
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Add auth interceptor if token function is provided
+    if (this.getToken) {
+      this.client.interceptors.request.use((config) => {
+        const token = this.getToken?.();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      });
+    }
+
+    // Add response interceptor for error handling
+    this.client.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        console.error('API Error:', error);
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  /**
+   * Get all items
+   * @returns Promise<ExampleModel[]>
+   */
+  async getAll(): Promise<ExampleModel[]> {
+    try {
+      const response: AxiosResponse<ExampleModel[]> = await this.client.get<ExampleModel[]>('/api/examples');
+      return response.data;
+    } catch (error) {
+      console.error('Error in getAll:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get item by ID
+   * @param id Item ID
+   * @returns Promise<ExampleModel>
+   */
+  async getById(id: number): Promise<ExampleModel> {
+    try {
+      const response: AxiosResponse<ExampleModel> = await this.client.get<ExampleModel>(`/api/examples/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error in getById:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create new item
+   * @param data Item data
+   * @returns Promise<ExampleModel>
+   */
+  async create(data: CreateExampleRequest): Promise<ExampleModel> {
+    try {
+      const response: AxiosResponse<ExampleModel> = await this.client.post<ExampleModel>('/api/examples', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error in create:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update existing item
+   * @param id Item ID
+   * @param data Update data
+   * @returns Promise<ExampleModel>
+   */
+  async update(id: number, data: UpdateExampleRequest): Promise<ExampleModel> {
+    try {
+      const response: AxiosResponse<ExampleModel> = await this.client.put<ExampleModel>(`/api/examples/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error in update:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete item
+   * @param id Item ID
+   * @returns Promise<void>
+   */
+  async delete(id: number): Promise<void> {
+    try {
+      await this.client.delete(`/api/examples/${id}`);
+    } catch (error) {
+      console.error('Error in delete:', error);
+      throw error;
+    }
+  }
+}

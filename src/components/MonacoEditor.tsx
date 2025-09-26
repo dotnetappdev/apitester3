@@ -4,7 +4,7 @@ import Editor, { Monaco } from '@monaco-editor/react';
 interface MonacoEditorProps {
   value: string;
   onChange?: (value: string) => void;
-  language?: 'json' | 'xml' | 'text' | 'javascript';
+  language?: 'json' | 'xml' | 'text' | 'javascript' | 'csharp' | 'typescript';
   readOnly?: boolean;
   height?: string | number;
   theme?: 'vs-dark' | 'light';

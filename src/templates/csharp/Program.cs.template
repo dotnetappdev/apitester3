@@ -1,0 +1,35 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Add JWT Authentication if enabled
+// TODO: Configure JWT authentication based on your requirements
+
+// Register services
+// TODO: Add your service registrations here
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+// Add authentication and authorization middleware if needed
+// app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
