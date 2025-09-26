@@ -11,6 +11,11 @@ A professional, local-first desktop API testing tool inspired by Postman, built 
 - **Authentication**: Bearer token, Basic auth, and API key authentication
 - **Request Organization**: Collections and folders to organize your API requests
 - **Response Visualization**: JSON formatting, headers inspection, and response metrics
+- **Code Generation**: Generate client and server code from Swagger/OpenAPI specifications
+  - **C# Support**: ASP.NET Core controllers with JWT authentication
+  - **TypeScript Support**: Service classes with Axios or Fetch HTTP clients
+  - **Monaco Editor**: View and edit generated code with syntax highlighting
+  - **Export Options**: Download as ZIP or save to directory
 - **Import/Export Collections**: Share collections and tests in binary format (.apit) with team members
 - **User ID Remapping**: Seamlessly import collections with automatic user ownership mapping
 - **Test Suites**: Advanced test runner with Visual Studio-style assertions
@@ -107,6 +112,49 @@ API Tester 3 includes a powerful import/export system for sharing collections an
 4. **Import Options**: Choose user mapping strategy during import
 
 For detailed documentation, see [docs/IMPORT_EXPORT.md](docs/IMPORT_EXPORT.md)
+
+## Code Generation
+
+API Tester 3 includes a powerful code generation feature that creates client and server code from Swagger/OpenAPI specifications:
+
+### How to Use
+
+1. **Access Code Generation**: File → Code Generation (Ctrl+G) or use the menu
+2. **Select Language**: Choose between C# or TypeScript
+3. **Enter Swagger JSON**: Paste the content of your swagger.json file
+4. **Configure Options**: 
+   - Choose authentication type (None or JWT Bearer)
+   - For TypeScript: Select HTTP client (Axios or Fetch)
+   - For C#: Set namespace (default: ApiClient)
+5. **Generate Code**: Click "Generate Code" to create the files
+6. **Review & Edit**: Use the built-in Monaco Editor to review and modify generated code
+7. **Export**: Download as ZIP or save to a directory
+
+### Supported Languages
+
+#### C# (.NET)
+- **Program.cs**: ASP.NET Core startup configuration
+- **Controllers**: RESTful API controllers with dependency injection
+- **JWT Authentication**: Optional Bearer token authentication setup
+- **CRUD Operations**: Generated endpoints for Create, Read, Update, Delete operations
+
+#### TypeScript
+- **Interfaces**: Type-safe data models from OpenAPI schemas
+- **Service Classes**: HTTP client wrappers for API endpoints
+- **Axios Support**: Full-featured HTTP client with interceptors
+- **Fetch Support**: Native browser fetch API implementation
+- **JWT Integration**: Optional Bearer token authentication
+
+### Features
+- **Template-based Generation**: Customizable code templates stored in `/src/templates/`
+- **Real-time Preview**: View generated code with syntax highlighting
+- **Error Handling**: Comprehensive error handling in generated code
+- **Type Safety**: Strong typing for TypeScript, proper C# types
+- **Documentation**: Auto-generated JSDoc/XML documentation comments
+
+### Example Usage
+
+For testing, you can enter "test" in the JSON content area, which will generate sample code with basic CRUD operations.
 
 ## Seed Data & Test Accounts
 

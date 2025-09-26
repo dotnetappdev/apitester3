@@ -1,0 +1,62 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
+namespace GeneratedApi.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ApiController : ControllerBase
+    {
+        private readonly ILogger<ApiController> _logger;
+
+        public ApiController(ILogger<ApiController> logger)
+        {
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// Generated API endpoint
+        /// </summary>
+        /// <returns>API response</returns>
+        [HttpGet]
+        public async Task<ActionResult<object>> Get()
+        {
+            try
+            {
+                _logger.LogInformation("API endpoint called");
+                
+                // TODO: Implement your API logic here
+                var result = new { message = "API endpoint working", timestamp = DateTime.UtcNow };
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in API endpoint");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        /// <summary>
+        /// Generated POST endpoint
+        /// </summary>
+        /// <param name="data">Request data</param>
+        /// <returns>API response</returns>
+        [HttpPost]
+        public async Task<ActionResult<object>> Post([FromBody] object data)
+        {
+            try
+            {
+                _logger.LogInformation("POST endpoint called");
+                
+                // TODO: Implement your POST logic here
+                var result = new { message = "Data received", data = data, timestamp = DateTime.UtcNow };
+                return CreatedAtAction(nameof(Get), result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in POST endpoint");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+    }
+}

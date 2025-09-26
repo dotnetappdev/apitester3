@@ -1,0 +1,33 @@
+// Generated interfaces from OpenAPI specification
+
+export interface ApiResponse<T = any> {
+  data: T;
+  success: boolean;
+  message?: string;
+  errors?: string[];
+}
+
+export interface ApiError {
+  message: string;
+  statusCode: number;
+  details?: any;
+}
+
+// TODO: Add your specific interface definitions based on the OpenAPI schema
+export interface ExampleModel {
+  id: number;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateExampleRequest {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateExampleRequest {
+  name?: string;
+  description?: string;
+}

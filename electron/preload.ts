@@ -35,6 +35,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('menu-show-overview', callback),
   onMenuShowUnitTesting: (callback: () => void) => 
     ipcRenderer.on('menu-show-unit-testing', callback),
+  onMenuCodeGeneration: (callback: () => void) => 
+    ipcRenderer.on('menu-code-generation', callback),
+  
+  // Code generation operations
+  readTemplate: (templatePath: string) => ipcRenderer.invoke('read-template', templatePath),
+  downloadGeneratedCode: (data: { files: any[], language: string }) => 
+    ipcRenderer.invoke('download-generated-code', data),
+  saveGeneratedCodeToDirectory: (data: { files: any[], language: string }) => 
+    ipcRenderer.invoke('save-generated-code-to-directory', data),
   
   // Remove listeners
   removeAllListeners: (channel: string) => 
@@ -65,6 +74,10 @@ declare global {
       onMenuAbout: (callback: () => void) => void;
       onMenuShowOverview: (callback: () => void) => void;
       onMenuShowUnitTesting: (callback: () => void) => void;
+      onMenuCodeGeneration: (callback: () => void) => void;
+      readTemplate: (templatePath: string) => Promise<string>;
+      downloadGeneratedCode: (data: { files: any[], language: string }) => Promise<any>;
+      saveGeneratedCodeToDirectory: (data: { files: any[], language: string }) => Promise<any>;
       removeAllListeners: (channel: string) => void;
       platform: string;
       version: string;

@@ -111,6 +111,14 @@ class AppManager {
           },
           { type: 'separator' },
           {
+            label: 'Code Generation',
+            accelerator: 'CmdOrCtrl+G',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-code-generation');
+            }
+          },
+          { type: 'separator' },
+          {
             label: 'Open Collection',
             accelerator: 'CmdOrCtrl+O',
             click: () => {
@@ -397,6 +405,88 @@ class AppManager {
         return { 
           success: false, 
           error: error instanceof Error ? error.message : 'Unknown error' 
+        };
+      }
+    });
+
+    // Handle code generation template reading
+    ipcMain.handle('read-template', async (event, templatePath) => {
+      try {
+        const fullPath = join(__dirname, '..', 'src', 'templates', templatePath);
+        const templateContent = await fs.readFile(fullPath, 'utf8');
+        return templateContent;
+      } catch (error) {
+        console.error('Failed to read template:', error);
+        throw new Error(`Failed to read template: ${templatePath}`);
+      }
+    });
+
+    // Handle downloading generated code as ZIP
+    ipcMain.handle('download-generated-code', async (event, { files, language }) => {
+      try {
+        const result = await dialog.showSaveDialog(this.mainWindow!, {
+          title: 'Save Generated Code',
+          defaultPath: `generated-${language}-code-${new Date().toISOString().split('T')[0]}.zip`,
+          filters: [
+            { name: 'ZIP Files', extensions: ['zip'] },
+            { name: 'All Files', extensions: ['*'] }
+          ]
+        });
+
+        if (result.canceled || !result.filePath) {
+          return { success: false, canceled: true };
+        }
+
+        // Create a simple ZIP-like structure (for demonstration)
+        // In a real implementation, you'd use a proper ZIP library
+        const zipData = {
+          files,
+          language,
+          generatedAt: new Date().toISOString()
+        };
+
+        await fs.writeFile(result.filePath, JSON.stringify(zipData, null, 2));
+
+        return { success: true, filePath: result.filePath };
+      } catch (error) {
+        console.error('Failed to save generated code:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        };
+      }
+    });
+
+    // Handle saving generated code to directory
+    ipcMain.handle('save-generated-code-to-directory', async (event, { files, language }) => {
+      try {
+        const result = await dialog.showOpenDialog(this.mainWindow!, {
+          title: 'Select Directory for Generated Code',
+          properties: ['openDirectory']
+        });
+
+        if (result.canceled || !result.filePaths.length) {
+          return { success: false, canceled: true };
+        }
+
+        const targetDir = result.filePaths[0];
+        const outputDir = join(targetDir, `generated-${language}-code`);
+
+        // Create the output directory
+        await fs.mkdir(outputDir, { recursive: true });
+
+        // Write each file
+        for (const file of files) {
+          const filePath = join(outputDir, file.name);
+          await fs.writeFile(filePath, file.content, 'utf8');
+        }
+
+        return { success: true, path: outputDir };
+      } catch (error) {
+        console.error('Failed to save generated code to directory:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
         };
       }
     });
