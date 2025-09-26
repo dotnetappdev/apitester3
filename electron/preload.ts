@@ -5,6 +5,8 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('electronAPI', {
   // API request methods
   makeApiRequest: (requestData: any) => ipcRenderer.invoke('make-api-request', requestData),
+  makeSoapRequest: (requestData: any) => ipcRenderer.invoke('make-soap-request', requestData),
+  makeGrpcRequest: (requestData: any) => ipcRenderer.invoke('make-grpc-request', requestData),
   
   // File operations
   saveCollection: (collectionData: any) => ipcRenderer.invoke('save-collection', collectionData),
@@ -48,6 +50,8 @@ declare global {
   interface Window {
     electronAPI: {
       makeApiRequest: (requestData: any) => Promise<any>;
+      makeSoapRequest: (requestData: any) => Promise<any>;
+      makeGrpcRequest: (requestData: any) => Promise<any>;
       saveCollection: (collectionData: any) => Promise<any>;
       loadCollection: (filePath: string) => Promise<any>;
       exportCollection: (data: { collections: any[], testSuites: any[], exportedBy: string }) => Promise<any>;

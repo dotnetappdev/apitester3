@@ -43,6 +43,8 @@
     "vite": "^4.0.0"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.14.0",
+    "@grpc/proto-loader": "^0.8.0",
     "@monaco-editor/react": "^4.7.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/crypto-js": "^4.2.2",
@@ -50,6 +52,8 @@
     "axios": "^1.4.0",
     "bcryptjs": "^3.0.2",
     "crypto-js": "^4.2.0",
+    "fast-xml-parser": "^5.2.5",
+    "node-soap": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sqlite3": "^5.1.7"

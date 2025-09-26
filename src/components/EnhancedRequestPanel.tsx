@@ -30,7 +30,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
   onRunTests,
   testResults = []
 }) => {
-  const [activeTab, setActiveTab] = useState<'params' | 'headers' | 'body' | 'auth' | 'tests'>('params');
+  const [activeTab, setActiveTab] = useState<'params' | 'headers' | 'body' | 'auth' | 'tests' | 'soap' | 'grpc'>('params');
 
   const updateRequest = (updates: Partial<Request>) => {
     onRequestChange({ ...request, ...updates });
@@ -135,6 +135,8 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
       case 'PATCH': return '#ff8c00';
       case 'HEAD': return '#9370db';
       case 'OPTIONS': return '#20b2aa';
+      case 'SOAP': return '#6f42c1';
+      case 'GRPC': return '#fd7e14';
       default: return '#cccccc';
     }
   };
@@ -168,6 +170,8 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
             <option value="PATCH">PATCH</option>
             <option value="HEAD">HEAD</option>
             <option value="OPTIONS">OPTIONS</option>
+            <option value="SOAP">SOAP</option>
+            <option value="GRPC">gRPC</option>
           </select>
           
           <input
@@ -197,26 +201,37 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
 
       {/* Request Tabs */}
       <div className="request-tabs">
-        {(['params', 'headers', 'body', 'auth', 'tests'] as const).map(tab => (
-          <button
-            key={tab}
-            className={`request-tab ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            <span className="tab-label">
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </span>
-            {tab === 'params' && Object.keys(params).length > 0 && (
-              <span className="tab-badge">{Object.keys(params).length}</span>
-            )}
-            {tab === 'headers' && Object.keys(headers).length > 0 && (
-              <span className="tab-badge">{Object.keys(headers).length}</span>
-            )}
-            {tab === 'tests' && request.tests && (
-              <span className="tab-badge">✓</span>
-            )}
-          </button>
-        ))}
+        {(() => {
+          const baseTabs: Array<'params' | 'headers' | 'body' | 'auth' | 'tests' | 'soap' | 'grpc'> = ['params', 'headers', 'body', 'auth', 'tests'];
+          
+          // Add protocol-specific tabs
+          if (request.method === 'SOAP') {
+            baseTabs.splice(2, 0, 'soap'); // Insert SOAP tab before body
+          } else if (request.method === 'GRPC') {
+            baseTabs.splice(2, 0, 'grpc'); // Insert gRPC tab before body
+          }
+          
+          return baseTabs.map(tab => (
+            <button
+              key={tab}
+              className={`request-tab ${activeTab === tab ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              <span className="tab-label">
+                {tab === 'soap' ? 'SOAP' : tab === 'grpc' ? 'gRPC' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </span>
+              {tab === 'params' && Object.keys(params).length > 0 && (
+                <span className="tab-badge">{Object.keys(params).length}</span>
+              )}
+              {tab === 'headers' && Object.keys(headers).length > 0 && (
+                <span className="tab-badge">{Object.keys(headers).length}</span>
+              )}
+              {tab === 'tests' && request.tests && (
+                <span className="tab-badge">✓</span>
+              )}
+            </button>
+          ));
+        })()}
       </div>
 
       {/* Tab Content */}
@@ -284,6 +299,316 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
           </div>
         )}
 
+        {activeTab === 'soap' && (
+          <div className="tab-panel">
+            <div className="panel-header">
+              <h4>SOAP Configuration</h4>
+              <p className="panel-description">
+                Configure SOAP-specific settings for this request
+              </p>
+            </div>
+            
+            <div className="soap-section">
+              <div className="form-group">
+                <label className="form-label">SOAP Action</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={(() => {
+                    try {
+                      const soap = request.body ? JSON.parse(request.body) : {};
+                      return soap.soapAction || '';
+                    } catch {
+                      return '';
+                    }
+                  })()}
+                  onChange={(e) => {
+                    try {
+                      const soap = request.body ? JSON.parse(request.body) : {};
+                      soap.soapAction = e.target.value;
+                      updateRequest({ body: JSON.stringify(soap) });
+                    } catch {
+                      updateRequest({ body: JSON.stringify({ soapAction: e.target.value }) });
+                    }
+                  }}
+                  placeholder="http://tempuri.org/SampleAction"
+                />
+                <small className="form-help">The SOAPAction HTTP header value</small>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">WSDL URL (Optional)</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={(() => {
+                    try {
+                      const soap = request.body ? JSON.parse(request.body) : {};
+                      return soap.wsdlUrl || '';
+                    } catch {
+                      return '';
+                    }
+                  })()}
+                  onChange={(e) => {
+                    try {
+                      const soap = request.body ? JSON.parse(request.body) : {};
+                      soap.wsdlUrl = e.target.value;
+                      updateRequest({ body: JSON.stringify(soap) });
+                    } catch {
+                      updateRequest({ body: JSON.stringify({ wsdlUrl: e.target.value }) });
+                    }
+                  }}
+                  placeholder="http://example.com/service.wsdl"
+                />
+                <small className="form-help">URL to the WSDL document for reference</small>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Target Namespace</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={(() => {
+                    try {
+                      const soap = request.body ? JSON.parse(request.body) : {};
+                      return soap.namespace || '';
+                    } catch {
+                      return '';
+                    }
+                  })()}
+                  onChange={(e) => {
+                    try {
+                      const soap = request.body ? JSON.parse(request.body) : {};
+                      soap.namespace = e.target.value;
+                      updateRequest({ body: JSON.stringify(soap) });
+                    } catch {
+                      updateRequest({ body: JSON.stringify({ namespace: e.target.value }) });
+                    }
+                  }}
+                  placeholder="http://tempuri.org/"
+                />
+                <small className="form-help">The XML namespace for the SOAP service</small>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Operation Name</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={(() => {
+                    try {
+                      const soap = request.body ? JSON.parse(request.body) : {};
+                      return soap.operation || '';
+                    } catch {
+                      return '';
+                    }
+                  })()}
+                  onChange={(e) => {
+                    try {
+                      const soap = request.body ? JSON.parse(request.body) : {};
+                      soap.operation = e.target.value;
+                      updateRequest({ body: JSON.stringify(soap) });
+                    } catch {
+                      updateRequest({ body: JSON.stringify({ operation: e.target.value }) });
+                    }
+                  }}
+                  placeholder="SampleOperation"
+                />
+                <small className="form-help">The SOAP operation/method name to call</small>
+              </div>
+              
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    const sampleEnvelope = `<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://tempuri.org/">
+  <soap:Header>
+    <!-- Optional header content -->
+  </soap:Header>
+  <soap:Body>
+    <tns:SampleOperation>
+      <tns:parameter1>value1</tns:parameter1>
+      <tns:parameter2>value2</tns:parameter2>
+    </tns:SampleOperation>
+  </soap:Body>
+</soap:Envelope>`;
+                    updateRequest({ body: sampleEnvelope });
+                    setActiveTab('body');
+                  }}
+                >
+                  Generate Sample Envelope
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'grpc' && (
+          <div className="tab-panel">
+            <div className="panel-header">
+              <h4>gRPC Configuration</h4>
+              <p className="panel-description">
+                Configure gRPC-specific settings for this request
+              </p>
+            </div>
+            
+            <div className="grpc-section">
+              <div className="form-group">
+                <label className="form-label">Service Name</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={(() => {
+                    try {
+                      const grpc = request.body ? JSON.parse(request.body) : {};
+                      return grpc.service || '';
+                    } catch {
+                      return '';
+                    }
+                  })()}
+                  onChange={(e) => {
+                    try {
+                      const grpc = request.body ? JSON.parse(request.body) : {};
+                      grpc.service = e.target.value;
+                      updateRequest({ body: JSON.stringify(grpc) });
+                    } catch {
+                      updateRequest({ body: JSON.stringify({ service: e.target.value }) });
+                    }
+                  }}
+                  placeholder="com.example.SampleService"
+                />
+                <small className="form-help">The fully qualified gRPC service name</small>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Method Name</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={(() => {
+                    try {
+                      const grpc = request.body ? JSON.parse(request.body) : {};
+                      return grpc.method || '';
+                    } catch {
+                      return '';
+                    }
+                  })()}
+                  onChange={(e) => {
+                    try {
+                      const grpc = request.body ? JSON.parse(request.body) : {};
+                      grpc.method = e.target.value;
+                      updateRequest({ body: JSON.stringify(grpc) });
+                    } catch {
+                      updateRequest({ body: JSON.stringify({ method: e.target.value }) });
+                    }
+                  }}
+                  placeholder="SampleMethod"
+                />
+                <small className="form-help">The gRPC method to call</small>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Streaming Type</label>
+                <select
+                  className="form-select"
+                  value={(() => {
+                    try {
+                      const grpc = request.body ? JSON.parse(request.body) : {};
+                      return grpc.streaming || 'none';
+                    } catch {
+                      return 'none';
+                    }
+                  })()}
+                  onChange={(e) => {
+                    try {
+                      const grpc = request.body ? JSON.parse(request.body) : {};
+                      grpc.streaming = e.target.value;
+                      updateRequest({ body: JSON.stringify(grpc) });
+                    } catch {
+                      updateRequest({ body: JSON.stringify({ streaming: e.target.value }) });
+                    }
+                  }}
+                >
+                  <option value="none">Unary (Request/Response)</option>
+                  <option value="client">Client Streaming</option>
+                  <option value="server">Server Streaming</option>
+                  <option value="bidirectional">Bidirectional Streaming</option>
+                </select>
+                <small className="form-help">Select the type of gRPC streaming</small>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Proto File Content</label>
+                <textarea
+                  className="form-textarea"
+                  rows={8}
+                  value={(() => {
+                    try {
+                      const grpc = request.body ? JSON.parse(request.body) : {};
+                      return grpc.protoFile || '';
+                    } catch {
+                      return '';
+                    }
+                  })()}
+                  onChange={(e) => {
+                    try {
+                      const grpc = request.body ? JSON.parse(request.body) : {};
+                      grpc.protoFile = e.target.value;
+                      updateRequest({ body: JSON.stringify(grpc) });
+                    } catch {
+                      updateRequest({ body: JSON.stringify({ protoFile: e.target.value }) });
+                    }
+                  }}
+                  placeholder="syntax = &quot;proto3&quot;;"
+                />
+                <small className="form-help">Paste your .proto file content here</small>
+              </div>
+              
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    const sampleProto = `syntax = "proto3";
+
+package sample;
+
+service SampleService {
+  rpc SampleMethod (SampleRequest) returns (SampleResponse);
+}
+
+message SampleRequest {
+  string message = 1;
+  int32 number = 2;
+}
+
+message SampleResponse {
+  string result = 1;
+  bool success = 2;
+}`;
+                    const grpcConfig = {
+                      service: 'sample.SampleService',
+                      method: 'SampleMethod',
+                      streaming: 'none',
+                      protoFile: sampleProto
+                    };
+                    updateRequest({ body: JSON.stringify(grpcConfig) });
+                    
+                    // Also set a sample request body
+                    setTimeout(() => {
+                      setActiveTab('body');
+                    }, 100);
+                  }}
+                >
+                  Generate Sample Proto
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'auth' && (
           <div className="tab-panel">
             <div className="panel-header">
@@ -307,6 +632,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
                   <option value="bearer">****** Authentication</option>
                   <option value="basic">Basic Auth</option>
                   <option value="api-key">API Key</option>
+                  <option value="ws-security">WS-Security (SOAP)</option>
                 </select>
               </div>
 
@@ -379,6 +705,49 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
                       })}
                       placeholder="API key value"
                     />
+                  </div>
+                </>
+              )}
+
+              {auth.type === 'ws-security' && (
+                <>
+                  <div className="form-group">
+                    <label className="form-label">Username</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={auth.wssUsername || ''}
+                      onChange={(e) => updateRequest({
+                        auth: JSON.stringify({ ...auth, wssUsername: e.target.value })
+                      })}
+                      placeholder="WS-Security username"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Password</label>
+                    <input
+                      type="password"
+                      className="form-input"
+                      value={auth.wssPassword || ''}
+                      onChange={(e) => updateRequest({
+                        auth: JSON.stringify({ ...auth, wssPassword: e.target.value })
+                      })}
+                      placeholder="WS-Security password"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Password Type</label>
+                    <select
+                      className="form-select"
+                      value={auth.wssPasswordType || 'PasswordText'}
+                      onChange={(e) => updateRequest({
+                        auth: JSON.stringify({ ...auth, wssPasswordType: e.target.value })
+                      })}
+                    >
+                      <option value="PasswordText">Password Text</option>
+                      <option value="PasswordDigest">Password Digest</option>
+                    </select>
+                    <small className="form-help">Choose how the password should be transmitted</small>
                   </div>
                 </>
               )}

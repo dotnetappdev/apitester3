@@ -35,6 +35,8 @@ export interface Request {
   params: string; // JSON string
   auth: string; // JSON string
   tests?: string; // JSON string for test scripts
+  soap?: string; // JSON string for SOAP-specific configuration
+  grpc?: string; // JSON string for gRPC-specific configuration
   createdAt: string;
   updatedAt: string;
 }

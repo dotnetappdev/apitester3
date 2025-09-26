@@ -1,8 +1,58 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ApiRequest, ApiResponse } from '../types';
+import { ApiRequest, ApiResponse, Environment } from '../types';
+import { EnvironmentVariableManager } from './environmentVariables';
+
+// Remove the imports since we'll call the main process instead
+// import { SoapClient } from './soapClient';
+// import { GrpcClient } from './grpcClient';
+
+declare global {
+  interface Window {
+    electronAPI: {
+      makeApiRequest: (requestData: any) => Promise<any>;
+      makeSoapRequest: (requestData: any) => Promise<any>;
+      makeGrpcRequest: (requestData: any) => Promise<any>;
+    };
+  }
+}
 
 export class ApiClient {
-  static async makeRequest(request: ApiRequest): Promise<ApiResponse> {
+  static async makeRequest(request: ApiRequest, environment?: Environment | null): Promise<ApiResponse> {
+    // Process environment variables first
+    const processedRequest = environment 
+      ? EnvironmentVariableManager.processRequest(request, environment)
+      : request;
+
+    // Route to appropriate client based on method type
+    switch (processedRequest.method) {
+      case 'SOAP':
+        return this.makeSoapRequest(processedRequest);
+      case 'GRPC':
+        return this.makeGrpcRequest(processedRequest);
+      default:
+        return this.makeHttpRequest(processedRequest);
+    }
+  }
+
+  private static async makeSoapRequest(request: ApiRequest): Promise<ApiResponse> {
+    try {
+      return await window.electronAPI.makeSoapRequest(request);
+    } catch (error) {
+      console.error('SOAP request failed:', error);
+      throw new Error(`SOAP Request Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private static async makeGrpcRequest(request: ApiRequest): Promise<ApiResponse> {
+    try {
+      return await window.electronAPI.makeGrpcRequest(request);
+    } catch (error) {
+      console.error('gRPC request failed:', error);
+      throw new Error(`gRPC Request Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private static async makeHttpRequest(request: ApiRequest): Promise<ApiResponse> {
     const startTime = Date.now();
     
     try {
@@ -69,7 +119,7 @@ export class ApiClient {
   }
 
   private static buildAuthHeader(auth?: ApiRequest['auth']): Record<string, string> {
-    if (!auth || auth.type === 'none') {
+    if (!auth || auth.type === 'none' || auth.type === 'ws-security') {
       return {};
     }
 
