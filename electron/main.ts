@@ -538,6 +538,15 @@ class AppManager {
       }
     });
 
+    ipcMain.handle('db-reset-password', async (event, username, newPassword) => {
+      try {
+        return await this.dbManager.resetPassword(username, newPassword);
+      } catch (error) {
+        console.error('Failed to reset password:', error);
+        throw error;
+      }
+    });
+
     // Collection operations
     ipcMain.handle('db-get-user-collections', async (event, userId) => {
       try {

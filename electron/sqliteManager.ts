@@ -217,12 +217,13 @@ export class SqliteDatabaseManager {
     ];
 
     for (const user of seedUsers) {
+      const salt = this.generateSalt();
       await this.db.run(
         'INSERT INTO users (username, passwordHash, salt, role, createdAt) VALUES (?, ?, ?, ?, ?)',
         [
           user.username,
-          this.encryptPassword(user.password),
-          this.generateSalt(),
+          this.hashPassword(user.password, salt),
+          salt,
           user.role,
           currentDate
         ]
@@ -233,23 +234,23 @@ export class SqliteDatabaseManager {
   }
 
   private generateSalt(): string {
-    return CryptoJS.lib.WordArray.random(128/8).toString();
+    return CryptoJS.lib.WordArray.random(32).toString();
   }
 
-  private encryptPassword(password: string): string {
-    const encrypted = CryptoJS.AES.encrypt(password, SqliteDatabaseManager.ENCRYPTION_KEY).toString();
-    return encrypted;
+  private hashPassword(password: string, salt: string): string {
+    // Use PBKDF2 with 600,000 iterations for strong password hashing
+    const hash = CryptoJS.PBKDF2(password, salt, {
+      keySize: 256/32,
+      iterations: 600000,
+      hasher: CryptoJS.algo.SHA256
+    });
+    return hash.toString();
   }
 
-  private decryptPassword(encryptedPassword: string): string {
-    const decrypted = CryptoJS.AES.decrypt(encryptedPassword, SqliteDatabaseManager.ENCRYPTION_KEY);
-    return decrypted.toString(CryptoJS.enc.Utf8);
-  }
-
-  private checkPassword(password: string, encryptedPassword: string): boolean {
+  private checkPassword(password: string, storedHash: string, salt: string): boolean {
     try {
-      const decryptedPassword = this.decryptPassword(encryptedPassword);
-      return password === decryptedPassword;
+      const testHash = this.hashPassword(password, salt);
+      return testHash === storedHash;
     } catch (error) {
       console.error('Password verification failed:', error);
       return false;
@@ -271,12 +272,13 @@ export class SqliteDatabaseManager {
   async createUser(username: string, password: string, role: 'admin' | 'standard' = 'standard'): Promise<number> {
     if (!this.db) throw new Error('Database not initialized');
     
+    const salt = this.generateSalt();
     const result = await this.db.run(
       'INSERT INTO users (username, passwordHash, salt, role, createdAt) VALUES (?, ?, ?, ?, ?)',
       [
         username,
-        this.encryptPassword(password),
-        this.generateSalt(),
+        this.hashPassword(password, salt),
+        salt,
         role,
         new Date().toISOString()
       ]
@@ -289,7 +291,7 @@ export class SqliteDatabaseManager {
     const user = await this.getUserByUsername(username);
     if (!user) return null;
     
-    const isValid = this.checkPassword(password, user.passwordHash);
+    const isValid = this.checkPassword(password, user.passwordHash, user.salt);
     
     if (isValid) {
       // Update last login
@@ -304,6 +306,23 @@ export class SqliteDatabaseManager {
     }
     
     return null;
+  }
+
+  async resetPassword(username: string, newPassword: string): Promise<boolean> {
+    if (!this.db) throw new Error('Database not initialized');
+    
+    const user = await this.getUserByUsername(username);
+    if (!user) return false;
+    
+    const salt = this.generateSalt();
+    const hashedPassword = this.hashPassword(newPassword, salt);
+    
+    const result = await this.db.run(
+      'UPDATE users SET passwordHash = ?, salt = ? WHERE username = ?',
+      [hashedPassword, salt, username]
+    );
+    
+    return result.changes! > 0;
   }
 
   // Collection operations

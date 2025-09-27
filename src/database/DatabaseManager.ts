@@ -81,6 +81,10 @@ export class DatabaseManager {
     return await window.electronAPI.dbVerifyPassword(username, password);
   }
 
+  async resetPassword(username: string, newPassword: string): Promise<boolean> {
+    return await window.electronAPI.dbResetPassword(username, newPassword);
+  }
+
   // Collection operations
   async getUserCollections(userId: number): Promise<Collection[]> {
     return await window.electronAPI.dbGetUserCollections(userId);
