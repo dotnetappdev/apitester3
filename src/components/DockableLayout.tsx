@@ -59,23 +59,42 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(() => layoutManager.loadLayout());
   const [isResponsive, setIsResponsive] = useState(() => layoutManager.getResponsiveConfig());
 
-  // Handle window resize for responsive design
+  // Handle window resize for responsive design with debouncing
   useEffect(() => {
+    let resizeTimer: NodeJS.Timeout;
+    
     const handleResize = () => {
-      const newResponsive = layoutManager.getResponsiveConfig();
-      setIsResponsive(newResponsive);
-      
-      // Update layout config if responsive state changed
-      if (newResponsive.mobile !== isResponsive.mobile || 
-          newResponsive.tablet !== isResponsive.tablet || 
-          newResponsive.desktop !== isResponsive.desktop) {
-        const updatedConfig = layoutManager.updateResponsiveState();
-        setLayoutConfig(updatedConfig);
-      }
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const newResponsive = layoutManager.getResponsiveConfig();
+        setIsResponsive(newResponsive);
+        
+        // Update layout config if responsive state changed
+        if (newResponsive.mobile !== isResponsive.mobile || 
+            newResponsive.tablet !== isResponsive.tablet || 
+            newResponsive.desktop !== isResponsive.desktop) {
+          const updatedConfig = layoutManager.updateResponsiveState();
+          setLayoutConfig(updatedConfig);
+        }
+      }, 150); // Debounce resize events
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    
+    // Handle orientation change on mobile devices
+    const handleOrientationChange = () => {
+      setTimeout(() => {
+        handleResize();
+      }, 100); // Small delay to ensure dimensions are updated
+    };
+    
+    window.addEventListener('orientationchange', handleOrientationChange);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      clearTimeout(resizeTimer);
+    };
   }, [layoutManager, isResponsive]);
 
   const handleSplitterChange = useCallback((sizes: number[], splitterKey: keyof LayoutConfig['splitterSizes']) => {
@@ -106,72 +125,160 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
     }
   });
 
-  // Mobile layout - stack vertically
+  // Mobile layout - optimized for touch and different orientations
   if (isResponsive.mobile) {
+    const isTouchDevice = 'ontouchstart' in window;
+    const isPortrait = window.innerHeight > window.innerWidth;
+    
     return (
-      <div className="dockable-layout mobile">
+      <div className={`dockable-layout mobile ${isPortrait ? 'portrait' : 'landscape'} ${isTouchDevice ? 'touch' : ''}`}>
         <div className="mobile-header">
-          <button className="panel-toggle" onClick={() => togglePanel('sidebar')}>
-            Collections {layoutConfig.panels.sidebar.visible ? '▼' : '▶'}
-          </button>
-          <button className="panel-toggle" onClick={() => togglePanel('testRunner')}>
-            Tests {layoutConfig.panels.testRunner.visible ? '▼' : '▶'}
+          <div className="mobile-nav-buttons">
+            <button 
+              className={`panel-toggle ${layoutConfig.panels.sidebar.visible ? 'active' : ''}`}
+              onClick={() => togglePanel('sidebar')}
+              aria-label="Toggle Collections Panel"
+            >
+              📁 Collections {layoutConfig.panels.sidebar.visible ? '▼' : '▶'}
+            </button>
+            <button 
+              className={`panel-toggle ${layoutConfig.panels.testRunner.visible ? 'active' : ''}`}
+              onClick={() => togglePanel('testRunner')}
+              aria-label="Toggle Test Explorer Panel"
+            >
+              🧪 Tests {layoutConfig.panels.testRunner.visible ? '▼' : '▶'}
+            </button>
+          </div>
+          <button className="layout-options" onClick={resetLayout} aria-label="Reset Layout">
+            🔄
           </button>
         </div>
         
-        {layoutConfig.panels.sidebar.visible && (
-          <div className="mobile-panel">
-            <EnhancedSidebar
-              user={user}
-              collections={collections}
-              onRequestSelect={onRequestSelect}
-              onNewRequest={onNewRequest}
-              onNewCollection={onNewCollection}
-              activeRequest={activeRequest}
-              testResults={testResults}
-              onRunTest={onRunTest}
-              onRunAllTests={onRunAllTests}
-              onUserProfile={onUserProfile}
-              onSettings={onSettings}
-              enableTestExplorer={false} // Separate panel on mobile
-            />
-          </div>
-        )}
+        <div className="mobile-panels">
+          {layoutConfig.panels.sidebar.visible && (
+            <div className="mobile-panel collections-panel">
+              <div className="panel-header">
+                <span className="panel-title">📁 Collections</span>
+                <button 
+                  className="panel-close"
+                  onClick={() => togglePanel('sidebar')}
+                  aria-label="Close Collections Panel"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="panel-content">
+                <EnhancedSidebar
+                  user={user}
+                  collections={collections}
+                  onRequestSelect={onRequestSelect}
+                  onNewRequest={onNewRequest}
+                  onNewCollection={onNewCollection}
+                  activeRequest={activeRequest}
+                  testResults={testResults}
+                  onRunTest={onRunTest}
+                  onRunAllTests={onRunAllTests}
+                  onUserProfile={onUserProfile}
+                  onSettings={onSettings}
+                  enableTestExplorer={false} // Separate panel on mobile
+                />
+              </div>
+            </div>
+          )}
 
-        {layoutConfig.panels.testRunner.visible && (
-          <div className="mobile-panel">
-            <TestExplorer
-              requests={allRequests}
-              testSuites={testSuitesMap}
-              onRunTest={onRunTest}
-              onRunAllTests={onRunAllTests}
-              onRunTestSuite={onRunTestSuite}
-              testResults={testResults}
-              testExecutionResults={testExecutionResults}
-            />
-          </div>
-        )}
+          {layoutConfig.panels.testRunner.visible && (
+            <div className="mobile-panel test-panel">
+              <div className="panel-header">
+                <span className="panel-title">🧪 Test Explorer</span>
+                <button 
+                  className="panel-close"
+                  onClick={() => togglePanel('testRunner')}
+                  aria-label="Close Test Explorer Panel"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="panel-content">
+                <TestExplorer
+                  requests={allRequests}
+                  testSuites={testSuitesMap}
+                  onRunTest={onRunTest}
+                  onRunAllTests={onRunAllTests}
+                  onRunTestSuite={onRunTestSuite}
+                  testResults={testResults}
+                  testExecutionResults={testExecutionResults}
+                />
+              </div>
+            </div>
+          )}
+        </div>
 
         {activeRequest && (
           <div className="mobile-content">
-            <Allotment vertical>
-              <Allotment.Pane minSize={200}>
-                <EnhancedRequestPanel
-                  request={activeRequest}
-                  onRequestChange={onRequestChange}
-                  onSendRequest={onSendRequest}
-                  isLoading={isLoading}
-                  enableSyntaxHighlighting={enableSyntaxHighlighting}
-                  theme={theme}
-                />
+            <Allotment 
+              vertical={isPortrait}
+              snap={true} // Enable snap points
+              resizerStyle={{ 
+                backgroundColor: 'var(--accent-color)',
+                width: isPortrait ? '100%' : '6px',
+                height: isPortrait ? '6px' : '100%'
+              }}
+            >
+              <Allotment.Pane 
+                minSize={isPortrait ? 200 : 300}
+                preferredSize={isPortrait ? "50%" : "60%"}
+                snap
+              >
+                <div className="mobile-panel-wrapper">
+                  <div className="panel-header">
+                    <span className="panel-title">📝 Request</span>
+                  </div>
+                  <EnhancedRequestPanel
+                    request={activeRequest}
+                    onRequestChange={onRequestChange}
+                    onSendRequest={onSendRequest}
+                    isLoading={isLoading}
+                    enableSyntaxHighlighting={enableSyntaxHighlighting}
+                    theme={theme}
+                  />
+                </div>
               </Allotment.Pane>
-              <Allotment.Pane minSize={200}>
-                <ResponsePanel
-                  response={response}
-                  isLoading={isLoading}
-                />
+              <Allotment.Pane 
+                minSize={isPortrait ? 150 : 250}
+                snap
+              >
+                <div className="mobile-panel-wrapper">
+                  <div className="panel-header">
+                    <span className="panel-title">📄 Response</span>
+                  </div>
+                  <ResponsePanel
+                    response={response}
+                    isLoading={isLoading}
+                  />
+                </div>
               </Allotment.Pane>
             </Allotment>
+          </div>
+        )}
+        
+        {!activeRequest && (
+          <div className="mobile-welcome">
+            <div className="welcome-content">
+              <h2>API Tester 3</h2>
+              <p>Professional API testing on mobile</p>
+              <div className="welcome-actions">
+                <button className="btn btn-primary" onClick={onNewRequest}>
+                  ➕ New Request
+                </button>
+                <button className="btn btn-secondary" onClick={onNewCollection}>
+                  📁 New Collection
+                </button>
+              </div>
+              <div className="mobile-tips">
+                <p>💡 Tap headers to show/hide panels</p>
+                <p>📱 Rotate device for different layouts</p>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -179,37 +286,55 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
   }
 
   // Desktop/Tablet layout with dockable panels
+  const isTablet = isResponsive.tablet;
+  const isPortraitTablet = isTablet && window.innerHeight > window.innerWidth;
+  
   return (
-    <div className="dockable-layout desktop">
+    <div className={`dockable-layout ${isTablet ? 'tablet' : 'desktop'} ${isPortraitTablet ? 'portrait' : 'landscape'}`}>
       <div className="layout-toolbar">
         <div className="panel-controls">
           <button 
             className={`panel-toggle ${layoutConfig.panels.sidebar.visible ? 'active' : ''}`}
             onClick={() => togglePanel('sidebar')}
-            title="Toggle Collections"
+            title="Toggle Collections Panel"
+            aria-label="Toggle Collections Panel"
           >
-            📁
+            📁 {!isTablet && 'Collections'}
           </button>
           <button 
             className={`panel-toggle ${layoutConfig.panels.testRunner.visible ? 'active' : ''}`}
             onClick={() => togglePanel('testRunner')}
-            title="Toggle Test Explorer"
+            title="Toggle Test Explorer Panel"
+            aria-label="Toggle Test Explorer Panel"
           >
-            🧪
+            🧪 {!isTablet && 'Tests'}
           </button>
+          <div className="toolbar-spacer"></div>
           <button 
             className="reset-layout"
             onClick={resetLayout}
-            title="Reset Layout"
+            title="Reset Layout to Default"
+            aria-label="Reset Layout"
           >
-            🔄
+            🔄 {!isTablet && 'Reset'}
           </button>
         </div>
+        {isTablet && (
+          <div className="tablet-orientation-indicator">
+            {isPortraitTablet ? '📱' : '💻'} {window.innerWidth}×{window.innerHeight}
+          </div>
+        )}
       </div>
 
       <Allotment
+        snap={true}
         defaultSizes={[layoutConfig.splitterSizes.main, 1000 - layoutConfig.splitterSizes.main]}
         onChange={(sizes) => handleSplitterChange(sizes, 'main')}
+        resizerStyle={{
+          backgroundColor: 'var(--border-color)',
+          width: '4px',
+          transition: 'background-color 0.2s ease'
+        }}
       >
         {/* Left Panel - Sidebar + Test Runner */}
         <Allotment.Pane 
@@ -288,17 +413,33 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         </Allotment.Pane>
 
         {/* Main Content Area */}
-        <Allotment.Pane minSize={400}>
+        <Allotment.Pane minSize={isTablet ? 350 : 400} snap>
           {activeRequest ? (
             <Allotment 
-              vertical={isResponsive.tablet}
+              vertical={isPortraitTablet}
+              snap={true}
               defaultSizes={[layoutConfig.splitterSizes.content, 100 - layoutConfig.splitterSizes.content]}
               onChange={(sizes) => handleSplitterChange(sizes, 'content')}
+              resizerStyle={{
+                backgroundColor: 'var(--border-color)',
+                ...(isPortraitTablet ? {
+                  height: '4px',
+                  width: '100%'
+                } : {
+                  width: '4px',
+                  height: '100%'
+                })
+              }}
             >
-              <Allotment.Pane minSize={300}>
+              <Allotment.Pane 
+                minSize={isTablet ? 250 : 300}
+                preferredSize="50%"
+                snap
+              >
                 <div className="panel-container request-panel">
                   <div className="panel-header">
-                    <span className="panel-title">Request</span>
+                    <span className="panel-title">📝 Request</span>
+                    {isLoading && <span className="loading-indicator">⏳</span>}
                   </div>
                   <div className="panel-content">
                     <EnhancedRequestPanel
@@ -313,10 +454,18 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                 </div>
               </Allotment.Pane>
               
-              <Allotment.Pane minSize={300}>
+              <Allotment.Pane 
+                minSize={isTablet ? 200 : 300}
+                snap
+              >
                 <div className="panel-container response-panel">
                   <div className="panel-header">
-                    <span className="panel-title">Response</span>
+                    <span className="panel-title">📄 Response</span>
+                    {response && (
+                      <span className="response-status">
+                        {response.status} • {response.responseTime}ms
+                      </span>
+                    )}
                   </div>
                   <div className="panel-content">
                     <ResponsePanel
@@ -463,29 +612,244 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         /* Mobile layout styles */
         .dockable-layout.mobile {
           height: 100vh;
-          overflow-y: auto;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .dockable-layout.mobile.touch {
+          -webkit-overflow-scrolling: touch;
+          scroll-behavior: smooth;
         }
 
         .mobile-header {
-          height: 40px;
+          height: 48px;
           background: var(--bg-secondary);
           border-bottom: 1px solid var(--border-color);
           display: flex;
           align-items: center;
-          gap: 8px;
+          justify-content: space-between;
           padding: 0 12px;
           flex-shrink: 0;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+        }
+
+        .mobile-nav-buttons {
+          display: flex;
+          gap: 8px;
+        }
+
+        .mobile-header .panel-toggle {
+          padding: 8px 12px;
+          font-size: 14px;
+          border-radius: 6px;
+          min-height: 44px; /* Touch-friendly */
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .layout-options {
+          background: transparent;
+          border: 1px solid var(--border-color);
+          color: var(--text-muted);
+          padding: 8px;
+          border-radius: 6px;
+          font-size: 16px;
+          min-height: 44px;
+          min-width: 44px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .mobile-panels {
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          max-height: 40vh;
         }
 
         .mobile-panel {
+          border-bottom: 1px solid var(--border-color);
+          background: var(--bg-secondary);
+        }
+
+        .mobile-panel .panel-header {
+          height: 40px;
+          padding: 0 16px;
+          background: var(--bg-tertiary);
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .mobile-panel .panel-title {
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        .mobile-panel .panel-content {
           max-height: 300px;
           overflow-y: auto;
-          border-bottom: 1px solid var(--border-color);
         }
 
         .mobile-content {
           flex: 1;
           min-height: 400px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .mobile-panel-wrapper {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          background: var(--bg-secondary);
+        }
+
+        .mobile-welcome {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          text-align: center;
+        }
+
+        .mobile-welcome .welcome-content h2 {
+          font-size: 24px;
+          margin-bottom: 8px;
+          color: var(--text-primary);
+        }
+
+        .mobile-welcome .welcome-content p {
+          font-size: 16px;
+          color: var(--text-muted);
+          margin-bottom: 20px;
+        }
+
+        .mobile-welcome .welcome-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-bottom: 20px;
+        }
+
+        .mobile-welcome .btn {
+          padding: 12px 20px;
+          font-size: 16px;
+          border-radius: 8px;
+          min-height: 48px;
+        }
+
+        .mobile-tips {
+          padding: 16px;
+          background: var(--bg-tertiary);
+          border-radius: 8px;
+          border: 1px solid var(--border-color);
+        }
+
+        .mobile-tips p {
+          font-size: 12px;
+          color: var(--text-muted);
+          margin: 4px 0;
+        }
+
+        /* Tablet layout styles */
+        .dockable-layout.tablet {
+          height: 100vh;
+        }
+
+        .dockable-layout.tablet .layout-toolbar {
+          height: 40px;
+          padding: 0 12px;
+        }
+
+        .dockable-layout.tablet .panel-toggle {
+          padding: 6px 12px;
+          font-size: 13px;
+          min-height: 36px;
+        }
+
+        .tablet-orientation-indicator {
+          font-size: 12px;
+          color: var(--text-muted);
+          padding: 4px 8px;
+          background: var(--bg-tertiary);
+          border-radius: 4px;
+          border: 1px solid var(--border-color);
+        }
+
+        .toolbar-spacer {
+          flex: 1;
+        }
+
+        /* Enhanced panel headers with status indicators */
+        .panel-header .loading-indicator {
+          font-size: 12px;
+          animation: pulse 1s infinite;
+        }
+
+        .panel-header .response-status {
+          font-size: 10px;
+          color: var(--text-muted);
+          font-family: 'Consolas', Monaco, monospace;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        /* Touch-friendly improvements */
+        @media (pointer: coarse) {
+          .panel-toggle,
+          .panel-close,
+          .reset-layout {
+            min-height: 44px;
+            min-width: 44px;
+            padding: 8px;
+          }
+          
+          .panel-header {
+            height: 44px;
+          }
+          
+          .mobile-header {
+            height: 56px;
+          }
+        }
+
+        /* Responsive breakpoints */
+        @media (max-width: 479px) {
+          .dockable-layout.mobile .mobile-header .panel-toggle {
+            font-size: 12px;
+            padding: 6px 8px;
+          }
+          
+          .mobile-welcome .welcome-content h2 {
+            font-size: 20px;
+          }
+        }
+
+        @media (min-width: 480px) and (max-width: 767px) {
+          .mobile-panels {
+            max-height: 50vh;
+          }
+          
+          .dockable-layout.mobile.landscape .mobile-panels {
+            max-height: 35vh;
+          }
+        }
+
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .dockable-layout.tablet.portrait .layout-toolbar {
+            height: 48px;
+          }
+          
+          .dockable-layout.tablet.portrait .panel-toggle {
+            padding: 8px 16px;
+            font-size: 14px;
+          }
         }
 
         /* Welcome screen enhancements */

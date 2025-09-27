@@ -17,6 +17,7 @@ import { DockableLayout } from './DockableLayout';
 import { ApiClient } from '../utils/api';
 import { ApiResponse } from '../types';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
+import { useRealTimeData } from '../hooks/useRealTimeData';
 
 export const EnhancedApp: React.FC = () => {
   // Core state
@@ -48,6 +49,7 @@ export const EnhancedApp: React.FC = () => {
   const [dbManager] = useState(() => new DatabaseManager());
   const [authManager] = useState(() => AuthManager.getInstance(dbManager));
   const [settingsManager] = useState(() => SettingsManager.getInstance());
+  const { subscribeToUpdates, broadcastUpdate, updateDataCache } = useRealTimeData();
 
   // Initialize the application
   useEffect(() => {
@@ -148,6 +150,74 @@ export const EnhancedApp: React.FC = () => {
     }
   }, []);
 
+  // Subscribe to real-time data updates
+  useEffect(() => {
+    const unsubscribe = subscribeToUpdates((event) => {
+      console.log('Real-time update received:', event);
+      
+      switch (event.type) {
+        case 'collection_updated':
+          const updatedCollection = event.data as Collection;
+          setCollections(prev => prev.map(c => 
+            c.id === updatedCollection.id ? updatedCollection : c
+          ));
+          break;
+          
+        case 'request_updated':
+          const updatedRequest = event.data as Request;
+          setCollections(prev => prev.map(collection => ({
+            ...collection,
+            requests: collection.requests?.map(req => 
+              req.id === updatedRequest.id ? updatedRequest : req
+            ) || []
+          })));
+          
+          // Update active request if it's the one being updated
+          if (activeRequest?.id === updatedRequest.id) {
+            setActiveRequest(updatedRequest);
+          }
+          break;
+          
+        case 'test_result_updated':
+          const { requestId, results } = event.data as { requestId: number; results: TestResult[] };
+          setTestResults(prev => new Map(prev).set(requestId, results));
+          break;
+          
+        case 'collection_deleted':
+          const deletedCollectionId = event.data as number;
+          setCollections(prev => prev.filter(c => c.id !== deletedCollectionId));
+          break;
+          
+        case 'request_deleted':
+          const deletedRequestId = event.data as number;
+          setCollections(prev => prev.map(collection => ({
+            ...collection,
+            requests: collection.requests?.filter(r => r.id !== deletedRequestId) || []
+          })));
+          
+          if (activeRequest?.id === deletedRequestId) {
+            setActiveRequest(null);
+            setResponse(null);
+          }
+          
+          setTestResults(prev => {
+            const updated = new Map(prev);
+            updated.delete(deletedRequestId);
+            return updated;
+          });
+          
+          setTestExecutionResults(prev => {
+            const updated = new Map(prev);
+            updated.delete(deletedRequestId);
+            return updated;
+          });
+          break;
+      }
+    });
+
+    return unsubscribe;
+  }, [subscribeToUpdates, activeRequest]);
+
   const loadUserCollections = async (userId: number) => {
     try {
       const userCollections = await dbManager.getUserCollections(userId);
@@ -161,6 +231,9 @@ export const EnhancedApp: React.FC = () => {
       );
       
       setCollections(collectionsWithRequests);
+      
+      // Update real-time data cache
+      updateDataCache(collectionsWithRequests, testResults, testExecutionResults);
     } catch (error) {
       console.error('Failed to load collections:', error);
     }
@@ -181,12 +254,21 @@ export const EnhancedApp: React.FC = () => {
       setActiveRequest(updatedRequest);
       
       // Update in collections
-      setCollections(prev => prev.map(collection => ({
+      const updatedCollections = collections.map(collection => ({
         ...collection,
         requests: collection.requests?.map(req => 
           req.id === updatedRequest.id ? updatedRequest : req
         ) || []
-      })));
+      }));
+      
+      setCollections(updatedCollections);
+      
+      // Broadcast real-time update
+      broadcastUpdate({
+        type: 'request_updated',
+        data: updatedRequest
+      });
+      
     } catch (error) {
       console.error('Failed to update request:', error);
     }
@@ -265,6 +347,12 @@ export const EnhancedApp: React.FC = () => {
       
       setActiveRequest(createdRequest);
       await loadUserCollections(currentUser.id);
+      
+      // Broadcast real-time update
+      broadcastUpdate({
+        type: 'request_updated',
+        data: createdRequest
+      });
     } catch (error) {
       console.error('Failed to create request:', error);
     }
@@ -279,9 +367,19 @@ export const EnhancedApp: React.FC = () => {
     if (!currentUser) return;
 
     try {
-      await dbManager.createCollection(name, '', currentUser.id);
+      const collectionId = await dbManager.createCollection(name, '', currentUser.id);
       await loadUserCollections(currentUser.id);
       setShowNewCollectionDialog(false);
+      
+      // Find the newly created collection and broadcast update
+      const updatedCollections = await dbManager.getUserCollections(currentUser.id);
+      const newCollection = updatedCollections.find(c => c.id === collectionId);
+      if (newCollection) {
+        broadcastUpdate({
+          type: 'collection_updated',
+          data: newCollection
+        });
+      }
     } catch (error) {
       console.error('Failed to create collection:', error);
     }
@@ -295,6 +393,12 @@ export const EnhancedApp: React.FC = () => {
     try {
       const results = await dbManager.getTestResults(requestId);
       setTestResults(prev => new Map(prev).set(requestId, results));
+      
+      // Broadcast real-time update
+      broadcastUpdate({
+        type: 'test_result_updated',
+        data: { requestId, results }
+      });
     } catch (error) {
       console.error('Failed to load test results:', error);
     }

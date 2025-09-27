@@ -137,30 +137,74 @@ export class LayoutManager {
 
   public getResponsiveConfig(): { mobile: boolean; tablet: boolean; desktop: boolean } {
     const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    // Enhanced responsive breakpoints with orientation support
+    const isMobile = width < 768;
+    const isTablet = width >= 768 && width < 1024;
+    const isDesktop = width >= 1024;
+    
+    // Detect landscape vs portrait for mobile/tablet
+    const isPortrait = height > width;
+    const isLandscape = width > height;
+    
     return {
-      mobile: width < 768,
-      tablet: width >= 768 && width < 1024,
-      desktop: width >= 1024
-    };
+      mobile: isMobile,
+      tablet: isTablet,
+      desktop: isDesktop,
+      // Additional responsive flags
+      portrait: isPortrait,
+      landscape: isLandscape,
+      touchDevice: 'ontouchstart' in window,
+      // Snap point categories
+      smallPhone: width < 480,
+      largePhone: width >= 480 && width < 768,
+      smallTablet: width >= 768 && width < 900,
+      largeTablet: width >= 900 && width < 1024,
+      smallDesktop: width >= 1024 && width < 1440,
+      largeDesktop: width >= 1440
+    } as any;
   }
 
   public updateResponsiveState(): LayoutConfig {
     const config = this.loadLayout();
-    config.responsive = this.getResponsiveConfig();
+    const responsive = this.getResponsiveConfig() as any;
+    config.responsive = responsive;
     
-    // Adjust panel visibility based on screen size
-    if (config.responsive.mobile) {
-      // On mobile, hide test runner by default to save space
-      config.panels.testRunner.visible = false;
-      config.splitterSizes.main = 250; // Smaller sidebar
-    } else if (config.responsive.tablet) {
-      // On tablet, show test runner but make it smaller
-      config.panels.testRunner.visible = true;
-      config.panels.testRunner.size = 280;
-      config.splitterSizes.main = 280;
+    // Adjust panel visibility and sizes based on device type and orientation
+    if (responsive.mobile) {
+      if (responsive.portrait) {
+        // Mobile portrait - minimize panels, stack vertically
+        config.panels.testRunner.visible = false;
+        config.panels.sidebar.size = 250;
+        config.splitterSizes.main = 250;
+      } else {
+        // Mobile landscape - show test runner if screen is wide enough
+        config.panels.testRunner.visible = responsive.largePhone;
+        config.panels.sidebar.size = 220;
+        config.splitterSizes.main = 220;
+      }
+    } else if (responsive.tablet) {
+      if (responsive.portrait) {
+        // Tablet portrait - compact layout
+        config.panels.testRunner.visible = true;
+        config.panels.testRunner.size = 250;
+        config.panels.sidebar.size = 280;
+        config.splitterSizes.main = 280;
+      } else {
+        // Tablet landscape - more space for panels
+        config.panels.testRunner.visible = true;
+        config.panels.testRunner.size = 300;
+        config.panels.sidebar.size = 320;
+        config.splitterSizes.main = 320;
+      }
     } else {
       // Desktop - use saved preferences or defaults
       config.panels.testRunner.visible = config.panels.testRunner.visible ?? true;
+      if (responsive.smallDesktop) {
+        config.panels.sidebar.size = Math.min(config.panels.sidebar.size || 300, 300);
+        config.panels.testRunner.size = Math.min(config.panels.testRunner.size || 350, 320);
+      }
     }
     
     this.saveLayout(config);
