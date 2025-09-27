@@ -14,9 +14,13 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showCreateProfile, setShowCreateProfile] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<'admin' | 'standard'>('standard');
+  const [resetUsername, setResetUsername] = useState('');
+  const [resetNewPassword, setResetNewPassword] = useState('');
+  const [resetConfirmPassword, setResetConfirmPassword] = useState('');
 
   useEffect(() => {
     loadProfiles();
@@ -81,6 +85,46 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
       }
     } catch (error) {
       setError('Failed to create profile: ' + (error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetUsername || !resetNewPassword || !resetConfirmPassword) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    if (resetNewPassword !== resetConfirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (resetNewPassword.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const result = await authManager.resetPassword(resetUsername, resetNewPassword);
+      
+      if (result.success) {
+        setShowResetPassword(false);
+        setResetUsername('');
+        setResetNewPassword('');
+        setResetConfirmPassword('');
+        setError('');
+        // Show success message (you could add a success state if needed)
+        alert('Password reset successfully! You can now login with your new password.');
+      } else {
+        setError(result.error || 'Failed to reset password');
+      }
+    } catch (error) {
+      setError('Failed to reset password: ' + (error as Error).message);
     } finally {
       setIsLoading(false);
     }
@@ -159,6 +203,69 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
     );
   }
 
+  if (showResetPassword) {
+    return (
+      <div className="login-overlay">
+        <div className="login-container create-profile">
+          <div className="login-header">
+            <h1>Reset Password</h1>
+            <button 
+              className="back-button"
+              onClick={() => setShowResetPassword(false)}
+            >
+              ← Back
+            </button>
+          </div>
+
+          <div className="create-profile-form">
+            <div className="form-group">
+              <label>Username</label>
+              <input
+                type="text"
+                value={resetUsername}
+                onChange={(e) => setResetUsername(e.target.value)}
+                placeholder="Enter username to reset password"
+                className="profile-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>New Password</label>
+              <input
+                type="password"
+                value={resetNewPassword}
+                onChange={(e) => setResetNewPassword(e.target.value)}
+                placeholder="Enter new password (min 6 characters)"
+                className="profile-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Confirm New Password</label>
+              <input
+                type="password"
+                value={resetConfirmPassword}
+                onChange={(e) => setResetConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                className="profile-input"
+              />
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <button
+              className="create-profile-button"
+              onClick={handleResetPassword}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Resetting...' : 'Reset Password'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="login-overlay">
       <div className="login-container">
@@ -204,6 +311,14 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
           >
             <div className="add-profile-icon">+</div>
             <p>Add Profile</p>
+          </div>
+
+          <div 
+            className="profile-card reset-password"
+            onClick={() => setShowResetPassword(true)}
+          >
+            <div className="reset-password-icon">🔑</div>
+            <p>Reset Password</p>
           </div>
         </div>
 

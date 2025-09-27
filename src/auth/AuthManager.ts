@@ -119,6 +119,19 @@ export class AuthManager {
     }
   }
 
+  async resetPassword(username: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const success = await this.dbManager.resetPassword(username, newPassword);
+      if (success) {
+        return { success: true };
+      } else {
+        return { success: false, error: 'User not found' };
+      }
+    } catch (error) {
+      return { success: false, error: 'Failed to reset password: ' + (error as Error).message };
+    }
+  }
+
   onSessionChange(callback: (session: UserSession | null) => void): () => void {
     this.sessionListeners.push(callback);
     
