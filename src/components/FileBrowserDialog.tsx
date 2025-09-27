@@ -56,7 +56,7 @@ export const FileBrowserDialog: React.FC<FileBrowserDialogProps> = ({
       './database.db',
       './data/apitester.db',
       './apitester3.db',
-      '%APPDATA%/apitester3/database.db',
+      '~/apitester3/database.db', // Cross-platform home directory
       '~/Documents/apitester3/database.db'
     ];
     

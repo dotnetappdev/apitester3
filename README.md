@@ -4,13 +4,19 @@ A professional, local-first desktop API testing tool inspired by Postman, built 
 
 ## Features
 
-- **Desktop Application**: Built with Electron for cross-platform compatibility
-- **Modern UI**: React + TypeScript frontend with Visual Studio Code inspired design
-- **Two-Pane Layout**: Familiar Postman-style interface with request and response panels
+- **Desktop Application**: Built with Electron for cross-platform compatibility (Windows, macOS, Linux)
+- **Dockable Layout**: Visual Studio-style dockable panels with drag-and-drop resizing and layout persistence
+  - **Test Explorer Panel**: Dedicated dockable test runner similar to VS Code Test Explorer
+  - **Collections Panel**: Organized request management with expand/collapse functionality
+  - **Request/Response Panels**: Resizable split-pane interface with vertical/horizontal layouts
+  - **Layout Persistence**: Save and restore custom panel arrangements and sizes
+  - **Responsive Design**: Mobile/tablet optimized with collapsible panels and touch-friendly controls
+- **Modern UI**: React + TypeScript frontend with Visual Studio Code inspired dark theme
 - **Multiple HTTP Methods**: Support for GET, POST, PUT, DELETE, PATCH, HEAD, and OPTIONS
 - **Authentication**: Bearer token, Basic auth, and API key authentication
 - **Request Organization**: Collections and folders to organize your API requests
 - **Response Visualization**: JSON formatting, headers inspection, and response metrics
+- **Real-time Updates**: Live synchronization of data changes across all panels and views
 - **Code Generation**: Generate client and server code from Swagger/OpenAPI specifications
   - **C# Support**: ASP.NET Core controllers with JWT authentication
   - **TypeScript Support**: Service classes with Axios or Fetch HTTP clients
@@ -62,6 +68,9 @@ npm run dev
 
 ### Build for Production
 
+#### Cross-Platform Build Instructions
+
+**All Platforms:**
 ```bash
 # Build React app and Electron main process
 npm run build
@@ -69,6 +78,75 @@ npm run build
 # Package for current platform
 npm run package
 ```
+
+**Windows:**
+```bash
+# Install Windows-specific dependencies (if needed)
+npm install --platform=win32
+
+# Build and package for Windows
+npm run build
+npm run package
+
+# The built application will be in release/ directory
+# Look for API-Tester-3-Setup.exe or similar
+```
+
+**macOS:**
+```bash
+# Ensure Xcode Command Line Tools are installed
+xcode-select --install
+
+# Build and package for macOS
+npm run build
+npm run package
+
+# The built application will be in release/ directory
+# Look for API Tester 3.dmg or API Tester 3.app
+```
+
+**Linux:**
+```bash
+# Install build dependencies (Ubuntu/Debian)
+sudo apt-get update
+sudo apt-get install build-essential libnss3-dev libatk-bridge2.0-dev libxss1 libgconf-2-4
+
+# Or for Red Hat/CentOS/Fedora
+sudo yum groupinstall "Development Tools"
+sudo yum install nss atk at-spi2-atk libXScrnSaver
+
+# Build and package for Linux
+npm run build
+npm run package
+
+# The built application will be in release/ directory
+# Look for API Tester 3.AppImage or .deb/.rpm files
+```
+
+**Build for Specific Platforms (Cross-compilation):**
+```bash
+# Build for Windows (from any platform)
+npm run build
+npx electron-builder --win
+
+# Build for macOS (requires macOS or special setup)
+npm run build
+npx electron-builder --mac
+
+# Build for Linux (from any platform)
+npm run build
+npx electron-builder --linux
+```
+
+**Platform-Specific Notes:**
+- **Windows**: No additional setup required. Builds work on Windows 10/11.
+- **macOS**: Requires macOS 10.15+ (Catalina) or later. Apple Silicon (M1/M2) supported.
+- **Linux**: Tested on Ubuntu 18.04+, CentOS 7+, Debian 10+, Fedora 32+.
+
+**Package Formats by Platform:**
+- Windows: `.exe` installer, `.zip` portable
+- macOS: `.dmg` disk image, `.app` application bundle  
+- Linux: `.AppImage` universal, `.deb` (Debian/Ubuntu), `.rpm` (Red Hat/CentOS), `.snap` (Universal Linux)
 
 ## Architecture
 

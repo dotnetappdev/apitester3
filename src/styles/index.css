@@ -3087,3 +3087,124 @@ textarea:focus-visible {
   margin-right: 8px;
   font-size: 18px;
 }
+
+/* ALLOTMENT LAYOUT OVERRIDES */
+.allotment > .split-view-view:first-child {
+  min-width: 200px !important;
+}
+
+.allotment > .split-view-view:last-child {
+  min-width: 400px !important;
+}
+
+.allotment .sash {
+  background: var(--border-color) !important;
+  transition: background-color 0.2s ease;
+}
+
+.allotment .sash:hover {
+  background: var(--accent-color) !important;
+}
+
+.allotment .sash.vertical {
+  width: 4px !important;
+}
+
+.allotment .sash.horizontal {
+  height: 4px !important;
+}
+
+/* Mobile and responsive layout overrides */
+@media (max-width: 767px) {
+  .dockable-layout.mobile .mobile-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  .dockable-layout.mobile .mobile-panel {
+    border-left: 3px solid var(--accent-color);
+    background: var(--bg-secondary);
+  }
+  
+  .allotment .sash {
+    width: 6px !important;
+    height: 6px !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .allotment > .split-view-view:first-child {
+    min-width: 180px !important;
+  }
+  
+  .panel-container .panel-header {
+    font-size: 10px;
+  }
+}
+
+/* Dark theme specific allotment overrides */
+.allotment {
+  background: var(--bg-primary) !important;
+}
+
+.allotment .split-view-view {
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+}
+
+/* Panel specific styling within allotment */
+.panel-container .panel-content {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.panel-container .panel-content > * {
+  height: 100%;
+}
+
+/* Enhanced sidebar within dockable layout */
+.panel-container .enhanced-sidebar {
+  border: none;
+  border-radius: 0;
+  height: 100%;
+}
+
+/* Test explorer within dockable layout */
+.panel-container .test-explorer {
+  border: none;
+  border-radius: 0;
+  height: 100%;
+}
+
+/* Request and response panels within dockable layout */
+.panel-container .enhanced-request-panel,
+.panel-container .response-panel {
+  height: 100%;
+}
+
+/* Ensure proper scrolling in docked panels */
+.panel-content {
+  overflow: hidden;
+}
+
+.panel-content > .enhanced-sidebar .sidebar-content,
+.panel-content > .test-explorer .test-explorer-content {
+  overflow-y: auto;
+}
+
+/* Layout persistence indicator */
+.layout-toolbar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    var(--accent-color) 0%, 
+    transparent 50%, 
+    var(--accent-color) 100%);
+  opacity: 0.3;
+}
