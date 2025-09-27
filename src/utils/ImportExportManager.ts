@@ -1,8 +1,8 @@
 // Import/Export Manager for Collections and Tests
 // Creates a portable binary format for sharing between teams
 import CryptoJS from 'crypto-js';
-import { Collection, Request, User } from '../database/DatabaseManager';
-import { TestSuite, TestCase } from '../testing/TestRunner';
+import { Collection } from '../database/DatabaseManager';
+import { TestSuite } from '../testing/TestRunner';
 
 export interface ExportData {
   version: string;

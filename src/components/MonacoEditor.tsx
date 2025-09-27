@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
 
 interface MonacoEditorProps {
@@ -19,8 +19,7 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
   readOnly = false,
   height = '200px',
   theme = 'vs-dark',
-  enableSuggestions = true,
-  placeholder
+  enableSuggestions = true
 }) => {
   const editorRef = useRef<any>(null);
 

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Request, TestResult } from '../database/DatabaseManager';
-import { TestSuite, TestExecutionResult, TestRunner } from '../testing/TestRunner';
+import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
 import { ApiResponse } from '../types';
 
 interface TestExplorerProps {
@@ -18,13 +18,12 @@ export const TestExplorer: React.FC<TestExplorerProps> = ({
   testSuites,
   onRunTest,
   onRunAllTests,
-  onRunTestSuite,
+  onRunTestSuite: _onRunTestSuite,
   testResults,
   testExecutionResults
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
-  const [selectedTest, setSelectedTest] = useState<number | null>(null);
   const [expandedRequests, setExpandedRequests] = useState<Set<number>>(new Set());
 
   // Get combined test status (both simple and execution tests)
@@ -92,18 +91,20 @@ export const TestExplorer: React.FC<TestExplorerProps> = ({
     }
   };
 
-  const getTestIcon = (status: 'pass' | 'fail' | 'none') => {
+  const getTestIcon = (status: 'pass' | 'fail' | 'none' | 'skip') => {
     switch (status) {
       case 'pass': return '✓';
       case 'fail': return '✗';
+      case 'skip': return '⊝';
       default: return '○';
     }
   };
 
-  const getTestIconColor = (status: 'pass' | 'fail' | 'none') => {
+  const getTestIconColor = (status: 'pass' | 'fail' | 'none' | 'skip') => {
     switch (status) {
       case 'pass': return 'var(--success-color)';
       case 'fail': return 'var(--error-color)';
+      case 'skip': return 'var(--warning-color)';
       default: return 'var(--text-muted)';
     }
   };
@@ -235,7 +236,7 @@ export const TestExplorer: React.FC<TestExplorerProps> = ({
 
                     {hasTests && isExpanded && (
                       <div className="test-cases-list">
-                        {testSuite.testCases.map((testCase, index) => {
+                        {testSuite.testCases.map((testCase, _index) => {
                           const testResult = executionResults.find(r => r.testCaseId === testCase.id);
                           const testStatus = testResult ? 
                             (testResult.status === 'error' ? 'fail' : testResult.status) : 'none';
@@ -277,7 +278,7 @@ export const TestExplorer: React.FC<TestExplorerProps> = ({
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .test-explorer {
           height: 100%;
           display: flex;

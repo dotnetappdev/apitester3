@@ -15,7 +15,7 @@ export const TestScriptEditor: React.FC<TestScriptEditorProps> = ({
   requestId,
   requestName,
   onTestSuiteChange,
-  onRunTests,
+  onRunTests: _onRunTests,
   testResults = []
 }) => {
   const [testSuite, setTestSuite] = useState<TestSuite>({
@@ -26,8 +26,7 @@ export const TestScriptEditor: React.FC<TestScriptEditorProps> = ({
   });
 
   const [selectedTestIndex, setSelectedTestIndex] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [currentResults, setCurrentResults] = useState<TestExecutionResult[]>(testResults);
+  const [currentResults] = useState<TestExecutionResult[]>(testResults);
 
   // Initialize with a default test case if none exist
   useEffect(() => {
@@ -83,25 +82,27 @@ export const TestScriptEditor: React.FC<TestScriptEditorProps> = ({
     updateTestCase(index, { enabled: !testSuite.testCases[index].enabled });
   };
 
-  const getTestStatus = (testId: string): 'pass' | 'fail' | 'error' | 'none' => {
+  const getTestStatus = (testId: string): 'pass' | 'fail' | 'error' | 'none' | 'skip' => {
     const result = currentResults.find(r => r.testCaseId === testId);
-    return result ? result.status === 'error' ? 'error' : result.status : 'none';
+    return result ? (result.status === 'error' ? 'error' : result.status as 'pass' | 'fail' | 'skip') : 'none';
   };
 
-  const getTestIcon = (status: 'pass' | 'fail' | 'error' | 'none') => {
+  const getTestIcon = (status: 'pass' | 'fail' | 'error' | 'none' | 'skip') => {
     switch (status) {
       case 'pass': return '✓';
       case 'fail': return '✗';
       case 'error': return '⚠';
+      case 'skip': return '⊝';
       default: return '○';
     }
   };
 
-  const getTestIconColor = (status: 'pass' | 'fail' | 'error' | 'none') => {
+  const getTestIconColor = (status: 'pass' | 'fail' | 'error' | 'none' | 'skip') => {
     switch (status) {
       case 'pass': return 'var(--success-color)';
       case 'fail': return 'var(--error-color)';
       case 'error': return 'var(--warning-color)';
+      case 'skip': return 'var(--warning-color)';
       default: return 'var(--text-muted)';
     }
   };
@@ -216,13 +217,6 @@ export const TestScriptEditor: React.FC<TestScriptEditorProps> = ({
                   onChange={(value) => updateTestCase(selectedTestIndex, { script: value })}
                   language="javascript"
                   height="300px"
-                  options={{
-                    minimap: { enabled: false },
-                    lineNumbers: 'on',
-                    folding: false,
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on'
-                  }}
                 />
               </div>
 
@@ -280,7 +274,7 @@ export const TestScriptEditor: React.FC<TestScriptEditorProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .test-script-editor {
           height: 100%;
           display: flex;

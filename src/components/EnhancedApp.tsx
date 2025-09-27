@@ -277,7 +277,7 @@ export const EnhancedApp: React.FC = () => {
     if (!currentUser) return;
 
     try {
-      const collectionId = await dbManager.createCollection(name, '', currentUser.id);
+      await dbManager.createCollection(name, '', currentUser.id);
       await loadUserCollections(currentUser.id);
       setShowNewCollectionDialog(false);
     } catch (error) {

@@ -117,7 +117,9 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
               minWidth: '32px',
               minHeight: '32px'
             }}
-          />
+          >
+            New
+          </ModernButton>
         </div>
       </div>
 
@@ -249,9 +251,12 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
           <div className="tests-panel">
             <TestExplorer
               requests={allRequests}
+              testSuites={new Map()}
               onRunTest={onRunTest}
               onRunAllTests={onRunAllTests}
+              onRunTestSuite={async () => []}
               testResults={testResults}
+              testExecutionResults={new Map()}
             />
           </div>
         )}

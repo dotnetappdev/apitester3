@@ -200,7 +200,7 @@ export class DatabaseManager {
     ];
   }
 
-  async createCollection(name: string, description: string, ownerId: number): Promise<number> {
+  async createCollection(_name: string, _description: string, _ownerId: number): Promise<number> {
     return Date.now();
   }
 
@@ -224,20 +224,20 @@ export class DatabaseManager {
     ];
   }
 
-  async createRequest(request: Omit<Request, 'id' | 'createdAt' | 'updatedAt'>): Promise<number> {
+  async createRequest(_request: Omit<Request, 'id' | 'createdAt' | 'updatedAt'>): Promise<number> {
     return Date.now();
   }
 
-  async updateRequest(id: number, request: Partial<Request>): Promise<void> {
+  async updateRequest(_id: number, _request: Partial<Request>): Promise<void> {
     // Mock update
     return Promise.resolve();
   }
 
-  async saveTestResult(result: Omit<TestResult, 'id' | 'runAt'>): Promise<number> {
+  async saveTestResult(_result: Omit<TestResult, 'id' | 'runAt'>): Promise<number> {
     return Date.now();
   }
 
-  async getTestResults(requestId: number, limit: number = 50): Promise<TestResult[]> {
+  async getTestResults(requestId: number, _limit: number = 50): Promise<TestResult[]> {
     // Mock test results
     return [
       {
