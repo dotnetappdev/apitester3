@@ -45,6 +45,43 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveGeneratedCodeToDirectory: (data: { files: any[], language: string }) => 
     ipcRenderer.invoke('save-generated-code-to-directory', data),
   
+  // Database operations
+  // User operations
+  dbGetAllUsers: () => ipcRenderer.invoke('db-get-all-users'),
+  dbGetUserByUsername: (username: string) => ipcRenderer.invoke('db-get-user-by-username', username),
+  dbCreateUser: (username: string, password: string, role: string) => 
+    ipcRenderer.invoke('db-create-user', username, password, role),
+  dbVerifyPassword: (username: string, password: string) => 
+    ipcRenderer.invoke('db-verify-password', username, password),
+
+  // Collection operations
+  dbGetUserCollections: (userId: number) => ipcRenderer.invoke('db-get-user-collections', userId),
+  dbCreateCollection: (name: string, description: string, ownerId: number) => 
+    ipcRenderer.invoke('db-create-collection', name, description, ownerId),
+  dbUpdateCollection: (id: number, updates: any) => 
+    ipcRenderer.invoke('db-update-collection', id, updates),
+  dbDeleteCollection: (id: number) => ipcRenderer.invoke('db-delete-collection', id),
+
+  // Request operations
+  dbGetCollectionRequests: (collectionId: number) => 
+    ipcRenderer.invoke('db-get-collection-requests', collectionId),
+  dbCreateRequest: (request: any) => ipcRenderer.invoke('db-create-request', request),
+  dbUpdateRequest: (id: number, request: any) => 
+    ipcRenderer.invoke('db-update-request', id, request),
+  dbDeleteRequest: (id: number) => ipcRenderer.invoke('db-delete-request', id),
+
+  // Test result operations
+  dbSaveTestResult: (result: any) => ipcRenderer.invoke('db-save-test-result', result),
+  dbGetTestResults: (requestId: number, limit?: number) => 
+    ipcRenderer.invoke('db-get-test-results', requestId, limit),
+
+  // Test suite operations
+  dbSaveTestSuite: (testSuite: any) => ipcRenderer.invoke('db-save-test-suite', testSuite),
+  dbGetTestSuites: (requestId: number) => ipcRenderer.invoke('db-get-test-suites', requestId),
+  dbUpdateTestSuite: (id: number, updates: any) => 
+    ipcRenderer.invoke('db-update-test-suite', id, updates),
+  dbDeleteTestSuite: (id: number) => ipcRenderer.invoke('db-delete-test-suite', id),
+  
   // Remove listeners
   removeAllListeners: (channel: string) => 
     ipcRenderer.removeAllListeners(channel),
@@ -78,6 +115,27 @@ declare global {
       readTemplate: (templatePath: string) => Promise<string>;
       downloadGeneratedCode: (data: { files: any[], language: string }) => Promise<any>;
       saveGeneratedCodeToDirectory: (data: { files: any[], language: string }) => Promise<any>;
+      
+      // Database operations
+      dbGetAllUsers: () => Promise<any[]>;
+      dbGetUserByUsername: (username: string) => Promise<any>;
+      dbCreateUser: (username: string, password: string, role: string) => Promise<number>;
+      dbVerifyPassword: (username: string, password: string) => Promise<any>;
+      dbGetUserCollections: (userId: number) => Promise<any[]>;
+      dbCreateCollection: (name: string, description: string, ownerId: number) => Promise<number>;
+      dbUpdateCollection: (id: number, updates: any) => Promise<void>;
+      dbDeleteCollection: (id: number) => Promise<void>;
+      dbGetCollectionRequests: (collectionId: number) => Promise<any[]>;
+      dbCreateRequest: (request: any) => Promise<number>;
+      dbUpdateRequest: (id: number, request: any) => Promise<void>;
+      dbDeleteRequest: (id: number) => Promise<void>;
+      dbSaveTestResult: (result: any) => Promise<number>;
+      dbGetTestResults: (requestId: number, limit?: number) => Promise<any[]>;
+      dbSaveTestSuite: (testSuite: any) => Promise<number>;
+      dbGetTestSuites: (requestId: number) => Promise<any[]>;
+      dbUpdateTestSuite: (id: number, updates: any) => Promise<void>;
+      dbDeleteTestSuite: (id: number) => Promise<void>;
+      
       removeAllListeners: (channel: string) => void;
       platform: string;
       version: string;

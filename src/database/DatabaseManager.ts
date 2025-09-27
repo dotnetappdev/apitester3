@@ -1,6 +1,5 @@
-// Enhanced database manager with AES encryption and seed data
-// Mock implementation forRenderer process - production would use SQLite in main process
-import CryptoJS from 'crypto-js';
+// Enhanced database manager with SQLite backend via Electron IPC
+// This replaces the mock implementation with actual database operations
 
 export interface User {
   id: number;
@@ -59,200 +58,91 @@ export interface Permission {
 }
 
 export class DatabaseManager {
-  private static readonly ENCRYPTION_KEY = 'APITester3-SecureKey-256bit-ForPasswordEncryption-Change-In-Production';
-  private seedUsers: User[] = [];
-
-  constructor() {
-    this.initializeSeedData();
-  }
-
-  private initializeSeedData(): void {
-    // Generate secure seed data with AES-encrypted passwords
-    const currentDate = new Date().toISOString();
-    
-    this.seedUsers = [
-      {
-        id: 1,
-        username: 'admin',
-        passwordHash: this.encryptPassword('admin123'),
-        salt: this.generateSalt(),
-        role: 'admin',
-        createdAt: currentDate
-      },
-      {
-        id: 2,
-        username: 'testuser',
-        passwordHash: this.encryptPassword('password123'),
-        salt: this.generateSalt(),
-        role: 'standard',
-        createdAt: currentDate
-      },
-      {
-        id: 3,
-        username: 'developer',
-        passwordHash: this.encryptPassword('dev2024!'),
-        salt: this.generateSalt(),
-        role: 'standard',
-        createdAt: currentDate
-      },
-      {
-        id: 4,
-        username: 'qa_lead',
-        passwordHash: this.encryptPassword('quality123'),
-        salt: this.generateSalt(),
-        role: 'admin',
-        createdAt: currentDate
-      },
-      {
-        id: 5,
-        username: 'api_tester',
-        passwordHash: this.encryptPassword('testing456'),
-        salt: this.generateSalt(),
-        role: 'standard',
-        createdAt: currentDate
-      }
-    ];
-  }
-
-  private generateSalt(): string {
-    return CryptoJS.lib.WordArray.random(128/8).toString();
-  }
-
-  private encryptPassword(password: string): string {
-    // AES-256 encryption with secure key
-    const encrypted = CryptoJS.AES.encrypt(password, DatabaseManager.ENCRYPTION_KEY).toString();
-    return encrypted;
-  }
-
-  private decryptPassword(encryptedPassword: string): string {
-    const decrypted = CryptoJS.AES.decrypt(encryptedPassword, DatabaseManager.ENCRYPTION_KEY);
-    return decrypted.toString(CryptoJS.enc.Utf8);
-  }
-
-  private checkPassword(password: string, encryptedPassword: string): boolean {
-    try {
-      const decryptedPassword = this.decryptPassword(encryptedPassword);
-      return password === decryptedPassword;
-    } catch (error) {
-      console.error('Password verification failed:', error);
-      return false;
-    }
-  }
-
   async initialize(): Promise<void> {
-    // Mock initialization - in production this would set up SQLite database
-    console.log('Database initialized with seed data');
+    // Database initialization is handled by the main process
+    console.log('Database manager initialized - using SQLite backend');
     return Promise.resolve();
   }
 
+  // User operations
   async getAllUsers(): Promise<User[]> {
-    // Return seed users
-    return [...this.seedUsers];
+    return await window.electronAPI.dbGetAllUsers();
   }
 
   async getUserByUsername(username: string): Promise<User | null> {
-    const user = this.seedUsers.find(u => u.username === username);
-    return user || null;
+    return await window.electronAPI.dbGetUserByUsername(username);
   }
 
   async createUser(username: string, password: string, role: 'admin' | 'standard' = 'standard'): Promise<number> {
-    const newUser: User = {
-      id: this.seedUsers.length + 1,
-      username,
-      passwordHash: this.encryptPassword(password),
-      salt: this.generateSalt(),
-      role,
-      createdAt: new Date().toISOString()
-    };
-    
-    this.seedUsers.push(newUser);
-    return newUser.id;
+    return await window.electronAPI.dbCreateUser(username, password, role);
   }
 
   async verifyPassword(username: string, password: string): Promise<User | null> {
-    const user = await this.getUserByUsername(username);
-    if (!user) return null;
-    
-    const isValid = this.checkPassword(password, user.passwordHash);
-    
-    if (isValid) {
-      // Update last login
-      user.lastLogin = new Date().toISOString();
-      return user;
-    }
-    
-    return null;
+    return await window.electronAPI.dbVerifyPassword(username, password);
   }
 
+  // Collection operations
   async getUserCollections(userId: number): Promise<Collection[]> {
-    // Mock collections
-    return [
-      {
-        id: 1,
-        name: 'My API Collection',
-        description: 'Sample collection for testing',
-        ownerId: userId,
-        isShared: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        requests: []
-      }
-    ];
+    return await window.electronAPI.dbGetUserCollections(userId);
   }
 
-  async createCollection(_name: string, _description: string, _ownerId: number): Promise<number> {
-    return Date.now();
+  async createCollection(name: string, description: string, ownerId: number): Promise<number> {
+    return await window.electronAPI.dbCreateCollection(name, description, ownerId);
   }
 
+  async updateCollection(id: number, updates: Partial<Collection>): Promise<void> {
+    return await window.electronAPI.dbUpdateCollection(id, updates);
+  }
+
+  async deleteCollection(id: number): Promise<void> {
+    return await window.electronAPI.dbDeleteCollection(id);
+  }
+
+  // Request operations
   async getCollectionRequests(collectionId: number): Promise<Request[]> {
-    // Mock requests
-    return [
-      {
-        id: 1,
-        collectionId,
-        name: 'Sample GET Request',
-        method: 'GET',
-        url: 'https://jsonplaceholder.typicode.com/posts/1',
-        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
-        body: '',
-        params: JSON.stringify({}),
-        auth: JSON.stringify({ type: 'none' }),
-        tests: '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
+    return await window.electronAPI.dbGetCollectionRequests(collectionId);
   }
 
-  async createRequest(_request: Omit<Request, 'id' | 'createdAt' | 'updatedAt'>): Promise<number> {
-    return Date.now();
+  async createRequest(request: Omit<Request, 'id' | 'createdAt' | 'updatedAt'>): Promise<number> {
+    return await window.electronAPI.dbCreateRequest(request);
   }
 
-  async updateRequest(_id: number, _request: Partial<Request>): Promise<void> {
-    // Mock update
-    return Promise.resolve();
+  async updateRequest(id: number, request: Partial<Request>): Promise<void> {
+    return await window.electronAPI.dbUpdateRequest(id, request);
   }
 
-  async saveTestResult(_result: Omit<TestResult, 'id' | 'runAt'>): Promise<number> {
-    return Date.now();
+  async deleteRequest(id: number): Promise<void> {
+    return await window.electronAPI.dbDeleteRequest(id);
   }
 
-  async getTestResults(requestId: number, _limit: number = 50): Promise<TestResult[]> {
-    // Mock test results
-    return [
-      {
-        id: 1,
-        requestId,
-        status: 'pass',
-        responseTime: 145,
-        statusCode: 200,
-        message: 'Request succeeded',
-        runAt: new Date().toISOString()
-      }
-    ];
+  // Test result operations
+  async saveTestResult(result: Omit<TestResult, 'id' | 'runAt'>): Promise<number> {
+    return await window.electronAPI.dbSaveTestResult(result);
+  }
+
+  async getTestResults(requestId: number, limit: number = 50): Promise<TestResult[]> {
+    return await window.electronAPI.dbGetTestResults(requestId, limit);
+  }
+
+  // Test suite operations (not in original interface but adding for completeness)
+  async saveTestSuite(testSuite: any): Promise<number> {
+    return await window.electronAPI.dbSaveTestSuite(testSuite);
+  }
+
+  async getTestSuites(requestId: number): Promise<any[]> {
+    return await window.electronAPI.dbGetTestSuites(requestId);
+  }
+
+  async updateTestSuite(id: number, updates: any): Promise<void> {
+    return await window.electronAPI.dbUpdateTestSuite(id, updates);
+  }
+
+  async deleteTestSuite(id: number): Promise<void> {
+    return await window.electronAPI.dbDeleteTestSuite(id);
   }
 
   async close(): Promise<void> {
+    // Database closing is handled by the main process
     return Promise.resolve();
   }
 }

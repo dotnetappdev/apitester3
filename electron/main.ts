@@ -4,23 +4,32 @@ import { promises as fs } from 'fs';
 import { isDev } from './utils';
 import { ElectronSoapClient } from './soapClient';
 import { ElectronGrpcClient } from './grpcClient';
+import { SqliteDatabaseManager } from './sqliteManager';
 
 class AppManager {
   private mainWindow: BrowserWindow | null = null;
+  private dbManager: SqliteDatabaseManager;
 
   constructor() {
+    this.dbManager = new SqliteDatabaseManager();
     this.initializeApp();
   }
 
   private initializeApp(): void {
     // Handle app events
-    app.whenReady().then(() => {
+    app.whenReady().then(async () => {
+      // Initialize database first
+      await this.dbManager.initialize();
+      
       this.createMainWindow();
       this.setupMenu();
       this.setupIpcHandlers();
     });
 
-    app.on('window-all-closed', () => {
+    app.on('window-all-closed', async () => {
+      // Close database connection before quitting
+      await this.dbManager.close();
+      
       if (process.platform !== 'darwin') {
         app.quit();
       }
@@ -488,6 +497,174 @@ class AppManager {
           success: false,
           error: error instanceof Error ? error.message : 'Unknown error'
         };
+      }
+    });
+
+    // Database operations
+    // User operations
+    ipcMain.handle('db-get-all-users', async () => {
+      try {
+        return await this.dbManager.getAllUsers();
+      } catch (error) {
+        console.error('Failed to get users:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-get-user-by-username', async (event, username) => {
+      try {
+        return await this.dbManager.getUserByUsername(username);
+      } catch (error) {
+        console.error('Failed to get user by username:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-create-user', async (event, username, password, role) => {
+      try {
+        return await this.dbManager.createUser(username, password, role);
+      } catch (error) {
+        console.error('Failed to create user:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-verify-password', async (event, username, password) => {
+      try {
+        return await this.dbManager.verifyPassword(username, password);
+      } catch (error) {
+        console.error('Failed to verify password:', error);
+        throw error;
+      }
+    });
+
+    // Collection operations
+    ipcMain.handle('db-get-user-collections', async (event, userId) => {
+      try {
+        return await this.dbManager.getUserCollections(userId);
+      } catch (error) {
+        console.error('Failed to get user collections:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-create-collection', async (event, name, description, ownerId) => {
+      try {
+        return await this.dbManager.createCollection(name, description, ownerId);
+      } catch (error) {
+        console.error('Failed to create collection:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-update-collection', async (event, id, updates) => {
+      try {
+        return await this.dbManager.updateCollection(id, updates);
+      } catch (error) {
+        console.error('Failed to update collection:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-delete-collection', async (event, id) => {
+      try {
+        return await this.dbManager.deleteCollection(id);
+      } catch (error) {
+        console.error('Failed to delete collection:', error);
+        throw error;
+      }
+    });
+
+    // Request operations
+    ipcMain.handle('db-get-collection-requests', async (event, collectionId) => {
+      try {
+        return await this.dbManager.getCollectionRequests(collectionId);
+      } catch (error) {
+        console.error('Failed to get collection requests:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-create-request', async (event, request) => {
+      try {
+        return await this.dbManager.createRequest(request);
+      } catch (error) {
+        console.error('Failed to create request:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-update-request', async (event, id, request) => {
+      try {
+        return await this.dbManager.updateRequest(id, request);
+      } catch (error) {
+        console.error('Failed to update request:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-delete-request', async (event, id) => {
+      try {
+        return await this.dbManager.deleteRequest(id);
+      } catch (error) {
+        console.error('Failed to delete request:', error);
+        throw error;
+      }
+    });
+
+    // Test result operations
+    ipcMain.handle('db-save-test-result', async (event, result) => {
+      try {
+        return await this.dbManager.saveTestResult(result);
+      } catch (error) {
+        console.error('Failed to save test result:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-get-test-results', async (event, requestId, limit) => {
+      try {
+        return await this.dbManager.getTestResults(requestId, limit);
+      } catch (error) {
+        console.error('Failed to get test results:', error);
+        throw error;
+      }
+    });
+
+    // Test suite operations
+    ipcMain.handle('db-save-test-suite', async (event, testSuite) => {
+      try {
+        return await this.dbManager.saveTestSuite(testSuite);
+      } catch (error) {
+        console.error('Failed to save test suite:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-get-test-suites', async (event, requestId) => {
+      try {
+        return await this.dbManager.getTestSuites(requestId);
+      } catch (error) {
+        console.error('Failed to get test suites:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-update-test-suite', async (event, id, updates) => {
+      try {
+        return await this.dbManager.updateTestSuite(id, updates);
+      } catch (error) {
+        console.error('Failed to update test suite:', error);
+        throw error;
+      }
+    });
+
+    ipcMain.handle('db-delete-test-suite', async (event, id) => {
+      try {
+        return await this.dbManager.deleteTestSuite(id);
+      } catch (error) {
+        console.error('Failed to delete test suite:', error);
+        throw error;
       }
     });
   }
