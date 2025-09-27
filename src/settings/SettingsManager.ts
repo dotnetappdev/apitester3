@@ -11,6 +11,7 @@ export interface AppSettings {
   enableTestExplorer: boolean;
   splitterPosition: number;
   sidebarWidth: number;
+  layoutConfig: string; // JSON string of layout configuration
   windowState: {
     width: number;
     height: number;
@@ -32,6 +33,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   enableTestExplorer: true,
   splitterPosition: 50,
   sidebarWidth: 300,
+  layoutConfig: '', // Empty initially, will be populated by LayoutManager
   windowState: {
     width: 1400,
     height: 900,

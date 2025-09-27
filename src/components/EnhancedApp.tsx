@@ -13,9 +13,10 @@ import { InputDialog } from './InputDialog';
 import { CodeGenerationDialog } from './CodeGenerationDialog';
 import { CollectionIcon } from './ModernButton';
 import { Splitter } from './Splitter';
+import { DockableLayout } from './DockableLayout';
 import { ApiClient } from '../utils/api';
 import { ApiResponse } from '../types';
-import { TestSuite } from '../testing/TestRunner';
+import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
 
 export const EnhancedApp: React.FC = () => {
   // Core state
@@ -41,6 +42,7 @@ export const EnhancedApp: React.FC = () => {
   // Test results and test suites
   const [testResults, setTestResults] = useState<Map<number, TestResult[]>>(new Map());
   const [testSuites] = useState<TestSuite[]>([]);
+  const [testExecutionResults, setTestExecutionResults] = useState<Map<number, TestExecutionResult[]>>(new Map());
   
   // Managers
   const [dbManager] = useState(() => new DatabaseManager());
@@ -331,6 +333,14 @@ export const EnhancedApp: React.FC = () => {
     return results;
   };
 
+  const handleRunTestSuite = async (requestId: number, testSuite: TestSuite, response: ApiResponse, request: any): Promise<TestExecutionResult[]> => {
+    // This would run a test suite against a response and return detailed execution results
+    // For now, return empty array as placeholder
+    // TODO: Implement proper test suite execution
+    console.log('Running test suite:', testSuite.name, 'for request:', requestId);
+    return [];
+  };
+
   const handleExportCollections = async (selectedCollections: Collection[], selectedTestSuites: TestSuite[]) => {
     if (!currentUser) return;
 
@@ -407,63 +417,28 @@ export const EnhancedApp: React.FC = () => {
 
   return (
     <div className="app-container enhanced">
-      <div className="main-layout">
-        <EnhancedSidebar
-          user={currentUser}
-          collections={collections}
-          onRequestSelect={handleRequestSelect}
-          onNewRequest={handleNewRequest}
-          onNewCollection={handleNewCollection}
-          activeRequest={activeRequest}
-          testResults={testResults}
-          onRunTest={handleRunTest}
-          onRunAllTests={handleRunAllTests}
-          onUserProfile={() => {/* TODO: Profile dialog */}}
-          onSettings={() => setShowSettings(true)}
-          enableTestExplorer={enableTestExplorer}
-        />
-
-        <div className="content-area">
-          {activeRequest ? (
-            <Splitter
-              split="vertical"
-              defaultSize={splitterPosition}
-              onSizeChange={(size) => {
-                setSplitterPosition(size);
-                settingsManager.updateSettings({ splitterPosition: size });
-              }}
-            >
-              <EnhancedRequestPanel
-                request={activeRequest}
-                onRequestChange={handleRequestChange}
-                onSendRequest={handleSendRequest}
-                isLoading={isLoading}
-                enableSyntaxHighlighting={enableSyntaxHighlighting}
-                theme={theme}
-              />
-              <ResponsePanel
-                response={response}
-                isLoading={isLoading}
-              />
-            </Splitter>
-          ) : (
-            <div className="welcome-screen">
-              <div className="welcome-content">
-                <h1>Welcome to API Tester 3</h1>
-                <p>Professional API testing tool with enterprise features</p>
-                <div className="welcome-actions">
-                  <button className="btn btn-primary" onClick={handleNewRequest}>
-                    Create New Request
-                  </button>
-                  <button className="btn btn-secondary" onClick={handleNewCollection}>
-                    Create Collection
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      <DockableLayout
+        user={currentUser}
+        collections={collections}
+        activeRequest={activeRequest}
+        response={response}
+        isLoading={isLoading}
+        testResults={testResults}
+        testSuites={testSuites}
+        testExecutionResults={testExecutionResults}
+        theme={theme}
+        enableSyntaxHighlighting={enableSyntaxHighlighting}
+        onRequestSelect={handleRequestSelect}
+        onRequestChange={handleRequestChange}
+        onSendRequest={handleSendRequest}
+        onNewRequest={handleNewRequest}
+        onNewCollection={handleNewCollection}
+        onRunTest={handleRunTest}
+        onRunAllTests={handleRunAllTests}
+        onRunTestSuite={handleRunTestSuite}
+        onUserProfile={() => {/* TODO: Profile dialog */}}
+        onSettings={() => setShowSettings(true)}
+      />
 
       {showSettings && (
         <SettingsDialog
