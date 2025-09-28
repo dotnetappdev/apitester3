@@ -194,26 +194,51 @@ body.light-theme :root {
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  box-sizing: border-box;
 }
 
 .btn-primary {
   background-color: var(--button-bg);
   color: white;
+  min-width: 80px;
 }
 
 .btn-primary:hover {
   background-color: var(--button-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 122, 204, 0.3);
 }
 
 .btn-secondary {
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
+  min-width: 80px;
 }
 
 .btn-secondary:hover {
   background-color: var(--border-color);
+  border-color: var(--border-light);
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 11px;
+  min-height: 24px;
+  min-width: 60px;
+}
+
+.btn-large {
+  padding: 12px 24px;
+  font-size: 14px;
+  min-height: 40px;
+  min-width: 100px;
 }
 
 /* URL bar */
@@ -1835,6 +1860,7 @@ body.light-theme :root {
   border-radius: 4px;
   overflow: hidden;
   background: var(--input-bg);
+  margin: 12px 0;
 }
 
 .kv-header {
@@ -1844,26 +1870,58 @@ body.light-theme :root {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-secondary);
+  align-items: center;
 }
 
 .kv-header-cell {
   flex: 1;
   padding: 8px 12px;
   border-right: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.kv-header-cell:first-child {
+  flex: 0 0 40px;
+  text-align: center;
+}
+
+.kv-header-cell:nth-child(4) {
+  flex: 1.5; /* Description column wider */
 }
 
 .kv-header-cell:last-child {
-  flex: 0 0 60px;
+  flex: 0 0 80px;
   border-right: none;
+  text-align: center;
 }
 
 .key-value-row {
   display: flex;
   border-bottom: 1px solid var(--border-color);
+  align-items: center;
+  min-height: 40px;
 }
 
 .key-value-row:last-child {
   border-bottom: none;
+}
+
+.key-value-row:hover {
+  background: var(--bg-secondary);
+}
+
+.kv-checkbox-cell {
+  flex: 0 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--border-color);
+}
+
+.kv-checkbox {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--accent-color);
 }
 
 .kv-input {
@@ -1875,30 +1933,49 @@ body.light-theme :root {
   font-size: 12px;
   font-family: 'Consolas', Monaco, monospace;
   border-right: 1px solid var(--border-color);
+  min-height: 40px;
+}
+
+.kv-input.kv-description {
+  flex: 1.5;
+  font-style: italic;
+  color: var(--text-muted);
 }
 
 .kv-input:focus {
   outline: none;
   background: var(--bg-primary);
+  border-color: var(--accent-color);
+}
+
+.kv-input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 .kv-actions {
-  flex: 0 0 60px;
+  flex: 0 0 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 4px;
+  gap: 4px;
 }
 
 .kv-action-button {
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 14px;
-  padding: 4px;
+  font-size: 16px;
+  padding: 6px 8px;
   border-radius: 3px;
   cursor: pointer;
   transition: all 0.15s ease;
+  min-width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .kv-action-button:hover {
@@ -1909,6 +1986,62 @@ body.light-theme :root {
 .kv-action-button.remove:hover {
   background: var(--error-color);
   color: white;
+}
+
+.kv-action-button.add {
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+.kv-action-button.add:hover {
+  background: var(--accent-color);
+  color: white;
+}
+
+.kv-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+.kv-add-button {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kv-add-button:hover {
+  background: var(--accent-hover);
+}
+
+.kv-bulk-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 3px;
+  transition: all 0.15s ease;
+}
+
+.btn-link:hover {
+  background: var(--bg-quaternary);
+  color: var(--accent-light);
 }
 
 .body-editor, .tests-editor {
