@@ -37,6 +37,7 @@ interface DockableLayoutProps {
   onRunTestSuite: (requestId: number, testSuite: TestSuite, response: ApiResponse, request: any) => Promise<TestExecutionResult[]>;
   onUserProfile: () => void;
   onSettings: () => void;
+  onTeamManager: () => void;
 }
 
 export const DockableLayout: React.FC<DockableLayoutProps> = ({
@@ -65,7 +66,8 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
   onRunAllTests,
   onRunTestSuite,
   onUserProfile,
-  onSettings
+  onSettings,
+  onTeamManager
 }) => {
   const [layoutManager] = useState(() => LayoutManager.getInstance());
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(() => layoutManager.loadLayout());
@@ -195,6 +197,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                   onRunAllTests={onRunAllTests}
                   onUserProfile={onUserProfile}
                   onSettings={onSettings}
+                  onTeamManager={onTeamManager}
                   enableTestExplorer={false} // Separate panel on mobile
                 />
               </div>
@@ -390,6 +393,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                       onRunAllTests={onRunAllTests}
                       onUserProfile={onUserProfile}
                       onSettings={onSettings}
+                      onTeamManager={onTeamManager}
                       enableTestExplorer={false} // Now separate
                     />
                   </div>

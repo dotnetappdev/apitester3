@@ -12,11 +12,30 @@ export interface User {
   lastLogin?: string;
 }
 
+export interface Team {
+  id: number;
+  name: string;
+  description?: string;
+  ownerId: number;
+  members: TeamMember[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeamMember {
+  id: number;
+  teamId: number;
+  userId: number;
+  role: 'admin' | 'member' | 'viewer';
+  joinedAt: string;
+}
+
 export interface Collection {
   id: number;
   name: string;
   description?: string;
   ownerId: number;
+  teamId?: number; // Optional team association
   isShared: boolean;
   createdAt: string;
   updatedAt: string;
@@ -100,6 +119,51 @@ export class DatabaseManager {
 
   async deleteCollection(id: number): Promise<void> {
     return await window.electronAPI.dbDeleteCollection(id);
+  }
+
+  // Team operations
+  async createTeam(name: string, description: string, ownerId: number): Promise<number> {
+    return await window.electronAPI.dbCreateTeam(name, description, ownerId);
+  }
+
+  async getUserTeams(userId: number): Promise<Team[]> {
+    return await window.electronAPI.dbGetUserTeams(userId);
+  }
+
+  async getTeamById(teamId: number): Promise<Team | null> {
+    return await window.electronAPI.dbGetTeamById(teamId);
+  }
+
+  async updateTeam(id: number, updates: Partial<Team>): Promise<void> {
+    return await window.electronAPI.dbUpdateTeam(id, updates);
+  }
+
+  async deleteTeam(id: number): Promise<void> {
+    return await window.electronAPI.dbDeleteTeam(id);
+  }
+
+  async addTeamMember(teamId: number, userId: number, role: 'admin' | 'member' | 'viewer' = 'member'): Promise<void> {
+    return await window.electronAPI.dbAddTeamMember(teamId, userId, role);
+  }
+
+  async removeTeamMember(teamId: number, userId: number): Promise<void> {
+    return await window.electronAPI.dbRemoveTeamMember(teamId, userId);
+  }
+
+  async updateTeamMemberRole(teamId: number, userId: number, role: 'admin' | 'member' | 'viewer'): Promise<void> {
+    return await window.electronAPI.dbUpdateTeamMemberRole(teamId, userId, role);
+  }
+
+  async getTeamCollections(teamId: number): Promise<Collection[]> {
+    return await window.electronAPI.dbGetTeamCollections(teamId);
+  }
+
+  async assignCollectionToTeam(collectionId: number, teamId: number): Promise<void> {
+    return await window.electronAPI.dbAssignCollectionToTeam(collectionId, teamId);
+  }
+
+  async removeCollectionFromTeam(collectionId: number): Promise<void> {
+    return await window.electronAPI.dbRemoveCollectionFromTeam(collectionId);
   }
 
   // Request operations

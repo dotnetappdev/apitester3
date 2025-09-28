@@ -76,23 +76,68 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
     updateRequest({ params: JSON.stringify(params) });
   };
 
+  const addRow = () => {
+    // This function will be used by both params and headers to add new rows
+    return {};
+  };
+
+  const removeRow = (index: number, data: Record<string, string>, onUpdate: (key: string, value: string, index: number) => void) => {
+    const entries = Object.entries(data);
+    if (index < entries.length) {
+      onUpdate('', '', index); // This will remove the row
+    }
+  };
+
+  const clearAll = (onUpdate: (key: string, value: string, index: number) => void) => {
+    // Clear all entries by removing them one by one
+    onUpdate('', '', 0);
+  };
+
   const renderKeyValueEditor = (
     data: Record<string, string>,
     onUpdate: (key: string, value: string, index: number) => void,
     placeholder: { key: string; value: string }
   ) => {
     const entries = Object.entries(data);
-    const rows = [...entries, ['', '']];
+    const rows = [...entries, ['', '']]; // Always show one empty row at the end
 
     return (
       <div className="key-value-editor">
         <div className="kv-header">
+          <div className="kv-header-cell">
+            <input 
+              type="checkbox" 
+              className="kv-checkbox" 
+              title="Toggle all"
+              checked={entries.length > 0}
+              onChange={(e) => {
+                if (!e.target.checked) {
+                  // Clear all when unchecked
+                  entries.forEach((_, index) => onUpdate('', '', index));
+                }
+              }}
+            />
+          </div>
           <div className="kv-header-cell">Key</div>
           <div className="kv-header-cell">Value</div>
+          <div className="kv-header-cell">Description</div>
           <div className="kv-header-cell">Actions</div>
         </div>
         {rows.map(([key, value], index) => (
           <div key={index} className="key-value-row">
+            <div className="kv-checkbox-cell">
+              <input 
+                type="checkbox" 
+                className="kv-checkbox" 
+                checked={!!(key && value)} 
+                onChange={(e) => {
+                  if (!e.target.checked && key && value) {
+                    // Remove this row when unchecked
+                    onUpdate('', '', index);
+                  }
+                }}
+              />
+            </div>
             <input
               type="text"
               className="form-input kv-input"
@@ -107,19 +152,75 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
               value={value}
               onChange={(e) => onUpdate(key, e.target.value, index)}
             />
+            <input
+              type="text"
+              className="form-input kv-input kv-description"
+              placeholder="Description (optional)"
+              value=""
+              onChange={() => {}} // Description functionality could be added later
+            />
             <div className="kv-actions">
-              {(key || value) && (
+              {(key || value) ? (
                 <button
                   className="kv-action-button remove"
-                  onClick={() => onUpdate('', '', index)}
-                  title="Remove"
+                  onClick={() => removeRow(index, data, onUpdate)}
+                  title="Remove this parameter"
+                  type="button"
                 >
                   ×
+                </button>
+              ) : (
+                <button
+                  className="kv-action-button add"
+                  onClick={() => {
+                    // Focus on the key input to start adding
+                    const keyInput = document.querySelector(`.key-value-row:nth-child(${index + 2}) .kv-input:first-of-type`) as HTMLInputElement;
+                    if (keyInput) keyInput.focus();
+                  }}
+                  title="Add new parameter"
+                  type="button"
+                >
+                  +
                 </button>
               )}
             </div>
           </div>
         ))}
+        
+        <div className="kv-footer">
+          <button 
+            className="btn btn-secondary kv-add-button"
+            onClick={() => {
+              // Add a new empty row by focusing on the last empty row
+              const lastRow = document.querySelector('.key-value-row:last-child .kv-input:first-of-type') as HTMLInputElement;
+              if (lastRow) lastRow.focus();
+            }}
+            type="button"
+          >
+            + Add {placeholder.key.toLowerCase()}
+          </button>
+          <div className="kv-bulk-actions">
+            <button 
+              className="btn btn-link" 
+              type="button"
+              onClick={() => {
+                // TODO: Implement bulk edit functionality
+                console.log('Bulk edit clicked');
+              }}
+            >
+              Bulk Edit
+            </button>
+            <button 
+              className="btn btn-link" 
+              type="button"
+              onClick={() => {
+                entries.forEach((_, index) => onUpdate('', '', index));
+              }}
+            >
+              Clear All
+            </button>
+          </div>
+        </div>
       </div>
     );
   };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DatabaseManager, User, Collection, Request, TestResult } from '../database/DatabaseManager';
+import { DatabaseManager, User, Collection, Request, TestResult, Team } from '../database/DatabaseManager';
 import { AuthManager } from '../auth/AuthManager';
 import { SettingsManager } from '../settings/SettingsManager';
 import { LoginDialog } from './LoginDialog';
@@ -14,6 +14,7 @@ import { CodeGenerationDialog } from './CodeGenerationDialog';
 import { RequestDialog } from './RequestDialog';
 import { TestSuiteDialog } from './TestSuiteDialog';
 import { ConfirmDialog } from './ConfirmDialog';
+import { TeamManager } from './TeamManager';
 import { CollectionIcon } from './ModernButton';
 import { Splitter } from './Splitter';
 import { DockableLayout } from './DockableLayout';
@@ -27,6 +28,8 @@ export const EnhancedApp: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [activeRequest, setActiveRequest] = useState<Request | null>(null);
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +40,7 @@ export const EnhancedApp: React.FC = () => {
   const [showDocumentation, setShowDocumentation] = useState(false);
   const [showNewCollectionDialog, setShowNewCollectionDialog] = useState(false);
   const [showCodeGeneration, setShowCodeGeneration] = useState(false);
+  const [showTeamManager, setShowTeamManager] = useState(false);
   const [documentationType, setDocumentationType] = useState<'overview' | 'unit-testing' | null>(null);
   
   // Request and Test CRUD dialogs
@@ -93,8 +97,12 @@ export const EnhancedApp: React.FC = () => {
       setCurrentUser(session?.user || null);
       if (session?.user) {
         loadUserCollections(session.user.id);
+        loadUserTeams(session.user.id);
+        loadAllUsers(); // Load all users for team management
       } else {
         setCollections([]);
+        setTeams([]);
+        setUsers([]);
         setActiveRequest(null);
         setResponse(null);
       }
@@ -247,6 +255,100 @@ export const EnhancedApp: React.FC = () => {
       updateDataCache(collectionsWithRequests, testResults, testExecutionResults);
     } catch (error) {
       console.error('Failed to load collections:', error);
+    }
+  };
+
+  const loadUserTeams = async (userId: number) => {
+    try {
+      const userTeams = await dbManager.getUserTeams(userId);
+      setTeams(userTeams);
+    } catch (error) {
+      console.error('Failed to load teams:', error);
+    }
+  };
+
+  const loadAllUsers = async () => {
+    try {
+      const allUsers = await dbManager.getAllUsers();
+      setUsers(allUsers);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+    }
+  };
+
+  // Team management functions
+  const handleCreateTeam = async (name: string, description: string) => {
+    if (!currentUser) return;
+    
+    try {
+      await dbManager.createTeam(name, description, currentUser.id);
+      await loadUserTeams(currentUser.id);
+    } catch (error) {
+      console.error('Failed to create team:', error);
+    }
+  };
+
+  const handleUpdateTeam = async (teamId: number, updates: Partial<Team>) => {
+    try {
+      await dbManager.updateTeam(teamId, updates);
+      await loadUserTeams(currentUser!.id);
+    } catch (error) {
+      console.error('Failed to update team:', error);
+    }
+  };
+
+  const handleDeleteTeam = async (teamId: number) => {
+    try {
+      await dbManager.deleteTeam(teamId);
+      await loadUserTeams(currentUser!.id);
+      await loadUserCollections(currentUser!.id); // Reload collections in case any were unassigned
+    } catch (error) {
+      console.error('Failed to delete team:', error);
+    }
+  };
+
+  const handleAddTeamMember = async (teamId: number, userId: number, role: 'admin' | 'member' | 'viewer') => {
+    try {
+      await dbManager.addTeamMember(teamId, userId, role);
+      await loadUserTeams(currentUser!.id);
+    } catch (error) {
+      console.error('Failed to add team member:', error);
+    }
+  };
+
+  const handleRemoveTeamMember = async (teamId: number, userId: number) => {
+    try {
+      await dbManager.removeTeamMember(teamId, userId);
+      await loadUserTeams(currentUser!.id);
+    } catch (error) {
+      console.error('Failed to remove team member:', error);
+    }
+  };
+
+  const handleUpdateTeamMemberRole = async (teamId: number, userId: number, role: 'admin' | 'member' | 'viewer') => {
+    try {
+      await dbManager.updateTeamMemberRole(teamId, userId, role);
+      await loadUserTeams(currentUser!.id);
+    } catch (error) {
+      console.error('Failed to update member role:', error);
+    }
+  };
+
+  const handleAssignCollectionToTeam = async (collectionId: number, teamId: number) => {
+    try {
+      await dbManager.assignCollectionToTeam(collectionId, teamId);
+      await loadUserCollections(currentUser!.id);
+    } catch (error) {
+      console.error('Failed to assign collection to team:', error);
+    }
+  };
+
+  const handleRemoveCollectionFromTeam = async (collectionId: number) => {
+    try {
+      await dbManager.removeCollectionFromTeam(collectionId);
+      await loadUserCollections(currentUser!.id);
+    } catch (error) {
+      console.error('Failed to remove collection from team:', error);
     }
   };
 
@@ -695,7 +797,26 @@ export const EnhancedApp: React.FC = () => {
         onRunTestSuite={handleRunTestSuite}
         onUserProfile={() => {/* TODO: Profile dialog */}}
         onSettings={() => setShowSettings(true)}
+        onTeamManager={() => setShowTeamManager(true)}
       />
+
+      {showTeamManager && currentUser && (
+        <TeamManager
+          teams={teams}
+          users={users}
+          collections={collections}
+          currentUser={currentUser}
+          onCreateTeam={handleCreateTeam}
+          onUpdateTeam={handleUpdateTeam}
+          onDeleteTeam={handleDeleteTeam}
+          onAddMember={handleAddTeamMember}
+          onRemoveMember={handleRemoveTeamMember}
+          onUpdateMemberRole={handleUpdateTeamMemberRole}
+          onAssignCollection={handleAssignCollectionToTeam}
+          onRemoveCollection={handleRemoveCollectionFromTeam}
+          onClose={() => setShowTeamManager(false)}
+        />
+      )}
 
       {showSettings && (
         <SettingsDialog
