@@ -1,20 +1,35 @@
 import { Environment, ApiRequest } from '../types';
+import { DynamicVariableManager } from './dynamicVariables';
 
 export class EnvironmentVariableManager {
   /**
    * Replace variables in a string with environment values
-   * Supports {{variableName}} syntax
+   * Supports {{variableName}} syntax and built-in dynamic variables like {{$timestamp}}
    */
   static replaceVariables(text: string, environment: Environment | null): string {
-    if (!environment || !text) {
+    if (!text) {
       return text;
     }
 
-    // Replace variables in format {{variableName}}
-    return text.replace(/\{\{([^}]+)\}\}/g, (match, variableName) => {
-      const value = environment.variables[variableName.trim()];
-      return value !== undefined ? value : match; // Keep original if variable not found
-    });
+    // First, replace dynamic variables ({{$variableName}})
+    let processedText = DynamicVariableManager.replaceDynamicVariables(text);
+
+    // Then replace environment variables if environment is provided
+    if (environment) {
+      processedText = processedText.replace(/\{\{([^}]+)\}\}/g, (match, variableName) => {
+        const trimmedName = variableName.trim();
+        
+        // Skip dynamic variables (already processed)
+        if (trimmedName.startsWith('$')) {
+          return match;
+        }
+        
+        const value = environment.variables[trimmedName];
+        return value !== undefined ? value : match; // Keep original if variable not found
+      });
+    }
+
+    return processedText;
   }
 
   /**
@@ -127,6 +142,7 @@ export class EnvironmentVariableManager {
 
   /**
    * Extract variable references from a string
+   * Includes both environment variables and dynamic variables
    */
   static extractVariables(text: string): string[] {
     const variables: string[] = [];
@@ -211,19 +227,27 @@ export class EnvironmentVariableManager {
 
   /**
    * Validate that all variables in request have values in environment
+   * Dynamic variables are always considered valid since they generate values automatically
    */
   static validateRequest(request: ApiRequest, environment: Environment | null): { isValid: boolean; missingVariables: string[] } {
     const usedVariables = this.extractRequestVariables(request);
     const missingVariables: string[] = [];
 
     if (!environment) {
+      // Filter out dynamic variables as they don't need environment
+      const nonDynamicVars = usedVariables.filter(v => !DynamicVariableManager.isDynamicVariable(v));
       return {
-        isValid: usedVariables.length === 0,
-        missingVariables: usedVariables
+        isValid: nonDynamicVars.length === 0,
+        missingVariables: nonDynamicVars
       };
     }
 
     usedVariables.forEach(variable => {
+      // Skip dynamic variables as they are always valid
+      if (DynamicVariableManager.isDynamicVariable(variable)) {
+        return;
+      }
+      
       if (environment.variables[variable] === undefined) {
         missingVariables.push(variable);
       }

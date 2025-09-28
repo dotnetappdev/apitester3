@@ -3408,3 +3408,113 @@ textarea:focus-visible {
     var(--accent-color) 100%);
   opacity: 0.3;
 }
+
+/* Variables section header with dynamic variables button */
+.variables-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.variables-section-header h4 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-info {
+  background: var(--info-color);
+  border-color: var(--info-color);
+  color: var(--bg-primary);
+}
+
+.btn-info:hover {
+  background: #6bb6d6;
+  border-color: #6bb6d6;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 11px;
+  min-height: 24px;
+  min-width: auto;
+}
+
+/* Modal overlay and dialog styles for dynamic variables */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--overlay-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-dialog {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--header-bg);
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.modal-close:hover {
+  color: var(--text-primary);
+  background: var(--bg-quaternary);
+}
+
+.modal-body {
+  flex: 1;
+  overflow: hidden;
+  padding: 20px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+  background: var(--header-bg);
+}
+}
