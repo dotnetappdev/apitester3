@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { DatabaseManager, User, Collection, Request, TestResult, Team } from '../database/DatabaseManager';
+import { DatabaseManager, User, Collection, Request, TestResult, Project, Team } from '../database/DatabaseManager';
 import { AuthManager } from '../auth/AuthManager';
 import { SettingsManager } from '../settings/SettingsManager';
 import { LoginDialog } from './LoginDialog';
 import { EnhancedSidebar } from './EnhancedSidebar';
+import { ProjectExplorer } from './ProjectExplorer';
 import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
 import { SettingsDialog } from './SettingsDialog';
@@ -21,12 +22,14 @@ import { DockableLayout } from './DockableLayout';
 import { ApiClient } from '../utils/api';
 import { ApiResponse } from '../types';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
+import { UITestSuite, UITestExecutionResult, UITestRunner } from '../testing/UITestRunner';
 import { useRealTimeData } from '../hooks/useRealTimeData';
 
 export const EnhancedApp: React.FC = () => {
   // Core state
   const [isInitialized, setIsInitialized] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -35,10 +38,12 @@ export const EnhancedApp: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   // UI state
+  const [viewMode, setViewMode] = useState<'projects' | 'collections'>('projects'); // New view mode toggle
   const [showSettings, setShowSettings] = useState(false);
   const [showImportExport, setShowImportExport] = useState<'import' | 'export' | null>(null);
   const [showDocumentation, setShowDocumentation] = useState(false);
   const [showNewCollectionDialog, setShowNewCollectionDialog] = useState(false);
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false); // New project dialog
   const [showCodeGeneration, setShowCodeGeneration] = useState(false);
   const [showTeamManager, setShowTeamManager] = useState(false);
   const [documentationType, setDocumentationType] = useState<'overview' | 'unit-testing' | null>(null);
@@ -60,11 +65,20 @@ export const EnhancedApp: React.FC = () => {
   const [testSuites] = useState<TestSuite[]>([]);
   const [testExecutionResults, setTestExecutionResults] = useState<Map<number, TestExecutionResult[]>>(new Map());
   
+  // UI Test suites and results
+  const [uiTestSuites, setUITestSuites] = useState<Map<string, UITestSuite>>(new Map());
+  const [uiTestExecutionResults, setUITestExecutionResults] = useState<Map<string, UITestExecutionResult[]>>(new Map());
+  
   // Managers
   const [dbManager] = useState(() => new DatabaseManager());
   const [authManager] = useState(() => AuthManager.getInstance(dbManager));
   const [settingsManager] = useState(() => SettingsManager.getInstance());
   const { subscribeToUpdates, broadcastUpdate, updateDataCache } = useRealTimeData();
+
+  // Computed values for test explorer
+  const testSuitesMap = new Map<number, TestSuite>(
+    testSuites.map(suite => [suite.requestId, suite])
+  );
 
   // Initialize the application
   useEffect(() => {
@@ -99,12 +113,54 @@ export const EnhancedApp: React.FC = () => {
         loadUserCollections(session.user.id);
         loadUserTeams(session.user.id);
         loadAllUsers(); // Load all users for team management
+        
+        // Initialize with sample UI test suite for demonstration
+        const sampleUITestSuite: UITestSuite = {
+          id: 'sample_ui_test_' + Date.now(),
+          name: 'Sample UI Tests',
+          projectId: 1, // Associate with first project if available
+          testCases: [
+            {
+              id: 'test_homepage_' + Date.now(),
+              name: 'Homepage Loads Correctly',
+              description: 'Verify that the homepage loads and displays correctly',
+              enabled: true,
+              script: `// Sample UI Test - Homepage
+await page.goto('https://example.com');
+await page.waitForLoadState('networkidle');
+
+// Check page title
+assert.assertPageTitle('Example Domain', 'Page should have correct title');
+
+// Check main heading
+assert.assertElementExists('h1', 'Page should have a main heading');
+assert.assertElementText('h1', 'Example Domain', 'Heading should display correct text');
+
+// Check if the page is visible
+assert.assertElementVisible('h1', 'Heading should be visible to users');
+
+console.log('Homepage test completed successfully');`,
+              timeout: 30000,
+              browser: 'chromium',
+              headless: true,
+              viewport: { width: 1280, height: 720 },
+              tags: ['smoke', 'homepage'],
+              captureScreenshot: 'on-failure'
+            }
+          ]
+        };
+        
+        const initialUITestSuites = new Map<string, UITestSuite>();
+        initialUITestSuites.set(sampleUITestSuite.id, sampleUITestSuite);
+        setUITestSuites(initialUITestSuites);
       } else {
         setCollections([]);
         setTeams([]);
         setUsers([]);
         setActiveRequest(null);
         setResponse(null);
+        setUITestSuites(new Map());
+        setUITestExecutionResults(new Map());
       }
     });
 
@@ -694,6 +750,65 @@ export const EnhancedApp: React.FC = () => {
     return [];
   };
 
+  // UI Test Suite handlers
+  const handleNewUITestSuite = (testSuite?: UITestSuite) => {
+    if (testSuite) {
+      // Save the new test suite
+      handleSaveUITestSuite(testSuite);
+    } else {
+      // This will trigger the UI test dialog in EnhancedTestExplorer
+      console.log('Creating new UI test suite');
+    }
+  };
+
+  const handleEditUITestSuite = (testSuite: UITestSuite) => {
+    console.log('Editing UI test suite:', testSuite.name);
+  };
+
+  const handleDeleteUITestSuite = (testSuite: UITestSuite) => {
+    const updatedSuites = new Map(uiTestSuites);
+    updatedSuites.delete(testSuite.id);
+    setUITestSuites(updatedSuites);
+    
+    // Also remove execution results
+    const updatedResults = new Map(uiTestExecutionResults);
+    updatedResults.delete(testSuite.id);
+    setUITestExecutionResults(updatedResults);
+  };
+
+  const handleRunUITestSuite = async (testSuite: UITestSuite): Promise<UITestExecutionResult[]> => {
+    try {
+      const results = await UITestRunner.getInstance().executeUITestSuite(testSuite);
+      
+      // Store results
+      const updatedResults = new Map(uiTestExecutionResults);
+      updatedResults.set(testSuite.id, results);
+      setUITestExecutionResults(updatedResults);
+      
+      return results;
+    } catch (error) {
+      console.error('Failed to run UI test suite:', error);
+      return [];
+    }
+  };
+
+  const handleRunAllUITests = async (): Promise<UITestExecutionResult[]> => {
+    const allResults: UITestExecutionResult[] = [];
+    
+    for (const testSuite of uiTestSuites.values()) {
+      const results = await handleRunUITestSuite(testSuite);
+      allResults.push(...results);
+    }
+    
+    return allResults;
+  };
+
+  const handleSaveUITestSuite = (testSuite: UITestSuite) => {
+    const updatedSuites = new Map(uiTestSuites);
+    updatedSuites.set(testSuite.id, testSuite);
+    setUITestSuites(updatedSuites);
+  };
+
   const handleExportCollections = async (selectedCollections: Collection[], selectedTestSuites: TestSuite[]) => {
     if (!currentUser) return;
 
@@ -779,6 +894,8 @@ export const EnhancedApp: React.FC = () => {
         testResults={testResults}
         testSuites={testSuites}
         testExecutionResults={testExecutionResults}
+        uiTestSuites={uiTestSuites}
+        uiTestExecutionResults={uiTestExecutionResults}
         theme={theme}
         enableSyntaxHighlighting={enableSyntaxHighlighting}
         onRequestSelect={handleRequestSelect}
@@ -791,10 +908,15 @@ export const EnhancedApp: React.FC = () => {
         onNewTestSuite={handleNewTestSuite}
         onEditTestSuite={handleEditTestSuite}
         onDeleteTestSuite={handleDeleteTestSuite}
+        onNewUITestSuite={handleNewUITestSuite}
+        onEditUITestSuite={handleEditUITestSuite}
+        onDeleteUITestSuite={handleDeleteUITestSuite}
         onDeleteCollection={handleDeleteCollection}
         onRunTest={handleRunTest}
         onRunAllTests={handleRunAllTests}
         onRunTestSuite={handleRunTestSuite}
+        onRunUITestSuite={handleRunUITestSuite}
+        onRunAllUITests={handleRunAllUITests}
         onUserProfile={() => {/* TODO: Profile dialog */}}
         onSettings={() => setShowSettings(true)}
         onTeamManager={() => setShowTeamManager(true)}
