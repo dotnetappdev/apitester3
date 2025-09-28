@@ -657,17 +657,6 @@ export const EnhancedApp: React.FC = () => {
     );
   }
 
-  // Temporarily bypass login for UI testing
-  const testUser = currentUser || {
-    id: 1,
-    username: 'testuser',
-    role: 'admin',
-    isActive: true,
-    createdAt: new Date().toISOString()
-  };
-
-  // Original login check (commented out for testing)
-  /*
   if (!currentUser) {
     return (
       <LoginDialog
@@ -676,12 +665,11 @@ export const EnhancedApp: React.FC = () => {
       />
     );
   }
-  */
 
   return (
     <div className="app-container enhanced">
       <DockableLayout
-        user={testUser}
+        user={currentUser}
         collections={collections}
         activeRequest={activeRequest}
         response={response}
