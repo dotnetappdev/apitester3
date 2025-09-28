@@ -1928,6 +1928,28 @@ body.light-theme :root {
   max-width: 400px;
 }
 
+/* Enhanced request panel extra styles */
+.method-get { border-color: #4ec9b0; }
+.method-post { border-color: #ffcc02; }
+.method-put { border-color: #007acc; }
+.method-delete { border-color: #f72585; }
+.method-patch { border-color: #ff8c00; }
+.method-head { border-color: #9370db; }
+.method-options { border-color: #20b2aa; }
+.method-soap { border-color: #6f42c1; }
+.method-grpc { border-color: #fd7e14; }
+
+.mode-toggle { margin-top: 8px; display: flex; gap: 12px; }
+.mode-label { font-size: 13px; color: var(--text-primary); }
+.headers-raw-textarea { min-height: 120px; font-family: 'Consolas', Monaco, monospace; }
+
+.form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.form-key-input { flex: 1; }
+.form-value-input { flex: 2; }
+.form-add-row { margin-top: 8px; }
+
+.auth-radio-row { display: flex; gap: 12px; margin-bottom: 12px; }
+
 /* ENHANCED APP STYLES */
 .app-container.enhanced {
   height: 100vh;
@@ -1974,6 +1996,51 @@ body.light-theme :root {
   font-size: 16px;
   color: var(--text-secondary);
   margin-bottom: 32px;
+}
+
+/* Context menu styling used in EnhancedSidebar */
+.context-menu {
+  position: fixed;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  min-width: 120px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.context-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.context-menu-item:last-child {
+  border-bottom: none;
+}
+
+.context-menu-item:hover {
+  background-color: var(--bg-quaternary);
+}
+
+.context-menu-item.danger {
+  color: var(--error-color);
+}
+
+/* Email settings in SettingsDialog */
+.email-settings-section {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px dashed var(--border-color);
+  background: var(--bg-primary);
+}
+
+.email-settings-section .setting-item {
+  margin-bottom: 8px;
 }
 
 .welcome-actions {

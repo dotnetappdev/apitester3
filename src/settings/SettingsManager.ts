@@ -21,6 +21,24 @@ export interface AppSettings {
   };
   recentCollections: string[];
   defaultHeaders: Record<string, string>;
+  // Email notification settings (SendGrid)
+  emailNotifications?: {
+    enabled: boolean;
+    provider: 'sendgrid' | 'smtp' | 'none';
+    sendGridApiKey?: string; // Stored encrypted in production - stored plaintext here for simplicity
+    defaultFrom?: string;
+    defaultTo?: string;
+    notifyOnTestFail?: boolean;
+    notifyOnTestPass?: boolean;
+  };
+  // Reporting and execution options
+  reportFormat?: 'html' | 'json';
+  reportOutputPath?: string;
+  reportPerCollection?: boolean;
+  teamEmail?: string; // team address for collection-level report
+  // Test execution options
+  parallelExecution?: boolean;
+  retryCount?: number;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -44,6 +62,24 @@ const DEFAULT_SETTINGS: AppSettings = {
     'User-Agent': 'API Tester 3'
   }
 };
+
+// Extend default settings with email notification defaults
+DEFAULT_SETTINGS.emailNotifications = {
+  enabled: false,
+  provider: 'sendgrid',
+  sendGridApiKey: '',
+  defaultFrom: '',
+  defaultTo: '',
+  notifyOnTestFail: true,
+  notifyOnTestPass: false
+};
+
+DEFAULT_SETTINGS.reportFormat = 'html';
+DEFAULT_SETTINGS.reportOutputPath = '';
+DEFAULT_SETTINGS.reportPerCollection = false;
+DEFAULT_SETTINGS.teamEmail = '';
+DEFAULT_SETTINGS.parallelExecution = false;
+DEFAULT_SETTINGS.retryCount = 0;
 
 export class SettingsManager {
   private static instance: SettingsManager;

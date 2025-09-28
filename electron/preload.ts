@@ -83,6 +83,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   dbUpdateTestSuite: (id: number, updates: any) => 
     ipcRenderer.invoke('db-update-test-suite', id, updates),
   dbDeleteTestSuite: (id: number) => ipcRenderer.invoke('db-delete-test-suite', id),
+  sendEmail: (data: { apiKey?: string; from: string; to: string | string[]; subject: string; text?: string; html?: string }) =>
+    ipcRenderer.invoke('send-email', data),
+  exportReportExcel: (data: { results: any[]; defaultName?: string }) => ipcRenderer.invoke('export-report-excel', data),
+  exportReportPdf: (data: { htmlContent: string; defaultName?: string }) => ipcRenderer.invoke('export-report-pdf', data),
   
   // Remove listeners
   removeAllListeners: (channel: string) => 
@@ -138,6 +142,7 @@ declare global {
       dbGetTestSuites: (requestId: number) => Promise<any[]>;
       dbUpdateTestSuite: (id: number, updates: any) => Promise<void>;
       dbDeleteTestSuite: (id: number) => Promise<void>;
+  sendEmail: (data: { apiKey?: string; from: string; to: string | string[]; subject: string; text?: string; html?: string }) => Promise<any>;
       
       removeAllListeners: (channel: string) => void;
       platform: string;

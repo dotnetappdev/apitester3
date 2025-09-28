@@ -31,6 +31,8 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
   testResults = []
 }) => {
   const [activeTab, setActiveTab] = useState<'params' | 'headers' | 'body' | 'auth' | 'tests' | 'soap' | 'grpc'>('params');
+  const [bodyMode, setBodyMode] = useState<'raw' | 'json' | 'form'>('raw');
+  const [headersMode, setHeadersMode] = useState<'kv' | 'raw'>('kv');
 
   const updateRequest = (updates: Partial<Request>) => {
     onRequestChange({ ...request, ...updates });
@@ -126,20 +128,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
   const params = request.params ? JSON.parse(request.params) : {};
   const auth = request.auth ? JSON.parse(request.auth) : { type: 'none' };
 
-  const getMethodColor = (method: string): string => {
-    switch (method) {
-      case 'GET': return '#4ec9b0';
-      case 'POST': return '#ffcc02';
-      case 'PUT': return '#007acc';
-      case 'DELETE': return '#f72585';
-      case 'PATCH': return '#ff8c00';
-      case 'HEAD': return '#9370db';
-      case 'OPTIONS': return '#20b2aa';
-      case 'SOAP': return '#6f42c1';
-      case 'GRPC': return '#fd7e14';
-      default: return '#cccccc';
-    }
-  };
+  // method color handled via CSS classes (method-*)
 
   return (
     <div className="enhanced-request-panel">
@@ -157,10 +146,10 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
 
         <div className="url-section">
           <select
-            className="method-selector"
+            className={`method-selector method-${(request.method || '').toLowerCase()}`}
             value={request.method}
             onChange={(e) => updateRequest({ method: e.target.value })}
-            style={{ borderColor: getMethodColor(request.method) }}
+            aria-label="HTTP Method"
             disabled={!request.url}
           >
             <option value="GET">GET</option>
@@ -259,11 +248,36 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
               <p className="panel-description">
                 HTTP headers to be sent with the request
               </p>
+              <div className="mode-toggle">
+                <label className="mode-label">
+                  <input type="radio" name="headersMode" value="kv" checked={headersMode === 'kv'} onChange={() => setHeadersMode('kv')} /> KV
+                </label>
+                <label className="mode-label">
+                  <input type="radio" name="headersMode" value="raw" checked={headersMode === 'raw'} onChange={() => setHeadersMode('raw')} /> Raw JSON
+                </label>
+              </div>
             </div>
-            {renderKeyValueEditor(
-              headers,
-              updateHeaders,
-              { key: 'Header name', value: 'Header value' }
+            {headersMode === 'kv' ? (
+              renderKeyValueEditor(
+                headers,
+                updateHeaders,
+                { key: 'Header name', value: 'Header value' }
+              )
+            ) : (
+              <textarea
+                className="form-input form-textarea headers-raw-textarea"
+                value={JSON.stringify(headers, null, 2)}
+                onChange={(e) => {
+                  try {
+                    const parsed = JSON.parse(e.target.value);
+                    updateRequest({ headers: JSON.stringify(parsed) });
+                  } catch {
+                    // keep text until valid
+                    updateRequest({ headers: e.target.value });
+                  }
+                }}
+                aria-label="Raw headers JSON"
+              />
             )}
           </div>
         )}
@@ -275,14 +289,56 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
               <p className="panel-description">
                 Raw request body content (JSON, XML, plain text, etc.)
               </p>
+              <div className="mode-toggle">
+                <label className="mode-label">
+                  <input type="radio" name="bodyMode" value="raw" checked={bodyMode === 'raw'} onChange={() => setBodyMode('raw')} /> Raw
+                </label>
+                <label className="mode-label">
+                  <input type="radio" name="bodyMode" value="json" checked={bodyMode === 'json'} onChange={() => setBodyMode('json')} /> JSON
+                </label>
+                <label className="mode-label">
+                  <input type="radio" name="bodyMode" value="form" checked={bodyMode === 'form'} onChange={() => setBodyMode('form')} /> Form
+                </label>
+              </div>
             </div>
             
             <div className="body-editor">
-              {enableSyntaxHighlighting ? (
+              {bodyMode === 'form' ? (
+                <div>
+                  {/* Simple key/value form editor */}
+                  {(() => {
+                    const form = request.body ? (() => {
+                      try { return JSON.parse(request.body); } catch { return {}; }
+                    })() : {};
+                    const entries = Object.entries(form as Record<string, any>);
+                    return (
+                      <div>
+                        {entries.map(([k, v], i) => (
+                          <div key={i} className="form-row">
+                            <input className="form-input form-key-input" value={k} readOnly aria-label={`Field key ${i}`} />
+                            <input className="form-input form-value-input" value={String(v)} onChange={(e) => {
+                              const next = { ...(form as Record<string, any>) };
+                              next[k] = e.target.value;
+                              updateRequest({ body: JSON.stringify(next) });
+                            }} aria-label={`Field value ${i}`} />
+                          </div>
+                        ))}
+                        <div className="form-add-row">
+                          <button className="btn btn-secondary" onClick={() => {
+                            const next = { ...(form as Record<string, any>) };
+                            next[`field_${Date.now()}`] = '';
+                            updateRequest({ body: JSON.stringify(next) });
+                          }}>Add Field</button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              ) : enableSyntaxHighlighting ? (
                 <MonacoEditor
                   value={request.body || ''}
                   onChange={(value) => updateRequest({ body: value })}
-                  language="json"
+                  language={bodyMode === 'json' ? 'json' : 'text'}
                   height="300px"
                   theme={theme === 'dark' ? 'vs-dark' : 'light'}
                   placeholder="Enter request body..."
@@ -513,6 +569,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
                 <label className="form-label">Streaming Type</label>
                 <select
                   className="form-select"
+                  aria-label="gRPC streaming type"
                   value={(() => {
                     try {
                       const grpc = request.body ? JSON.parse(request.body) : {};
@@ -619,33 +676,22 @@ message SampleResponse {
             </div>
             
             <div className="auth-section">
-              <div className="form-group">
-                <label className="form-label">Authentication Type</label>
-                <select
-                  className="form-select"
-                  value={auth.type || 'none'}
-                  onChange={(e) => updateRequest({
-                    auth: JSON.stringify({ ...auth, type: e.target.value })
-                  })}
-                >
-                  <option value="none">No Authentication</option>
-                  <option value="bearer">****** Authentication</option>
-                  <option value="basic">Basic Auth</option>
-                  <option value="api-key">API Key</option>
-                  <option value="ws-security">WS-Security (SOAP)</option>
-                </select>
+              <div className="auth-radio-row" role="radiogroup" aria-label="Authentication Type">
+                <label className="mode-label"><input type="radio" name="authType" value="none" checked={auth.type === 'none'} onChange={() => updateRequest({ auth: JSON.stringify({ type: 'none' }) })} /> None</label>
+                <label className="mode-label"><input type="radio" name="authType" value="bearer" checked={auth.type === 'bearer'} onChange={() => updateRequest({ auth: JSON.stringify({ type: 'bearer', token: '' }) })} /> Bearer</label>
+                <label className="mode-label"><input type="radio" name="authType" value="basic" checked={auth.type === 'basic'} onChange={() => updateRequest({ auth: JSON.stringify({ type: 'basic', username: '', password: '' }) })} /> Basic</label>
+                <label className="mode-label"><input type="radio" name="authType" value="api-key" checked={auth.type === 'api-key'} onChange={() => updateRequest({ auth: JSON.stringify({ type: 'api-key', key: '', value: '' }) })} /> API Key</label>
+                <label className="mode-label"><input type="radio" name="authType" value="ws-security" checked={auth.type === 'ws-security'} onChange={() => updateRequest({ auth: JSON.stringify({ type: 'ws-security', wssUsername: '', wssPassword: '' }) })} /> WS-Security</label>
               </div>
 
               {auth.type === 'bearer' && (
                 <div className="form-group">
-                  <label className="form-label">****** Token</label>
+                  <label className="form-label">Bearer Token</label>
                   <input
                     type="password"
                     className="form-input"
                     value={auth.token || ''}
-                    onChange={(e) => updateRequest({
-                      auth: JSON.stringify({ ...auth, token: e.target.value })
-                    })}
+                    onChange={(e) => updateRequest({ auth: JSON.stringify({ ...auth, token: e.target.value }) })}
                     placeholder="Enter your bearer token"
                   />
                 </div>
@@ -659,9 +705,7 @@ message SampleResponse {
                       type="text"
                       className="form-input"
                       value={auth.username || ''}
-                      onChange={(e) => updateRequest({
-                        auth: JSON.stringify({ ...auth, username: e.target.value })
-                      })}
+                      onChange={(e) => updateRequest({ auth: JSON.stringify({ ...auth, username: e.target.value }) })}
                       placeholder="Username"
                     />
                   </div>
@@ -671,9 +715,7 @@ message SampleResponse {
                       type="password"
                       className="form-input"
                       value={auth.password || ''}
-                      onChange={(e) => updateRequest({
-                        auth: JSON.stringify({ ...auth, password: e.target.value })
-                      })}
+                      onChange={(e) => updateRequest({ auth: JSON.stringify({ ...auth, password: e.target.value }) })}
                       placeholder="Password"
                     />
                   </div>
@@ -688,9 +730,7 @@ message SampleResponse {
                       type="text"
                       className="form-input"
                       value={auth.key || ''}
-                      onChange={(e) => updateRequest({
-                        auth: JSON.stringify({ ...auth, key: e.target.value })
-                      })}
+                      onChange={(e) => updateRequest({ auth: JSON.stringify({ ...auth, key: e.target.value }) })}
                       placeholder="API key name (e.g., X-API-Key)"
                     />
                   </div>
@@ -700,9 +740,7 @@ message SampleResponse {
                       type="password"
                       className="form-input"
                       value={auth.value || ''}
-                      onChange={(e) => updateRequest({
-                        auth: JSON.stringify({ ...auth, value: e.target.value })
-                      })}
+                      onChange={(e) => updateRequest({ auth: JSON.stringify({ ...auth, value: e.target.value }) })}
                       placeholder="API key value"
                     />
                   </div>
@@ -717,9 +755,7 @@ message SampleResponse {
                       type="text"
                       className="form-input"
                       value={auth.wssUsername || ''}
-                      onChange={(e) => updateRequest({
-                        auth: JSON.stringify({ ...auth, wssUsername: e.target.value })
-                      })}
+                      onChange={(e) => updateRequest({ auth: JSON.stringify({ ...auth, wssUsername: e.target.value }) })}
                       placeholder="WS-Security username"
                     />
                   </div>
@@ -729,9 +765,7 @@ message SampleResponse {
                       type="password"
                       className="form-input"
                       value={auth.wssPassword || ''}
-                      onChange={(e) => updateRequest({
-                        auth: JSON.stringify({ ...auth, wssPassword: e.target.value })
-                      })}
+                      onChange={(e) => updateRequest({ auth: JSON.stringify({ ...auth, wssPassword: e.target.value }) })}
                       placeholder="WS-Security password"
                     />
                   </div>
@@ -739,10 +773,9 @@ message SampleResponse {
                     <label className="form-label">Password Type</label>
                     <select
                       className="form-select"
+                      aria-label="WS-Security password type"
                       value={auth.wssPasswordType || 'PasswordText'}
-                      onChange={(e) => updateRequest({
-                        auth: JSON.stringify({ ...auth, wssPasswordType: e.target.value })
-                      })}
+                      onChange={(e) => updateRequest({ auth: JSON.stringify({ ...auth, wssPasswordType: e.target.value }) })}
                     >
                       <option value="PasswordText">Password Text</option>
                       <option value="PasswordDigest">Password Digest</option>

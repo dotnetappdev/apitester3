@@ -5,6 +5,15 @@ import { isDev } from './utils';
 import { ElectronSoapClient } from './soapClient';
 import { ElectronGrpcClient } from './grpcClient';
 import { SqliteDatabaseManager } from './sqliteManager';
+import { configureSendGrid, sendEmail } from './email';
+// exceljs is optional; dynamically require to avoid install failures for users who don't need it
+let ExcelJS: any = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  ExcelJS = require('exceljs');
+} catch (err) {
+  ExcelJS = null;
+}
 
 class AppManager {
   private mainWindow: BrowserWindow | null = null;
@@ -674,6 +683,122 @@ class AppManager {
       } catch (error) {
         console.error('Failed to delete test suite:', error);
         throw error;
+      }
+    });
+
+    // Save test report to file
+    ipcMain.handle('save-test-report', async (event, { content, defaultName, as }) => {
+      try {
+        const defaultFile = defaultName || `api-test-report-${new Date().toISOString().split('T')[0]}.${as === 'html' ? 'html' : 'json'}`;
+        const result = await dialog.showSaveDialog(this.mainWindow!, {
+          title: 'Save Test Report',
+          defaultPath: defaultFile,
+          filters: [
+            { name: 'HTML', extensions: ['html', 'htm'] },
+            { name: 'JSON', extensions: ['json'] }
+          ]
+        });
+
+        if (result.canceled || !result.filePath) return { success: false, canceled: true };
+
+        await fs.writeFile(result.filePath, content, 'utf8');
+        return { success: true, filePath: result.filePath };
+      } catch (error) {
+        console.error('Failed to save test report:', error);
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
+      }
+    });
+
+    // Export report to Excel
+    ipcMain.handle('export-report-excel', async (event, { results, defaultName }) => {
+      try {
+        if (!ExcelJS) {
+          return { success: false, error: 'exceljs package not installed. Install exceljs to enable Excel export.' };
+        }
+
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Test Results');
+
+        sheet.columns = [
+          { header: 'Test Name', key: 'testName', width: 40 },
+          { header: 'Status', key: 'status', width: 12 },
+          { header: 'Execution Time (ms)', key: 'executionTime', width: 20 },
+          { header: 'Error Message', key: 'errorMessage', width: 60 },
+          { header: 'Run At', key: 'runAt', width: 24 }
+        ];
+
+        for (const r of results) {
+          sheet.addRow({ testName: r.testName, status: r.status, executionTime: r.executionTime, errorMessage: r.errorMessage || '', runAt: r.runAt });
+        }
+
+        const defaultFile = defaultName || `api-test-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+        const result = await dialog.showSaveDialog(this.mainWindow!, {
+          title: 'Export Report to Excel',
+          defaultPath: defaultFile,
+          filters: [{ name: 'Excel Workbook', extensions: ['xlsx'] }, { name: 'All Files', extensions: ['*'] }]
+        });
+
+        if (result.canceled || !result.filePath) return { success: false, canceled: true };
+
+        await workbook.xlsx.writeFile(result.filePath);
+        return { success: true, filePath: result.filePath };
+      } catch (error) {
+        console.error('Failed to export report to Excel:', error);
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
+      }
+    });
+
+    // Export report to PDF by loading the HTML in an offscreen BrowserWindow and printing to PDF
+    ipcMain.handle('export-report-pdf', async (event, { htmlContent, defaultName }) => {
+      try {
+        if (!this.mainWindow) return { success: false, error: 'Main window not available' };
+
+        const pdfWindow = new BrowserWindow({
+          show: false,
+          webPreferences: {
+            offscreen: true,
+            nodeIntegration: false,
+            contextIsolation: true
+          }
+        });
+
+        await pdfWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent));
+
+        const pdfBuffer = await pdfWindow.webContents.printToPDF({ printBackground: true });
+
+        const defaultFile = defaultName || `api-test-report-${new Date().toISOString().split('T')[0]}.pdf`;
+        const result = await dialog.showSaveDialog(this.mainWindow!, {
+          title: 'Export Report to PDF',
+          defaultPath: defaultFile,
+          filters: [{ name: 'PDF', extensions: ['pdf'] }, { name: 'All Files', extensions: ['*'] }]
+        });
+
+        if (result.canceled || !result.filePath) {
+          pdfWindow.close();
+          return { success: false, canceled: true };
+        }
+
+        await fs.writeFile(result.filePath, pdfBuffer);
+        pdfWindow.close();
+        return { success: true, filePath: result.filePath };
+      } catch (error) {
+        console.error('Failed to export report to PDF:', error);
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
+      }
+    });
+
+    // Email sending - SendGrid (used for notifications)
+    ipcMain.handle('send-email', async (event, { apiKey, from, to, subject, text, html }) => {
+      try {
+        if (apiKey) {
+          configureSendGrid(apiKey);
+        }
+
+        const result = await sendEmail({ from, to, subject, text, html });
+        return result;
+      } catch (error) {
+        console.error('Failed to send email:', error);
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
       }
     });
   }

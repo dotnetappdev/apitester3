@@ -58,6 +58,23 @@ npm run dev
 
 📋 **For comprehensive setup instructions including Node.js requirements, development environment configuration, and SQLite database setup, see [SETUP.md](SETUP.md)**
 
+## Email Notifications (SendGrid)
+
+API Tester 3 can send test run notifications via SendGrid. To enable email notifications:
+
+1. In the app open Settings → Advanced → Email Notifications and enable the feature.
+2. Enter your SendGrid API key and default From/To addresses.
+3. Toggle whether to notify on test pass/fail.
+
+For automated or CI setups, you can store the SendGrid key in an environment file and pass it to the Electron main process. Create a `.env` file in the project root with:
+
+```env
+SENDGRID_API_KEY=SG.xxxxx
+```
+
+The Electron main process can read this env variable and use it when renderer passes email requests. In development you can also paste the API key into the Settings dialog. In production consider using a secure secret store and not storing plaintext API keys.
+
+
 ### Available Scripts
 
 - `npm run dev` - Start development server with hot reload

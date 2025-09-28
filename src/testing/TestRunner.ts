@@ -19,6 +19,7 @@ export interface TestCase {
   expectedResponse?: any; // Expected JSON response
   assertions: TestAssertion[];
   timeout: number; // in milliseconds
+  tags?: string[];
 }
 
 export interface TestExecutionResult {
@@ -312,13 +313,35 @@ export class TestRunner {
   async executeTestSuite(
     testSuite: TestSuite,
     response: ApiResponse,
-    request: any
+    request: any,
+    options?: { retryCount?: number; parallel?: boolean }
   ): Promise<TestExecutionResult[]> {
     const results: TestExecutionResult[] = [];
+    const retryCount = options?.retryCount ?? 0;
+    const parallel = !!options?.parallel;
 
-    for (const testCase of testSuite.testCases) {
-      const result = await this.executeTestCase(testCase, response, request);
-      results.push(result);
+    const runOne = async (testCase: TestCase) => {
+      let attempt = 0;
+      let lastResult: TestExecutionResult | null = null;
+
+      while (attempt <= retryCount) {
+        lastResult = await this.executeTestCase(testCase, response, request);
+        if (lastResult.status === 'pass') break;
+        attempt++;
+      }
+
+      return lastResult as TestExecutionResult;
+    };
+
+    if (parallel) {
+      const promises = testSuite.testCases.map(tc => runOne(tc));
+      const settled = await Promise.all(promises);
+      results.push(...settled);
+    } else {
+      for (const testCase of testSuite.testCases) {
+        const res = await runOne(testCase);
+        results.push(res);
+      }
     }
 
     return results;

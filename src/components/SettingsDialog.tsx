@@ -345,6 +345,73 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                 </div>
 
                 <div className="setting-item">
+                  <h3>Reporting</h3>
+                  <label className="setting-label">Default Report Format</label>
+                  <select
+                    value={settings.reportFormat}
+                    onChange={(e) => handleSettingChange('reportFormat', e.target.value as any)}
+                    className="setting-select"
+                    aria-label="Default report format"
+                  >
+                    <option value="html">HTML</option>
+                    <option value="json">JSON</option>
+                  </select>
+
+                  <div className="setting-item">
+                    <label className="setting-label">Report Per Collection</label>
+                    <input
+                      type="checkbox"
+                      checked={!!settings.reportPerCollection}
+                      onChange={(e) => handleSettingChange('reportPerCollection', e.target.checked)}
+                      className="setting-checkbox"
+                      aria-label="Report per collection"
+                      title="Report per collection"
+                    />
+                  </div>
+
+                  <div className="setting-item">
+                    <label className="setting-label">Team Email</label>
+                    <input
+                      type="text"
+                      value={settings.teamEmail || ''}
+                      onChange={(e) => handleSettingChange('teamEmail', e.target.value)}
+                      className="setting-input"
+                      placeholder="team@yourdomain.com"
+                      aria-label="Team email for reports"
+                      title="Team email for reports"
+                    />
+                  </div>
+                </div>
+
+                <div className="setting-item">
+                  <h3>Test Execution</h3>
+                  <label className="setting-label">Parallel Execution</label>
+                  <input
+                    type="checkbox"
+                    checked={!!settings.parallelExecution}
+                    onChange={(e) => handleSettingChange('parallelExecution', e.target.checked)}
+                    className="setting-checkbox"
+                    aria-label="Enable parallel execution"
+                    title="Enable parallel execution"
+                  />
+
+                  <div className="setting-item">
+                    <label className="setting-label">Retry Count</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={10}
+                      value={settings.retryCount || 0}
+                      onChange={(e) => handleSettingChange('retryCount', parseInt(e.target.value || '0'))}
+                      className="setting-input number"
+                      aria-label="Retry count for failed tests"
+                      title="Retry count for failed tests"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <div className="setting-item">
                   <label className="setting-label">Reset Settings</label>
                   <button onClick={handleReset} className="reset-button">
                     Reset to Defaults
@@ -352,6 +419,82 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                   <span className="setting-description">
                     Reset all settings to their default values
                   </span>
+                </div>
+                
+                <div className="setting-item">
+                  <h3>Email Notifications</h3>
+                  <label className="setting-label">Enable Email Notifications</label>
+                  <input
+                    type="checkbox"
+                    checked={!!settings.emailNotifications?.enabled}
+                    onChange={(e) => handleSettingChange('emailNotifications', { ...settings.emailNotifications, enabled: e.target.checked })}
+                    className="setting-checkbox"
+                  />
+                  <span className="setting-description">Send emails on test run events (fail/pass)</span>
+
+                  {settings.emailNotifications?.enabled && (
+                    <div className="email-settings-section">
+                      <div className="setting-item">
+                        <label className="setting-label">SendGrid API Key</label>
+                        <input
+                          type="password"
+                          value={settings.emailNotifications?.sendGridApiKey || ''}
+                          onChange={(e) => handleSettingChange('emailNotifications', { ...settings.emailNotifications, sendGridApiKey: e.target.value })}
+                          className="setting-input"
+                          placeholder="SG.xxxxx"
+                          aria-label="SendGrid API Key"
+                        />
+                      </div>
+
+                      <div className="setting-item">
+                        <label className="setting-label">Default From</label>
+                        <input
+                          type="text"
+                          value={settings.emailNotifications?.defaultFrom || ''}
+                          onChange={(e) => handleSettingChange('emailNotifications', { ...settings.emailNotifications, defaultFrom: e.target.value })}
+                          className="setting-input"
+                          placeholder="no-reply@yourdomain.com"
+                          aria-label="Default from email address"
+                        />
+                      </div>
+
+                      <div className="setting-item">
+                        <label className="setting-label">Default To</label>
+                        <input
+                          type="text"
+                          value={settings.emailNotifications?.defaultTo || ''}
+                          onChange={(e) => handleSettingChange('emailNotifications', { ...settings.emailNotifications, defaultTo: e.target.value })}
+                          className="setting-input"
+                          placeholder="team@yourdomain.com"
+                          aria-label="Default to email address"
+                        />
+                      </div>
+
+                      <div className="setting-item">
+                        <label className="setting-label">Notify On Test Fail</label>
+                        <input
+                          type="checkbox"
+                          checked={!!settings.emailNotifications?.notifyOnTestFail}
+                          onChange={(e) => handleSettingChange('emailNotifications', { ...settings.emailNotifications, notifyOnTestFail: e.target.checked })}
+                          className="setting-checkbox"
+                          aria-label="Notify on test fail"
+                          title="Notify on test fail"
+                        />
+                      </div>
+
+                      <div className="setting-item">
+                        <label className="setting-label">Notify On Test Pass</label>
+                        <input
+                          type="checkbox"
+                          checked={!!settings.emailNotifications?.notifyOnTestPass}
+                          onChange={(e) => handleSettingChange('emailNotifications', { ...settings.emailNotifications, notifyOnTestPass: e.target.checked })}
+                          className="setting-checkbox"
+                          aria-label="Notify on test pass"
+                          title="Notify on test pass"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
