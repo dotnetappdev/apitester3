@@ -10,6 +10,7 @@
     "build": "npm run build-react && npm run build-electron",
     "build-react": "vite build",
     "build-electron": "tsc -p electron/tsconfig.json",
+    "postinstall": "electron-builder install-app-deps",
     "generate-icons": "node build/generate-icons.js",
     "package": "npm run build && electron-builder",
     "package:win": "npm run build && electron-builder --win",
@@ -18,7 +19,7 @@
     "package:all": "npm run build && electron-builder --win --mac --linux",
     "installer:prepare": "npm run generate-icons",
     "installer:win": "npm run package:win",
-    "installer:mac": "npm run package:mac", 
+    "installer:mac": "npm run package:mac",
     "installer:linux": "npm run package:linux",
     "installer:all": "npm run package:all",
     "test": "jest",
@@ -36,7 +37,11 @@
     "typescript",
     "react"
   ],
-  "author": "dotnetappdev",
+  "author": {
+    "name": "dotnetappdev",
+    "email": "dotnetappdev@users.noreply.github.com",
+    "url": "https://github.com/dotnetappdev"
+  },
   "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.55.1",
@@ -50,6 +55,7 @@
     "concurrently": "^8.0.0",
     "electron": "^25.0.0",
     "electron-builder": "^24.0.0",
+    "electron-rebuild": "^3.2.9",
     "eslint": "^8.0.0",
     "eslint-plugin-react": "^7.32.0",
     "eslint-plugin-react-hooks": "^4.6.0",
@@ -97,30 +103,41 @@
       "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
       "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
       "!**/{appveyor.yml,.travis.yml,circle.yml}",
-      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}",
+      "!**/node_modules/playwright*/**/*",
+      "!**/node_modules/@playwright*/**/*"
     ],
     "extraResources": [
       {
         "from": "assets/",
         "to": "assets/",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "nodeGypRebuild": false,
     "buildDependenciesFromSource": false,
+    "npmRebuild": false,
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64", "ia32"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64", "ia32"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["x64", "ia32"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "assets/icon.png",
@@ -142,11 +159,17 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "assets/icon.png",
@@ -173,19 +196,27 @@
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "deb",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "rpm",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "tar.gz",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "assets/icon.png",
@@ -194,11 +225,22 @@
       "description": "A comprehensive API testing application built with Electron, featuring request management, response analysis, and test automation capabilities."
     },
     "deb": {
-      "depends": ["gconf2", "gconf-service", "libnotify4", "libappindicator1", "libxtst6", "libnss3"],
+      "depends": [
+        "gconf2",
+        "gconf-service",
+        "libnotify4",
+        "libappindicator1",
+        "libxtst6",
+        "libnss3"
+      ],
       "priority": "optional"
     },
     "rpm": {
-      "depends": ["libXScrnSaver", "libnotify", "nss"]
+      "depends": [
+        "libXScrnSaver",
+        "libnotify",
+        "nss"
+      ]
     }
   }
 }
