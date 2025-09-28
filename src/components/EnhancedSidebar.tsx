@@ -34,6 +34,7 @@ interface EnhancedSidebarProps {
   onDeleteUITestSuite?: (testSuite: UITestSuite) => void;
   onUserProfile: () => void;
   onSettings: () => void;
+  onTeamManager?: () => void;
   onToggleOutput?: () => void;
   enableTestExplorer: boolean;
 }
@@ -66,6 +67,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
   onDeleteUITestSuite,
   onUserProfile,
   onSettings,
+  onTeamManager,
   onToggleOutput,
   enableTestExplorer
 }) => {
@@ -194,6 +196,9 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
         
         <div className="header-actions">
           <button className="header-action-button" onClick={onSettings} title="Settings">⚙️</button>
+          {onTeamManager && (
+            <button className="header-action-button" onClick={onTeamManager} title="Team Management">👥</button>
+          )}
           <button className="header-action-button" onClick={onNewCollection} title="New Collection">📁+</button>
           <ModernButton onClick={onNewRequest} variant="primary" size="small" icon={<AddIcon />}>New</ModernButton>
           <button className="header-action-button" onClick={() => onToggleOutput?.()} title="Toggle Output">🖥️</button>

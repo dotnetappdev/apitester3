@@ -107,6 +107,29 @@ export const TestScriptEditor: React.FC<TestScriptEditorProps> = ({
     }
   };
 
+  const insertAssertion = (type: 'status' | 'responseTime' | 'jsonPath' | 'contains') => {
+    if (!selectedTest) return;
+
+    let template = '';
+    switch (type) {
+      case 'status':
+        template = '\n// Assert HTTP status code\nassert.assertStatusCode(200, response.status, \'Should return success status\');';
+        break;
+      case 'responseTime':
+        template = '\n// Assert response time\nassert.assertResponseTime(1000, response.responseTime, \'Should respond within 1 second\');';
+        break;
+      case 'jsonPath':
+        template = '\n// Assert JSON path value\nassert.assertJsonPath(response.data, \'status\', \'success\', \'Status should be success\');';
+        break;
+      case 'contains':
+        template = '\n// Assert response contains data\nassert.assertContains(response.data, { key: \'value\' }, \'Response should contain expected data\');';
+        break;
+    }
+
+    const updatedScript = selectedTest.script + template;
+    updateTestCase(selectedTestIndex, { script: updatedScript });
+  };
+
   const selectedTest = testSuite.testCases[selectedTestIndex];
   const selectedTestResult = selectedTest ? currentResults.find(r => r.testCaseId === selectedTest.id) : null;
 
@@ -210,6 +233,37 @@ export const TestScriptEditor: React.FC<TestScriptEditorProps> = ({
                   <h4>Test Script</h4>
                   <div className="test-script-help">
                     Available: <code>response</code>, <code>request</code>, <code>assert</code>, <code>console</code>
+                  </div>
+                  <div className="assertion-templates">
+                    <label>Quick Assertions:</label>
+                    <button 
+                      className="btn btn-small template-btn"
+                      onClick={() => insertAssertion('status')}
+                      title="Add status code assertion"
+                    >
+                      Status Code
+                    </button>
+                    <button 
+                      className="btn btn-small template-btn"
+                      onClick={() => insertAssertion('responseTime')}
+                      title="Add response time assertion"
+                    >
+                      Response Time
+                    </button>
+                    <button 
+                      className="btn btn-small template-btn"
+                      onClick={() => insertAssertion('jsonPath')}
+                      title="Add JSON path assertion"
+                    >
+                      JSON Path
+                    </button>
+                    <button 
+                      className="btn btn-small template-btn"
+                      onClick={() => insertAssertion('contains')}
+                      title="Add contains assertion"
+                    >
+                      Contains
+                    </button>
                   </div>
                 </div>
                 <MonacoEditor
@@ -464,6 +518,8 @@ export const TestScriptEditor: React.FC<TestScriptEditorProps> = ({
           padding: 12px 16px;
           border-bottom: 1px solid var(--border-color);
           background: var(--bg-secondary);
+          flex-wrap: wrap;
+          gap: 8px;
         }
 
         .test-script-header h4 {
@@ -475,6 +531,34 @@ export const TestScriptEditor: React.FC<TestScriptEditorProps> = ({
         .test-script-help {
           font-size: 11px;
           color: var(--text-muted);
+        }
+
+        .assertion-templates {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .assertion-templates label {
+          font-size: 11px;
+          color: var(--text-muted);
+          margin-right: 4px;
+        }
+
+        .template-btn {
+          padding: 4px 8px;
+          font-size: 10px;
+          border-radius: 3px;
+          background: var(--accent-color);
+          color: white;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.15s;
+        }
+
+        .template-btn:hover {
+          background: var(--accent-hover);
         }
 
         .test-script-help code {
