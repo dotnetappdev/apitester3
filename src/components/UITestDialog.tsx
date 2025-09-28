@@ -152,6 +152,59 @@ assert.assertElementVisible('.mobile-menu-toggle', 'Mobile menu toggle should be
 await page.click('.mobile-menu-toggle');
 assert.assertElementVisible('.mobile-menu', 'Mobile menu should appear when toggle is clicked');`;
         break;
+      case 'auth':
+        templateScript = `// Authentication & Session Testing Template
+await page.goto('https://example.com/login');
+
+// Perform login
+await page.fill('input[name="username"]', 'testuser');
+await page.fill('input[name="password"]', 'testpass');
+await page.click('button[type="submit"]');
+
+// Wait for login to complete
+await page.waitForURL('**/dashboard');
+
+// Extract and validate JWT token
+const token = await utils.extractJWT(page, 'authToken');
+if (token) {
+  console.log('JWT Token found:', token);
+  
+  // Decode JWT claims
+  const claims = utils.decodeJWT(token);
+  console.log('JWT Claims:', claims);
+  
+  // Assert JWT is valid (not expired)
+  assert.assertJWTValid(token, 'JWT token should be valid');
+  
+  // Assert specific claims
+  assert.assertJWTClaim(token, 'sub', 'testuser', 'Subject should match username');
+  assert.assertJWTClaim(token, 'iss', 'your-app.com', 'Issuer should be your app');
+  
+  // Check if user has required permissions
+  assert.assertJWTClaim(token, 'role', 'user', 'User should have correct role');
+}
+
+// Validate session cookies
+assert.assertCookieExists('sessionId', 'Session cookie should exist after login');
+assert.assertCookieSecure('sessionId', 'Session cookie should be secure');
+assert.assertCookieHttpOnly('sessionId', 'Session cookie should be httpOnly');
+
+// Check authentication state
+assert.assertElementExists('.user-profile', 'User profile should be visible when authenticated');
+assert.assertElementText('.welcome-message', 'Welcome testuser', 'Welcome message should show username');
+
+// Test logout
+await page.click('.logout-button');
+await page.waitForURL('**/login');
+
+// Verify session cleanup
+const cookiesAfterLogout = await utils.getCookies(page);
+const sessionCookie = cookiesAfterLogout.find(c => c.name === 'sessionId');
+console.log('Session cookie after logout:', sessionCookie);
+
+// Verify redirect to login page
+assert.assertUrlContains('/login', 'Should redirect to login after logout');`;
+        break;
     }
     
     updateActiveTest({ script: templateScript });
@@ -347,6 +400,7 @@ assert.assertElementVisible('.mobile-menu', 'Mobile menu should appear when togg
                     <button type="button" onClick={() => loadTemplate('form')}>Form Testing</button>
                     <button type="button" onClick={() => loadTemplate('navigation')}>Navigation</button>
                     <button type="button" onClick={() => loadTemplate('responsive')}>Responsive</button>
+                    <button type="button" onClick={() => loadTemplate('auth')}>Authentication</button>
                   </div>
                 </div>
               </>

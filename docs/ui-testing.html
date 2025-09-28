@@ -119,6 +119,7 @@
                 <li><a href="#getting-started">Getting Started</a></li>
                 <li><a href="#creating-tests">Creating UI Test Suites</a></li>
                 <li><a href="#test-script-api">Test Script API</a></li>
+                <li><a href="#jwt-cookie-testing">JWT Claims & Cookie Testing</a></li>
                 <li><a href="#browser-support">Browser Support</a></li>
                 <li><a href="#best-practices">Best Practices</a></li>
                 <li><a href="#examples">Complete Examples</a></li>
@@ -148,7 +149,7 @@
                 </div>
                 <div class="feature-card">
                     <h3>🔍 Rich Assertions</h3>
-                    <p>Built-in assertion framework for element existence, visibility, text content, and page navigation.</p>
+                    <p>Built-in assertion framework for element existence, visibility, text content, page navigation, JWT claims, and cookie validation.</p>
                 </div>
                 <div class="feature-card">
                     <h3>🏷️ Test Organization</h3>
@@ -222,6 +223,10 @@
 assert.<span class="function">assertElementExists</span>(<span class="string">'h1'</span>, <span class="string">'Page should have a heading'</span>);
 assert.<span class="function">assertElementText</span>(<span class="string">'h1'</span>, <span class="string">'Welcome'</span>, <span class="string">'Heading should say Welcome'</span>);
 
+<span class="comment">// JWT and Cookie utilities - authentication testing</span>
+<span class="keyword">const</span> token = <span class="keyword">await</span> utils.<span class="function">extractJWT</span>(page, <span class="string">'authToken'</span>);
+<span class="keyword">const</span> claims = utils.<span class="function">decodeJWT</span>(token);
+
 <span class="comment">// Console logging for debugging</span>
 console.<span class="function">log</span>(<span class="string">'Test step completed'</span>);
                 </pre>
@@ -240,6 +245,107 @@ assert.<span class="function">assertElementText</span>(<span class="string">'sel
 assert.<span class="function">assertPageTitle</span>(<span class="string">'expected title'</span>, <span class="string">'message'</span>);
 assert.<span class="function">assertUrlContains</span>(<span class="string">'/expected-path'</span>, <span class="string">'message'</span>);
                 </pre>
+            </div>
+        </div>
+
+        <div id="jwt-cookie-testing" class="section">
+            <h2>🔐 JWT Claims & Cookie Testing</h2>
+            
+            <h3>Authentication Testing</h3>
+            <p>API Tester 3 provides powerful utilities for testing authentication flows, JWT claims, and cookie management.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>🎫 JWT Token Validation</h3>
+                    <p>Decode JWT tokens, validate claims, and check expiration status automatically.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🍪 Cookie Management</h3>
+                    <p>Test cookie properties, values, security flags, and session management.</p>
+                </div>
+            </div>
+
+            <h3>JWT Claims Testing</h3>
+            <div class="code-block">
+                <pre>
+<span class="comment">// Extract JWT token from localStorage or cookies</span>
+<span class="keyword">const</span> token = <span class="keyword">await</span> utils.<span class="function">extractJWT</span>(page, <span class="string">'authToken'</span>);
+
+<span class="keyword">if</span> (token) {
+  <span class="comment">// Decode JWT claims</span>
+  <span class="keyword">const</span> claims = utils.<span class="function">decodeJWT</span>(token);
+  console.<span class="function">log</span>(<span class="string">'JWT Claims:'</span>, claims);
+  
+  <span class="comment">// Assert JWT is valid (not expired)</span>
+  assert.<span class="function">assertJWTValid</span>(token, <span class="string">'JWT token should be valid'</span>);
+  
+  <span class="comment">// Assert specific claims</span>
+  assert.<span class="function">assertJWTClaim</span>(token, <span class="string">'sub'</span>, <span class="string">'user123'</span>, <span class="string">'Subject should be user123'</span>);
+  assert.<span class="function">assertJWTClaim</span>(token, <span class="string">'role'</span>, <span class="string">'admin'</span>, <span class="string">'User should have admin role'</span>);
+  assert.<span class="function">assertJWTClaim</span>(token, <span class="string">'iss'</span>, <span class="string">'your-app.com'</span>, <span class="string">'Issuer should be your app'</span>);
+}
+                </pre>
+            </div>
+
+            <h3>Cookie Testing</h3>
+            <div class="code-block">
+                <pre>
+<span class="comment">// Test cookie existence and properties</span>
+assert.<span class="function">assertCookieExists</span>(<span class="string">'sessionId'</span>, <span class="string">'Session cookie should exist'</span>);
+assert.<span class="function">assertCookieSecure</span>(<span class="string">'sessionId'</span>, <span class="string">'Session cookie should be secure'</span>);
+assert.<span class="function">assertCookieHttpOnly</span>(<span class="string">'sessionId'</span>, <span class="string">'Session cookie should be httpOnly'</span>);
+
+<span class="comment">// Test specific cookie values</span>
+assert.<span class="function">assertCookieValue</span>(<span class="string">'theme'</span>, <span class="string">'dark'</span>, <span class="string">'Theme should be set to dark'</span>);
+
+<span class="comment">// Get all cookies for inspection</span>
+<span class="keyword">const</span> cookies = <span class="keyword">await</span> utils.<span class="function">getCookies</span>(page);
+console.<span class="function">log</span>(<span class="string">'All cookies:'</span>, cookies);
+
+<span class="comment">// Get specific cookie details</span>
+<span class="keyword">const</span> sessionCookie = <span class="keyword">await</span> utils.<span class="function">getCookie</span>(page, <span class="string">'sessionId'</span>);
+<span class="keyword">if</span> (sessionCookie) {
+  console.<span class="function">log</span>(<span class="string">'Session cookie details:'</span>, sessionCookie);
+}
+                </pre>
+            </div>
+
+            <h3>Complete Authentication Test</h3>
+            <div class="code-block">
+                <pre>
+<span class="comment">// Navigate to login page</span>
+<span class="keyword">await</span> page.<span class="function">goto</span>(<span class="string">'https://your-app.com/login'</span>);
+
+<span class="comment">// Perform login</span>
+<span class="keyword">await</span> page.<span class="function">fill</span>(<span class="string">'input[name="username"]'</span>, <span class="string">'testuser'</span>);
+<span class="keyword">await</span> page.<span class="function">fill</span>(<span class="string">'input[name="password"]'</span>, <span class="string">'testpass'</span>);
+<span class="keyword">await</span> page.<span class="function">click</span>(<span class="string">'button[type="submit"]'</span>);
+
+<span class="comment">// Wait for login to complete</span>
+<span class="keyword">await</span> page.<span class="function">waitForURL</span>(<span class="string">'**/dashboard'</span>);
+
+<span class="comment">// Extract and validate JWT</span>
+<span class="keyword">const</span> token = <span class="keyword">await</span> utils.<span class="function">extractJWT</span>(page, <span class="string">'authToken'</span>);
+<span class="keyword">if</span> (token) {
+  assert.<span class="function">assertJWTValid</span>(token, <span class="string">'JWT should be valid after login'</span>);
+  assert.<span class="function">assertJWTClaim</span>(token, <span class="string">'sub'</span>, <span class="string">'testuser'</span>, <span class="string">'Subject should match username'</span>);
+}
+
+<span class="comment">// Validate session cookies</span>
+assert.<span class="function">assertCookieExists</span>(<span class="string">'sessionId'</span>, <span class="string">'Session cookie should exist after login'</span>);
+assert.<span class="function">assertCookieSecure</span>(<span class="string">'sessionId'</span>, <span class="string">'Session cookie should be secure'</span>);
+
+<span class="comment">// Test logout</span>
+<span class="keyword">await</span> page.<span class="function">click</span>(<span class="string">'.logout-button'</span>);
+<span class="keyword">await</span> page.<span class="function">waitForURL</span>(<span class="string">'**/login'</span>);
+
+<span class="comment">// Verify session cleanup</span>
+assert.<span class="function">assertUrlContains</span>(<span class="string">'/login'</span>, <span class="string">'Should redirect to login after logout'</span>);
+                </pre>
+            </div>
+
+            <div class="success">
+                <strong>Pro Tip:</strong> Use the "Authentication" template in the UI Test Dialog to quickly generate authentication test scripts with JWT claims and cookie validation.
             </div>
         </div>
 

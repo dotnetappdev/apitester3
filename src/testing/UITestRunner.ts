@@ -2,6 +2,29 @@
 import { Browser, BrowserContext, Page, chromium, firefox, webkit } from 'playwright';
 import { TestExecutionResult, TestAssertion } from './TestRunner';
 
+// JWT Claims and Cookies utilities
+export interface JWTClaims {
+  [key: string]: any;
+  iss?: string; // Issuer
+  sub?: string; // Subject
+  aud?: string | string[]; // Audience
+  exp?: number; // Expiration time
+  nbf?: number; // Not before
+  iat?: number; // Issued at
+  jti?: string; // JWT ID
+}
+
+export interface ParsedCookie {
+  name: string;
+  value: string;
+  domain?: string;
+  path?: string;
+  expires?: Date;
+  httpOnly?: boolean;
+  secure?: boolean;
+  sameSite?: 'Strict' | 'Lax' | 'None';
+}
+
 export interface UITestCase {
   id: string;
   name: string;
@@ -99,12 +122,175 @@ export class UITestAssertions {
     });
   }
 
+  // Assert JWT claims
+  assertJWTClaim(token: string, claimName: string, expectedValue: any, message?: string): void {
+    this.assertions.push({
+      type: 'equals',
+      expected: expectedValue,
+      path: `jwt:${token}:${claimName}`,
+      message: message || `JWT claim '${claimName}' should be '${expectedValue}'`,
+      passed: false
+    });
+  }
+
+  // Assert JWT token is valid (not expired)
+  assertJWTValid(token: string, message?: string): void {
+    this.assertions.push({
+      type: 'contains',
+      expected: true,
+      path: `jwt:${token}:valid`,
+      message: message || `JWT token should be valid and not expired`,
+      passed: false
+    });
+  }
+
+  // Assert cookie exists
+  assertCookieExists(cookieName: string, message?: string): void {
+    this.assertions.push({
+      type: 'contains',
+      expected: true,
+      path: `cookie:${cookieName}:exists`,
+      message: message || `Cookie '${cookieName}' should exist`,
+      passed: false
+    });
+  }
+
+  // Assert cookie value
+  assertCookieValue(cookieName: string, expectedValue: string, message?: string): void {
+    this.assertions.push({
+      type: 'equals',
+      expected: expectedValue,
+      path: `cookie:${cookieName}:value`,
+      message: message || `Cookie '${cookieName}' should have value '${expectedValue}'`,
+      passed: false
+    });
+  }
+
+  // Assert cookie is secure
+  assertCookieSecure(cookieName: string, message?: string): void {
+    this.assertions.push({
+      type: 'equals',
+      expected: true,
+      path: `cookie:${cookieName}:secure`,
+      message: message || `Cookie '${cookieName}' should be secure`,
+      passed: false
+    });
+  }
+
+  // Assert cookie is httpOnly
+  assertCookieHttpOnly(cookieName: string, message?: string): void {
+    this.assertions.push({
+      type: 'equals',
+      expected: true,
+      path: `cookie:${cookieName}:httpOnly`,
+      message: message || `Cookie '${cookieName}' should be httpOnly`,
+      passed: false
+    });
+  }
+
   getAssertions(): TestAssertion[] {
     return [...this.assertions];
   }
 
   reset(): void {
     this.assertions = [];
+  }
+}
+
+// JWT and Cookie utility functions
+export class UITestUtils {
+  // Decode JWT token
+  static decodeJWT(token: string): JWTClaims | null {
+    try {
+      // Remove Bearer prefix if present
+      const cleanToken = token.replace(/^Bearer\s+/i, '');
+      
+      // JWT has 3 parts separated by dots
+      const parts = cleanToken.split('.');
+      if (parts.length !== 3) {
+        return null;
+      }
+      
+      // Decode the payload (second part)
+      const payload = parts[1];
+      // Add padding if needed
+      const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+      
+      // Decode base64url
+      const decodedPayload = atob(paddedPayload.replace(/-/g, '+').replace(/_/g, '/'));
+      
+      return JSON.parse(decodedPayload);
+    } catch (error) {
+      console.error('Failed to decode JWT:', error);
+      return null;
+    }
+  }
+
+  // Check if JWT is valid (not expired)
+  static isJWTValid(token: string): boolean {
+    const claims = UITestUtils.decodeJWT(token);
+    if (!claims || !claims.exp) {
+      return false;
+    }
+    
+    const now = Math.floor(Date.now() / 1000);
+    return claims.exp > now;
+  }
+
+  // Parse cookies from page context
+  static async getCookies(page: Page): Promise<ParsedCookie[]> {
+    const cookies = await page.context().cookies();
+    return cookies.map(cookie => ({
+      name: cookie.name,
+      value: cookie.value,
+      domain: cookie.domain,
+      path: cookie.path,
+      expires: cookie.expires ? new Date(cookie.expires * 1000) : undefined,
+      httpOnly: cookie.httpOnly,
+      secure: cookie.secure,
+      sameSite: cookie.sameSite as 'Strict' | 'Lax' | 'None' | undefined
+    }));
+  }
+
+  // Get specific cookie by name
+  static async getCookie(page: Page, name: string): Promise<ParsedCookie | null> {
+    const cookies = await UITestUtils.getCookies(page);
+    return cookies.find(cookie => cookie.name === name) || null;
+  }
+
+  // Extract JWT from localStorage, sessionStorage, or cookies
+  static async extractJWT(page: Page, storageKey?: string): Promise<string | null> {
+    try {
+      // Try specified localStorage key first
+      if (storageKey) {
+        const localStorageToken = await page.evaluate((key) => {
+          return localStorage.getItem(key);
+        }, storageKey);
+        if (localStorageToken) return localStorageToken;
+      }
+      
+      // Try common localStorage keys
+      const commonKeys = ['token', 'authToken', 'accessToken', 'jwt', 'auth_token', 'access_token'];
+      for (const key of commonKeys) {
+        const token = await page.evaluate((k) => {
+          return localStorage.getItem(k) || sessionStorage.getItem(k);
+        }, key);
+        if (token) return token;
+      }
+      
+      // Try Authorization header from cookies
+      const cookies = await UITestUtils.getCookies(page);
+      const authCookie = cookies.find(c => 
+        c.name.toLowerCase().includes('auth') || 
+        c.name.toLowerCase().includes('token') ||
+        c.name.toLowerCase().includes('jwt')
+      );
+      
+      return authCookie?.value || null;
+    } catch (error) {
+      console.error('Failed to extract JWT:', error);
+      return null;
+    }
   }
 }
 
@@ -155,6 +341,7 @@ export class UITestRunner {
         browser,
         context,
         assert: uiAssert,
+        utils: UITestUtils, // Add utility functions
         console: {
           log: (...args: any[]) => console.log('[UI Test]', ...args),
           error: (...args: any[]) => console.error('[UI Test]', ...args),
@@ -305,8 +492,8 @@ export class UITestRunner {
   // Execute test script in a sandboxed environment
   private async executeScript(script: string, context: any): Promise<void> {
     // Create a function from the script and execute it
-    const testFunction = new Function('page', 'browser', 'context', 'assert', 'console', script);
-    await testFunction(context.page, context.browser, context.context, context.assert, context.console);
+    const testFunction = new Function('page', 'browser', 'context', 'assert', 'utils', 'console', script);
+    await testFunction(context.page, context.browser, context.context, context.assert, context.utils, context.console);
   }
 
   // Validate assertions by checking actual values
@@ -319,6 +506,10 @@ export class UITestRunner {
           await this.validateUrlAssertion(assertion, page);
         } else if (assertion.path === 'title') {
           await this.validateTitleAssertion(assertion, page);
+        } else if (assertion.path?.startsWith('jwt:')) {
+          await this.validateJWTAssertion(assertion, page);
+        } else if (assertion.path?.startsWith('cookie:')) {
+          await this.validateCookieAssertion(assertion, page);
         }
       } catch (error) {
         assertion.passed = false;
@@ -362,10 +553,67 @@ export class UITestRunner {
     assertion.passed = assertion.actual === assertion.expected;
   }
 
+  private async validateJWTAssertion(assertion: TestAssertion, page: Page): Promise<void> {
+    const pathParts = assertion.path!.split(':');
+    const token = pathParts[1];
+    const property = pathParts[2];
+
+    switch (property) {
+      case 'valid':
+        assertion.actual = UITestUtils.isJWTValid(token);
+        assertion.passed = assertion.actual === assertion.expected;
+        break;
+      default:
+        // JWT claim assertion
+        const claims = UITestUtils.decodeJWT(token);
+        if (claims) {
+          assertion.actual = claims[property];
+          assertion.passed = assertion.actual === assertion.expected;
+        } else {
+          assertion.actual = null;
+          assertion.passed = false;
+          assertion.message = 'Failed to decode JWT token';
+        }
+        break;
+    }
+  }
+
+  private async validateCookieAssertion(assertion: TestAssertion, page: Page): Promise<void> {
+    const pathParts = assertion.path!.split(':');
+    const cookieName = pathParts[1];
+    const property = pathParts[2];
+
+    const cookie = await UITestUtils.getCookie(page, cookieName);
+
+    switch (property) {
+      case 'exists':
+        assertion.actual = cookie !== null;
+        assertion.passed = assertion.actual === assertion.expected;
+        break;
+      case 'value':
+        assertion.actual = cookie?.value || null;
+        assertion.passed = assertion.actual === assertion.expected;
+        break;
+      case 'secure':
+        assertion.actual = cookie?.secure || false;
+        assertion.passed = assertion.actual === assertion.expected;
+        break;
+      case 'httpOnly':
+        assertion.actual = cookie?.httpOnly || false;
+        assertion.passed = assertion.actual === assertion.expected;
+        break;
+      default:
+        assertion.actual = null;
+        assertion.passed = false;
+        assertion.message = `Unknown cookie property: ${property}`;
+        break;
+    }
+  }
+
   // Generate sample UI test script
   generateSampleUITestScript(): string {
     return `// Playwright UI Test Script
-// Available objects: page, browser, context, assert, console
+// Available objects: page, browser, context, assert, utils, console
 
 // Navigate to a page
 await page.goto('https://example.com');
@@ -385,6 +633,37 @@ assert.assertElementText('h1', 'Example Domain', 'Heading should have correct te
 // Check if element is visible
 assert.assertElementVisible('h1', 'Heading should be visible');
 
+// JWT Claims Testing Example
+// Extract JWT token from localStorage/cookies
+const token = await utils.extractJWT(page, 'authToken');
+if (token) {
+  // Decode and inspect JWT claims
+  const claims = utils.decodeJWT(token);
+  console.log('JWT Claims:', claims);
+  
+  // Assert JWT is valid (not expired)
+  assert.assertJWTValid(token, 'JWT token should be valid');
+  
+  // Assert specific claims
+  assert.assertJWTClaim(token, 'sub', 'user123', 'Subject should be user123');
+  assert.assertJWTClaim(token, 'role', 'admin', 'User should have admin role');
+}
+
+// Cookie Testing Example
+// Check if authentication cookie exists
+assert.assertCookieExists('sessionId', 'Session cookie should exist');
+
+// Validate cookie properties
+assert.assertCookieSecure('sessionId', 'Session cookie should be secure');
+assert.assertCookieHttpOnly('sessionId', 'Session cookie should be httpOnly');
+
+// Check specific cookie value
+assert.assertCookieValue('theme', 'dark', 'Theme cookie should be set to dark');
+
+// Get all cookies for inspection
+const cookies = await utils.getCookies(page);
+console.log('All cookies:', cookies);
+
 // Interact with elements
 await page.click('a[href*="more"]');
 
@@ -394,17 +673,7 @@ await page.waitForURL('**/more/**');
 // Assert URL contains expected path
 assert.assertUrlContains('/more', 'Should navigate to more information page');
 
-// Fill form fields
-await page.fill('input[name="search"]', 'test query');
-await page.click('button[type="submit"]');
-
-// Wait for results
-await page.waitForSelector('.results');
-
-// Validate results
-assert.assertElementExists('.results', 'Search results should be displayed');
-
-console.log('UI test completed successfully');`;
+console.log('UI test with JWT and cookie validation completed successfully');`;
   }
 
   // Create default UI test case
