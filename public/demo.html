@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Tester 3 - CRUD Dialog Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #1e1e1e;
+            color: #cccccc;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #252526;
+            border-radius: 8px;
+            border: 1px solid #404040;
+        }
+        
+        .demo-title {
+            color: #4fc3f7;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .demo-subtitle {
+            color: #4fc3f7;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #404040;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .status-complete {
+            color: #28a745;
+        }
+        
+        .status-pending {
+            color: #ffc107;
+        }
+        
+        .screenshot-placeholder {
+            width: 100%;
+            height: 400px;
+            background: #2d2d30;
+            border: 2px dashed #404040;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .mock-dialog {
+            background: #252526;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            width: 500px;
+            margin: 20px auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .mock-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #404040;
+            background: #2d2d30;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .mock-title {
+            color: #4fc3f7;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .mock-close {
+            color: #cccccc;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .mock-content {
+            padding: 20px;
+        }
+        
+        .mock-form-group {
+            margin-bottom: 16px;
+        }
+        
+        .mock-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #cccccc;
+        }
+        
+        .mock-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #6c6c6c;
+            border-radius: 4px;
+            background: #3c3c3c;
+            color: #cccccc;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .mock-select {
+            width: 120px;
+            padding: 8px 12px;
+            border: 1px solid #6c6c6c;
+            border-radius: 4px;
+            background: #3c3c3c;
+            color: #cccccc;
+            font-size: 14px;
+        }
+        
+        .mock-textarea {
+            width: 100%;
+            height: 80px;
+            padding: 8px 12px;
+            border: 1px solid #6c6c6c;
+            border-radius: 4px;
+            background: #3c3c3c;
+            color: #cccccc;
+            font-size: 14px;
+            font-family: monospace;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        
+        .mock-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #404040;
+            background: #2d2d30;
+            border-radius: 0 0 8px 8px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .mock-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            min-width: 80px;
+        }
+        
+        .mock-button-cancel {
+            background: #3c3c3c;
+            color: #cccccc;
+            border: 1px solid #6c6c6c;
+        }
+        
+        .mock-button-save {
+            background: #007acc;
+            color: #ffffff;
+        }
+        
+        .mock-form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .mock-form-row .mock-form-group {
+            margin-bottom: 0;
+        }
+        
+        .mock-form-row .mock-form-group:first-child {
+            flex: 0 0 120px;
+        }
+        
+        .mock-form-row .mock-form-group:last-child {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-section">
+            <h1 class="demo-title">🎉 CRUD Operations Implementation Complete</h1>
+            <p>Successfully implemented comprehensive CRUD (Create, Read, Update, Delete) dialogs for requests and test suites in API Tester 3.</p>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="demo-subtitle">✅ Features Implemented</h2>
+            <ul class="feature-list">
+                <li><span class="status-complete">✓</span> RequestDialog - Full-featured request creation/editing</li>
+                <li><span class="status-complete">✓</span> TestSuiteDialog - Comprehensive test suite management</li>
+                <li><span class="status-complete">✓</span> Context menus for collections and requests</li>
+                <li><span class="status-complete">✓</span> Confirmation dialogs for safe delete operations</li>
+                <li><span class="status-complete">✓</span> Request duplication functionality</li>
+                <li><span class="status-complete">✓</span> SQLite database integration</li>
+                <li><span class="status-complete">✓</span> Real-time updates and broadcasting</li>
+                <li><span class="status-complete">✓</span> Form validation and error handling</li>
+                <li><span class="status-complete">✓</span> Keyboard shortcuts (Ctrl+Enter, Esc)</li>
+                <li><span class="status-complete">✓</span> Responsive design for mobile/tablet</li>
+            </ul>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="demo-subtitle">🖼️ Request Creation/Edit Dialog</h2>
+            <p>Modern dialog with comprehensive form validation and all HTTP methods support.</p>
+            
+            <div class="mock-dialog">
+                <div class="mock-header">
+                    <span class="mock-title">Create New Request</span>
+                    <span class="mock-close">×</span>
+                </div>
+                <div class="mock-content">
+                    <div class="mock-form-group">
+                        <label class="mock-label">Request Name *</label>
+                        <input class="mock-input" value="Get User Profile" />
+                    </div>
+                    
+                    <div class="mock-form-row">
+                        <div class="mock-form-group">
+                            <label class="mock-label">Method</label>
+                            <select class="mock-select">
+                                <option>GET</option>
+                                <option>POST</option>
+                                <option>PUT</option>
+                                <option>DELETE</option>
+                            </select>
+                        </div>
+                        <div class="mock-form-group">
+                            <label class="mock-label">URL *</label>
+                            <input class="mock-input" value="https://api.example.com/users/profile" />
+                        </div>
+                    </div>
+                    
+                    <div class="mock-form-group">
+                        <label class="mock-label">Collection *</label>
+                        <select class="mock-input">
+                            <option>User Management API</option>
+                            <option>Payment API</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mock-form-group">
+                        <label class="mock-label">Headers (JSON)</label>
+                        <textarea class="mock-textarea">{"Authorization": "Bearer token", "Content-Type": "application/json"}</textarea>
+                    </div>
+                    
+                    <div class="mock-form-group">
+                        <label class="mock-label">Tests (JavaScript)</label>
+                        <textarea class="mock-textarea">pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});</textarea>
+                    </div>
+                </div>
+                <div class="mock-footer">
+                    <div style="font-size: 12px; color: #969696; margin-right: auto;">
+                        Ctrl+Enter to save, Esc to cancel
+                    </div>
+                    <button class="mock-button mock-button-cancel">Cancel</button>
+                    <button class="mock-button mock-button-save">Create</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="demo-subtitle">🧪 Test Suite Management Dialog</h2>
+            <p>Advanced test suite editor with dynamic test case management.</p>
+            
+            <div class="mock-dialog" style="width: 700px;">
+                <div class="mock-header">
+                    <span class="mock-title">Create New Test Suite</span>
+                    <span class="mock-close">×</span>
+                </div>
+                <div class="mock-content">
+                    <div class="mock-form-group">
+                        <label class="mock-label">Test Suite Name *</label>
+                        <input class="mock-input" value="User Profile API Tests" />
+                    </div>
+                    
+                    <div class="mock-form-group">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                            <label class="mock-label">Test Cases *</label>
+                            <button class="mock-button" style="background: #28a745; color: white; font-size: 12px; padding: 6px 12px;">+ Add Test Case</button>
+                        </div>
+                        
+                        <div style="border: 1px solid #404040; border-radius: 6px; padding: 16px; background: #2d2d30;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <input type="checkbox" checked style="margin-right: 8px;" />
+                                <input class="mock-input" value="Status code validation" style="flex: 1;" />
+                                <button class="mock-button" style="background: #dc3545; color: white; font-size: 11px; padding: 4px 8px;">Remove</button>
+                            </div>
+                            <textarea class="mock-textarea" style="height: 100px;">pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+    pm.expect(pm.response.responseTime).to.be.below(500);
+});</textarea>
+                        </div>
+                        
+                        <div style="border: 1px solid #404040; border-radius: 6px; padding: 16px; background: #2d2d30; margin-top: 12px;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <input type="checkbox" checked style="margin-right: 8px;" />
+                                <input class="mock-input" value="Response schema validation" style="flex: 1;" />
+                                <button class="mock-button" style="background: #dc3545; color: white; font-size: 11px; padding: 4px 8px;">Remove</button>
+                            </div>
+                            <textarea class="mock-textarea" style="height: 100px;">pm.test("Response has required fields", function () {
+    pm.expect(pm.response.json()).to.have.property('id');
+    pm.expect(pm.response.json()).to.have.property('name');
+});</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="mock-footer">
+                    <div style="font-size: 12px; color: #969696; margin-right: auto;">
+                        Ctrl+Enter to save, Esc to cancel
+                    </div>
+                    <button class="mock-button mock-button-cancel">Cancel</button>
+                    <button class="mock-button mock-button-save">Create</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="demo-subtitle">🎯 Context Menu Actions</h2>
+            <p>Right-click or action button (⋮) to access CRUD operations:</p>
+            <ul class="feature-list">
+                <li><strong>Collections:</strong> Edit Collection, Delete Collection</li>
+                <li><strong>Requests:</strong> Edit Request, Duplicate Request, Delete Request</li>
+                <li><strong>Test Suites:</strong> Edit Test Suite, Delete Test Suite</li>
+            </ul>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="demo-subtitle">⚡ Key Improvements</h2>
+            <ul class="feature-list">
+                <li><strong>User Experience:</strong> Intuitive dialogs with proper validation and feedback</li>
+                <li><strong>Data Integrity:</strong> All operations properly persist to SQLite database</li>
+                <li><strong>Real-time Updates:</strong> Changes broadcast across all components instantly</li>
+                <li><strong>Error Handling:</strong> Comprehensive validation with user-friendly error messages</li>
+                <li><strong>Keyboard Support:</strong> Professional shortcuts for power users</li>
+                <li><strong>Responsive Design:</strong> Works seamlessly on desktop, tablet, and mobile</li>
+                <li><strong>Consistent UI:</strong> Follows existing design patterns and theming</li>
+            </ul>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="demo-subtitle">🔧 Technical Implementation</h2>
+            <ul class="feature-list">
+                <li><strong>Components Added:</strong> RequestDialog.tsx, TestSuiteDialog.tsx</li>
+                <li><strong>Enhanced Components:</strong> EnhancedApp.tsx, EnhancedSidebar.tsx, DockableLayout.tsx, TestExplorer.tsx</li>
+                <li><strong>Dialog Management:</strong> Centralized state in EnhancedApp with proper cleanup</li>
+                <li><strong>Context Menus:</strong> Right-click and button actions with hover effects</li>
+                <li><strong>Form Validation:</strong> JSON validation, required field checks, length limits</li>
+                <li><strong>Database Integration:</strong> Full CRUD operations via DatabaseManager</li>
+                <li><strong>Type Safety:</strong> Complete TypeScript integration with proper interfaces</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

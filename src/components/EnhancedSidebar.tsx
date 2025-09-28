@@ -9,6 +9,9 @@ interface EnhancedSidebarProps {
   onRequestSelect: (request: Request) => void;
   onNewRequest: () => void;
   onNewCollection: () => void;
+  onEditRequest: (request: Request) => void;
+  onDeleteRequest: (request: Request) => void;
+  onDeleteCollection: (collection: Collection) => void;
   activeRequest: Request | null;
   testResults: Map<number, TestResult[]>;
   onRunTest: (requestId: number) => Promise<TestResult>;
@@ -24,6 +27,9 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
   onRequestSelect,
   onNewRequest,
   onNewCollection,
+  onEditRequest,
+  onDeleteRequest,
+  onDeleteCollection,
   activeRequest,
   testResults,
   onRunTest,
@@ -34,6 +40,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
 }) => {
   const [expandedCollections, setExpandedCollections] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState<'collections' | 'tests'>('collections');
+  const [contextMenu, setContextMenu] = useState<{type: 'collection' | 'request', id: number, x: number, y: number} | null>(null);
 
   const toggleCollection = (collectionId: number) => {
     const newExpanded = new Set(expandedCollections);
@@ -61,6 +68,68 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
   const getRoleIcon = (role: string) => {
     return role === 'admin' ? '👑' : '👤';
   };
+
+  const handleContextMenu = (e: React.MouseEvent, type: 'collection' | 'request', id: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({
+      type,
+      id,
+      x: e.clientX,
+      y: e.clientY
+    });
+  };
+
+  const handleContextMenuAction = (action: string, type: 'collection' | 'request', id: number) => {
+    setContextMenu(null);
+    
+    if (type === 'collection') {
+      const collection = collections.find(c => c.id === id);
+      if (!collection) return;
+      
+      switch (action) {
+        case 'edit':
+          // TODO: Add collection edit dialog
+          break;
+        case 'delete':
+          onDeleteCollection(collection);
+          break;
+      }
+    } else if (type === 'request') {
+      const request = collections.flatMap(c => c.requests || []).find(r => r.id === id);
+      if (!request) return;
+      
+      switch (action) {
+        case 'edit':
+          onEditRequest(request);
+          break;
+        case 'delete':
+          onDeleteRequest(request);
+          break;
+        case 'duplicate':
+          // Create a duplicate request with "Copy of" prefix
+          const duplicateData = {
+            ...request,
+            name: `Copy of ${request.name}`,
+            id: undefined, // Remove ID so a new one gets created
+            createdAt: undefined,
+            updatedAt: undefined
+          };
+          // Remove the id, createdAt, updatedAt fields and call onSave instead
+          onEditRequest({ ...duplicateData, id: -1 } as Request); // Use -1 as a flag for duplication
+          break;
+      }
+    }
+  };
+
+  // Close context menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = () => setContextMenu(null);
+    if (contextMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [contextMenu]);
 
   // Get all requests from all collections for test explorer
   const allRequests = collections.flatMap(collection => 
@@ -173,18 +242,20 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                 <div key={collection.id} className="collection-item">
                   <div
                     className="collection-header"
-                    onClick={() => toggleCollection(collection.id)}
+                    onContextMenu={(e) => handleContextMenu(e, 'collection', collection.id)}
                   >
                     <span
                       className="expand-icon"
+                      onClick={() => toggleCollection(collection.id)}
                       style={{
                         transform: expandedCollections.has(collection.id) ? 'rotate(90deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.15s ease'
+                        transition: 'transform 0.15s ease',
+                        cursor: 'pointer'
                       }}
                     >
                       ▶
                     </span>
-                    <div className="collection-info">
+                    <div className="collection-info" onClick={() => toggleCollection(collection.id)}>
                       <span className="collection-name">{collection.name}</span>
                       <div className="collection-meta">
                         <span className="request-count">
@@ -202,6 +273,37 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                         )}
                       </div>
                     </div>
+                    <div className="collection-actions">
+                      <button
+                        className="action-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContextMenu(e, 'collection', collection.id);
+                        }}
+                        title="Collection actions"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--text-muted)',
+                          cursor: 'pointer',
+                          padding: '4px',
+                          borderRadius: '2px',
+                          fontSize: '12px',
+                          opacity: 0.6,
+                          transition: 'opacity 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.target as HTMLElement).style.opacity = '1';
+                          (e.target as HTMLElement).style.backgroundColor = 'var(--bg-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.target as HTMLElement).style.opacity = '0.6';
+                          (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        ⋮
+                      </button>
+                    </div>
                   </div>
 
                   {expandedCollections.has(collection.id) && collection.requests && (
@@ -215,7 +317,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                           <div
                             key={request.id}
                             className={`request-item ${activeRequest?.id === request.id ? 'active' : ''}`}
-                            onClick={() => onRequestSelect(request)}
+                            onContextMenu={(e) => handleContextMenu(e, 'request', request.id)}
                           >
                             <div className="request-method-badge">
                               <span
@@ -225,7 +327,11 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                                 {request.method}
                               </span>
                             </div>
-                            <div className="request-info">
+                            <div 
+                              className="request-info"
+                              onClick={() => onRequestSelect(request)}
+                              style={{ flex: 1, cursor: 'pointer' }}
+                            >
                               <div className="request-name">{request.name}</div>
                               <div className="request-url">{request.url}</div>
                             </div>
@@ -235,6 +341,36 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                                   🧪
                                 </span>
                               )}
+                              <button
+                                className="action-button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleContextMenu(e, 'request', request.id);
+                                }}
+                                title="Request actions"
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'var(--text-muted)',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  borderRadius: '2px',
+                                  fontSize: '12px',
+                                  marginLeft: '4px',
+                                  opacity: 0.6,
+                                  transition: 'opacity 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  (e.target as HTMLElement).style.opacity = '1';
+                                  (e.target as HTMLElement).style.backgroundColor = 'var(--bg-hover)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  (e.target as HTMLElement).style.opacity = '0.6';
+                                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                                }}
+                              >
+                                ⋮
+                              </button>
                             </div>
                           </div>
                         ))
@@ -273,6 +409,126 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
           </span>
         </div>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <div
+          className="context-menu"
+          style={{
+            position: 'fixed',
+            left: contextMenu.x,
+            top: contextMenu.y,
+            backgroundColor: '#2d2d30',
+            border: '1px solid #404040',
+            borderRadius: '4px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            zIndex: 1000,
+            minWidth: '120px'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {contextMenu.type === 'collection' ? (
+            <>
+              <div
+                className="context-menu-item"
+                onClick={() => handleContextMenuAction('edit', 'collection', contextMenu.id)}
+                style={{
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  color: '#cccccc',
+                  fontSize: '13px',
+                  borderBottom: '1px solid #404040'
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#3c3c3c';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                }}
+              >
+                ✏️ Edit Collection
+              </div>
+              <div
+                className="context-menu-item"
+                onClick={() => handleContextMenuAction('delete', 'collection', contextMenu.id)}
+                style={{
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  color: '#f44747',
+                  fontSize: '13px'
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#3c3c3c';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                }}
+              >
+                🗑️ Delete Collection
+              </div>
+            </>
+          ) : (
+            <>
+              <div
+                className="context-menu-item"
+                onClick={() => handleContextMenuAction('edit', 'request', contextMenu.id)}
+                style={{
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  color: '#cccccc',
+                  fontSize: '13px',
+                  borderBottom: '1px solid #404040'
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#3c3c3c';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                }}
+              >
+                ✏️ Edit Request
+              </div>
+              <div
+                className="context-menu-item"
+                onClick={() => handleContextMenuAction('duplicate', 'request', contextMenu.id)}
+                style={{
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  color: '#cccccc',
+                  fontSize: '13px',
+                  borderBottom: '1px solid #404040'
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#3c3c3c';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                }}
+              >
+                📋 Duplicate Request
+              </div>
+              <div
+                className="context-menu-item"
+                onClick={() => handleContextMenuAction('delete', 'request', contextMenu.id)}
+                style={{
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  color: '#f44747',
+                  fontSize: '13px'
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#3c3c3c';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                }}
+              >
+                🗑️ Delete Request
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };

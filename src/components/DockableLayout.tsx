@@ -26,6 +26,12 @@ interface DockableLayoutProps {
   onSendRequest: () => void;
   onNewRequest: () => void;
   onNewCollection: () => void;
+  onEditRequest: (request: Request) => void;
+  onDeleteRequest: (request: Request) => void;
+  onNewTestSuite: (requestId: number) => void;
+  onEditTestSuite: (testSuite: TestSuite) => void;
+  onDeleteTestSuite: (testSuite: TestSuite) => void;
+  onDeleteCollection: (collection: Collection) => void;
   onRunTest: (requestId: number) => Promise<TestResult>;
   onRunAllTests: () => Promise<TestResult[]>;
   onRunTestSuite: (requestId: number, testSuite: TestSuite, response: ApiResponse, request: any) => Promise<TestExecutionResult[]>;
@@ -49,6 +55,12 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
   onSendRequest,
   onNewRequest,
   onNewCollection,
+  onEditRequest,
+  onDeleteRequest,
+  onNewTestSuite,
+  onEditTestSuite,
+  onDeleteTestSuite,
+  onDeleteCollection,
   onRunTest,
   onRunAllTests,
   onRunTestSuite,
@@ -174,6 +186,9 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                   onRequestSelect={onRequestSelect}
                   onNewRequest={onNewRequest}
                   onNewCollection={onNewCollection}
+                  onEditRequest={onEditRequest}
+                  onDeleteRequest={onDeleteRequest}
+                  onDeleteCollection={onDeleteCollection}
                   activeRequest={activeRequest}
                   testResults={testResults}
                   onRunTest={onRunTest}
@@ -366,6 +381,9 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                       onRequestSelect={onRequestSelect}
                       onNewRequest={onNewRequest}
                       onNewCollection={onNewCollection}
+                      onEditRequest={onEditRequest}
+                      onDeleteRequest={onDeleteRequest}
+                      onDeleteCollection={onDeleteCollection}
                       activeRequest={activeRequest}
                       testResults={testResults}
                       onRunTest={onRunTest}
@@ -402,6 +420,9 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                       onRunTest={onRunTest}
                       onRunAllTests={onRunAllTests}
                       onRunTestSuite={onRunTestSuite}
+                      onNewTestSuite={onNewTestSuite}
+                      onEditTestSuite={onEditTestSuite}
+                      onDeleteTestSuite={onDeleteTestSuite}
                       testResults={testResults}
                       testExecutionResults={testExecutionResults}
                     />

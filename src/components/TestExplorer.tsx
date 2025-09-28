@@ -9,6 +9,9 @@ interface TestExplorerProps {
   onRunTest: (requestId: number) => Promise<TestResult>;
   onRunAllTests: () => Promise<TestResult[]>;
   onRunTestSuite: (requestId: number, testSuite: TestSuite, response: ApiResponse, request: any) => Promise<TestExecutionResult[]>;
+  onNewTestSuite?: (requestId: number) => void;
+  onEditTestSuite?: (testSuite: TestSuite) => void;
+  onDeleteTestSuite?: (testSuite: TestSuite) => void;
   testResults: Map<number, TestResult[]>;
   testExecutionResults: Map<number, TestExecutionResult[]>;
 }
@@ -19,6 +22,9 @@ export const TestExplorer: React.FC<TestExplorerProps> = ({
   onRunTest,
   onRunAllTests,
   onRunTestSuite: _onRunTestSuite,
+  onNewTestSuite,
+  onEditTestSuite,
+  onDeleteTestSuite,
   testResults,
   testExecutionResults
 }) => {
