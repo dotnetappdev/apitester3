@@ -122,21 +122,10 @@
     "win": {
       "target": [
         {
-          "target": "nsis",
+          "target": "appx",
           "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "x64"
+            "x64",
+            "ia32"
           ]
         }
       ],
@@ -144,16 +133,14 @@
       "requestedExecutionLevel": "asInvoker",
       "publisherName": "dotnetappdev"
     },
-    "nsis": {
-      "oneClick": false,
-      "allowElevation": true,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "assets/icon.png",
-      "uninstallerIcon": "assets/icon.png",
-      "installerHeaderIcon": "assets/icon.png",
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "API Tester 3"
+    "appx": {
+      "displayName": "API Tester 3",
+      "publisherDisplayName": "dotnetappdev",
+      "identityName": "dotnetappdev.APITester3",
+      "backgroundColor": "#007ACC",
+      "languages": ["en-US"],
+      "showNameOnTiles": true,
+      "setBuildNumber": true
     },
     "mac": {
       "target": [

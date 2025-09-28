@@ -21,7 +21,7 @@ npm run build
 npm run package
 
 # Build specific platform installers
-npm run package:win      # Windows (NSIS, Portable, ZIP)
+npm run package:win      # Windows (APPX/MSIX for Windows Store)
 npm run package:mac      # macOS (DMG, ZIP)
 npm run package:linux    # Linux (AppImage, DEB, RPM, TAR.GZ)
 
@@ -37,9 +37,7 @@ npm run package:all
 - ✅ **DEB Package** - `apitester3_1.0.0_amd64.deb` (~77MB)
 
 ### Windows (Configuration Ready)
-- 🔧 **NSIS Installer** - `.exe` installer with GUI
-- 🔧 **Portable Executable** - Single .exe file
-- 🔧 **ZIP Archive** - Compressed application folder
+- 🔧 **APPX/MSIX Package** - `.appx` for Windows Store (x64 and x86/32-bit support)
 
 ### macOS (Configuration Ready)
 - 🔧 **DMG Disk Image** - Standard macOS installer

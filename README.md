@@ -161,13 +161,13 @@ npx electron-builder --linux
 - **Linux**: Tested on Ubuntu 18.04+, CentOS 7+, Debian 10+, Fedora 32+.
 
 **Package Formats by Platform:**
-- **Windows**: `.exe` NSIS installer, portable `.exe`, `.zip` archive
+- **Windows**: `.appx` package for Windows Store (MSIX format, x64 and x86/32-bit support)
 - **macOS**: `.dmg` disk image, `.zip` application bundle (Universal: Intel + Apple Silicon)
 - **Linux**: `.AppImage` universal, `.deb` (Debian/Ubuntu), `.rpm` (Red Hat/CentOS), `.tar.gz` archive
 
 **Verified Working Packages:**
-- ✅ Linux: AppImage, DEB, TAR.GZ (tested on Ubuntu)
-- 🔧 Windows: NSIS, Portable, ZIP (configuration ready)  
+- ✅ Linux: AppImage, DEB, RPM, TAR.GZ (tested on Ubuntu)
+- 🔧 Windows: APPX/MSIX for Windows Store (x64 + x86 architectures ready)  
 - 🔧 macOS: DMG, ZIP (configuration ready)
 
 **Quick Build Commands:**

@@ -7,7 +7,7 @@ Successfully implemented comprehensive cross-platform installer configuration fo
 ## 🎯 What Was Implemented
 
 ### Cross-Platform Package Support
-- **Windows**: NSIS installer, Portable executable, ZIP archive
+- **Windows**: APPX/MSIX package for Windows Store (x64 and x86/32-bit support)
 - **macOS**: DMG disk image, ZIP bundle (Universal Intel + Apple Silicon)
 - **Linux**: AppImage, DEB package, RPM package, TAR.GZ archive
 
@@ -28,7 +28,7 @@ npm run package
 
 # Build specific platforms
 npm run package:linux    # All Linux formats
-npm run package:win      # All Windows formats  
+npm run package:win      # APPX/MSIX package for Windows Store (x64 + x86)  
 npm run package:mac      # All macOS formats
 npm run package:all      # Everything (requires platform setup)
 ```
@@ -39,9 +39,9 @@ npm run package:all      # Everything (requires platform setup)
 - `package.json` - Enhanced with comprehensive electron-builder config
 - `.electronbuilderignore` - Excludes unnecessary files from packages
 
-### Windows Installer
-- `build/installer.iss` - Inno Setup script for advanced Windows installer
-- `build/installer.nsh` - NSIS configuration enhancements
+### Windows Store Support
+- APPX package configuration in `package.json` for Windows Store distribution (generates MSIX format)
+- Support for both x64 and x86 (32-bit) architectures
 
 ### macOS Support  
 - `build/entitlements.mac.plist` - Security entitlements for App Store/notarization
@@ -80,7 +80,7 @@ release/
 ├── apitester3-1.0.0.tar.gz              # Linux archive  
 ├── apitester3_1.0.0_amd64.deb           # Ubuntu/Debian
 ├── apitester3-1.0.0.x86_64.rpm          # Red Hat/CentOS
-├── API-Tester-3-Setup.exe               # Windows installer
+├── API Tester 3-1.0.0.appx            # Windows Store package (x64 + x86, MSIX format)
 ├── API Tester 3.dmg                     # macOS disk image
 └── latest-*.yml                         # Auto-updater metadata
 ```

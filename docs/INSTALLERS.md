@@ -34,24 +34,17 @@ npm run installer:all     # All platforms (requires proper setup)
 
 ### Windows Installers
 
-#### NSIS Installer (Primary)
-- **Built by**: electron-builder with NSIS target
-- **Output**: `API-Tester-3-Setup-{version}.exe`
+#### APPX/MSIX Package (Primary - Windows Store)
+- **Built by**: electron-builder with APPX target (generates MSIX packages)
+- **Output**: `API Tester 3-{version}.appx` (MSIX format)
+- **Architecture**: Both x64 and x86 (32-bit) support
 - **Features**: 
-  - Custom installation directory
-  - Desktop/Start menu shortcuts
-  - Uninstaller
-  - Registry entries
-  - Application data folder creation
-
-#### Inno Setup (Alternative)
-- **Script**: `build/installer.iss`
-- **Requirements**: Inno Setup Compiler
-- **Usage**: Manual compilation after electron-builder
-
-#### Portable Version
-- **Output**: `API Tester 3 {version}.exe` (single file)
-- **Features**: No installation required, runs from any location
+  - Windows Store distribution ready
+  - Modern MSIX packaging format
+  - Automatic updates through Microsoft Store
+  - Sandboxed execution for security
+  - Digital signature validation
+  - Universal Windows Platform (UWP) integration
 
 ### macOS Installers
 
@@ -143,8 +136,8 @@ For production, replace placeholders with proper icons using:
 ### Platform-Specific Tools
 
 #### Windows
-- **NSIS**: Included with electron-builder
-- **Inno Setup**: Optional, for custom installer script
+- **APPX/MSIX Packaging Tools**: Included with electron-builder
+- **Windows 10 SDK**: Required for APPX/MSIX packaging (automatically handled)
 - **Code Signing**: Optional, requires certificate
 
 #### macOS
