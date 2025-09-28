@@ -12,8 +12,20 @@ export interface User {
   lastLogin?: string;
 }
 
+export interface Project {
+  id: number;
+  name: string;
+  description?: string;
+  ownerId: number;
+  isShared: boolean;
+  createdAt: string;
+  updatedAt: string;
+  collections?: Collection[];
+}
+
 export interface Collection {
   id: number;
+  projectId: number; // Link to parent project
   name: string;
   description?: string;
   ownerId: number;
@@ -143,6 +155,27 @@ export class DatabaseManager {
 
   async deleteTestSuite(id: number): Promise<void> {
     return await window.electronAPI.dbDeleteTestSuite(id);
+  }
+
+  // Project operations
+  async createProject(name: string, description: string, ownerId: number): Promise<number> {
+    return await window.electronAPI.dbCreateProject({ name, description, ownerId });
+  }
+
+  async getUserProjects(userId: number): Promise<Project[]> {
+    return await window.electronAPI.dbGetUserProjects(userId);
+  }
+
+  async updateProject(id: number, updates: Partial<Project>): Promise<void> {
+    return await window.electronAPI.dbUpdateProject(id, updates);
+  }
+
+  async deleteProject(id: number): Promise<void> {
+    return await window.electronAPI.dbDeleteProject(id);
+  }
+
+  async getProjectCollections(projectId: number): Promise<Collection[]> {
+    return await window.electronAPI.dbGetProjectCollections(projectId);
   }
 
   async close(): Promise<void> {

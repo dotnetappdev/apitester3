@@ -13,11 +13,13 @@ export interface UITestCase {
   browser: 'chromium' | 'firefox' | 'webkit';
   headless: boolean;
   viewport?: { width: number; height: number };
+  captureScreenshot?: 'always' | 'on-failure' | 'never'; // Screenshot capture option
 }
 
 export interface UITestSuite {
   id: string;
   name: string;
+  projectId?: number; // Link to parent project
   testCases: UITestCase[];
   beforeAll?: string; // Setup script for all tests
   afterAll?: string; // Cleanup script for all tests
@@ -176,8 +178,23 @@ export class UITestRunner {
       
       const hasFailures = assertions.some(a => !a.passed);
       
-      // Take screenshot on failure
-      if (hasFailures && page) {
+      // Take screenshot based on user preference
+      const captureMode = testCase.captureScreenshot || 'on-failure';
+      let shouldCapture = false;
+      
+      switch (captureMode) {
+        case 'always':
+          shouldCapture = true;
+          break;
+        case 'on-failure':
+          shouldCapture = hasFailures;
+          break;
+        case 'never':
+          shouldCapture = false;
+          break;
+      }
+      
+      if (shouldCapture && page) {
         screenshot = await page.screenshot({ encoding: 'base64' });
       }
       
@@ -195,8 +212,9 @@ export class UITestRunner {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
-      // Take screenshot on error
-      if (page) {
+      // Take screenshot on error based on user preference
+      const captureMode = testCase.captureScreenshot || 'on-failure';
+      if ((captureMode === 'always' || captureMode === 'on-failure') && page) {
         try {
           screenshot = await page.screenshot({ encoding: 'base64' });
         } catch (screenshotError) {
@@ -399,7 +417,8 @@ console.log('UI test completed successfully');`;
       script: this.generateSampleUITestScript(),
       timeout: 30000, // 30 seconds
       browser: 'chromium',
-      headless: true
+      headless: true,
+      captureScreenshot: 'on-failure' // Default to capture on failure
     };
   }
 }

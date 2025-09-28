@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { DatabaseManager, User, Collection, Request, TestResult } from '../database/DatabaseManager';
+import { DatabaseManager, User, Collection, Request, TestResult, Project } from '../database/DatabaseManager';
 import { AuthManager } from '../auth/AuthManager';
 import { SettingsManager } from '../settings/SettingsManager';
 import { LoginDialog } from './LoginDialog';
 import { EnhancedSidebar } from './EnhancedSidebar';
+import { ProjectExplorer } from './ProjectExplorer';
 import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
 import { SettingsDialog } from './SettingsDialog';
@@ -27,16 +28,19 @@ export const EnhancedApp: React.FC = () => {
   // Core state
   const [isInitialized, setIsInitialized] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [activeRequest, setActiveRequest] = useState<Request | null>(null);
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
   // UI state
+  const [viewMode, setViewMode] = useState<'projects' | 'collections'>('projects'); // New view mode toggle
   const [showSettings, setShowSettings] = useState(false);
   const [showImportExport, setShowImportExport] = useState<'import' | 'export' | null>(null);
   const [showDocumentation, setShowDocumentation] = useState(false);
   const [showNewCollectionDialog, setShowNewCollectionDialog] = useState(false);
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false); // New project dialog
   const [showCodeGeneration, setShowCodeGeneration] = useState(false);
   const [documentationType, setDocumentationType] = useState<'overview' | 'unit-testing' | null>(null);
   
@@ -108,6 +112,7 @@ export const EnhancedApp: React.FC = () => {
         const sampleUITestSuite: UITestSuite = {
           id: 'sample_ui_test_' + Date.now(),
           name: 'Sample UI Tests',
+          projectId: 1, // Associate with first project if available
           testCases: [
             {
               id: 'test_homepage_' + Date.now(),
@@ -133,7 +138,8 @@ console.log('Homepage test completed successfully');`,
               browser: 'chromium',
               headless: true,
               viewport: { width: 1280, height: 720 },
-              tags: ['smoke', 'homepage']
+              tags: ['smoke', 'homepage'],
+              captureScreenshot: 'on-failure'
             }
           ]
         };

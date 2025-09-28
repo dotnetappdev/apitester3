@@ -315,6 +315,19 @@ assert.assertElementVisible('.mobile-menu', 'Mobile menu should appear when togg
                 </div>
 
                 <div className="form-group">
+                  <label htmlFor="captureScreenshot">Screenshot Capture</label>
+                  <select
+                    id="captureScreenshot"
+                    value={activeTest.captureScreenshot || 'on-failure'}
+                    onChange={(e) => updateActiveTest({ captureScreenshot: e.target.value as 'always' | 'on-failure' | 'never' })}
+                  >
+                    <option value="always">Always capture screenshots</option>
+                    <option value="on-failure">Only on failure/error (default)</option>
+                    <option value="never">Never capture screenshots</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
                   <label htmlFor="tags">Tags (comma-separated)</label>
                   <input
                     id="tags"
