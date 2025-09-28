@@ -1,0 +1,5 @@
+<!-- png icon placeholder 256x256 -->
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="32" fill="#007ACC"/>
+  <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="Arial" font-size="32" font-weight="bold">API</text>
+</svg>

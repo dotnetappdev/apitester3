@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="64" fill="#007ACC"/>
+  <g fill="white">
+    <!-- API symbol -->
+    <rect x="80" y="160" width="352" height="40" rx="8"/>
+    <rect x="80" y="236" width="200" height="40" rx="8"/>
+    <rect x="80" y="312" width="280" height="40" rx="8"/>
+    
+    <!-- Connection lines -->
+    <circle cx="456" cy="180" r="12"/>
+    <circle cx="456" cy="256" r="12"/>
+    <circle cx="456" cy="332" r="12"/>
+    
+    <line x1="432" y1="180" x2="456" y2="180" stroke="white" stroke-width="4"/>
+    <line x1="280" y1="256" x2="456" y2="256" stroke="white" stroke-width="4"/>
+    <line x1="360" y1="332" x2="456" y2="332" stroke="white" stroke-width="4"/>
+  </g>
+  
+  <!-- Version indicator -->
+  <text x="256" y="450" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="48" font-weight="bold">3</text>
+</svg>
