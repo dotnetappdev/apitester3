@@ -750,7 +750,13 @@ export const EnhancedApp: React.FC = () => {
 
       <RequestDialog
         isOpen={showRequestDialog}
-        title={editingRequest ? 'Edit Request' : 'Create New Request'}
+        title={
+          editingRequest && editingRequest.id === -1 
+            ? 'Duplicate Request' 
+            : editingRequest 
+              ? 'Edit Request' 
+              : 'Create New Request'
+        }
         request={editingRequest}
         collections={collections}
         onSave={handleSaveRequest}

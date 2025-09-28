@@ -107,7 +107,16 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
           onDeleteRequest(request);
           break;
         case 'duplicate':
-          // TODO: Add duplicate functionality
+          // Create a duplicate request with "Copy of" prefix
+          const duplicateData = {
+            ...request,
+            name: `Copy of ${request.name}`,
+            id: undefined, // Remove ID so a new one gets created
+            createdAt: undefined,
+            updatedAt: undefined
+          };
+          // Remove the id, createdAt, updatedAt fields and call onSave instead
+          onEditRequest({ ...duplicateData, id: -1 } as Request); // Use -1 as a flag for duplication
           break;
       }
     }
@@ -279,7 +288,17 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                           cursor: 'pointer',
                           padding: '4px',
                           borderRadius: '2px',
-                          fontSize: '12px'
+                          fontSize: '12px',
+                          opacity: 0.6,
+                          transition: 'opacity 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.target as HTMLElement).style.opacity = '1';
+                          (e.target as HTMLElement).style.backgroundColor = 'var(--bg-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.target as HTMLElement).style.opacity = '0.6';
+                          (e.target as HTMLElement).style.backgroundColor = 'transparent';
                         }}
                       >
                         ⋮
@@ -337,7 +356,17 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                                   padding: '4px',
                                   borderRadius: '2px',
                                   fontSize: '12px',
-                                  marginLeft: '4px'
+                                  marginLeft: '4px',
+                                  opacity: 0.6,
+                                  transition: 'opacity 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  (e.target as HTMLElement).style.opacity = '1';
+                                  (e.target as HTMLElement).style.backgroundColor = 'var(--bg-hover)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  (e.target as HTMLElement).style.opacity = '0.6';
+                                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
                                 }}
                               >
                                 ⋮
@@ -410,6 +439,12 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                   fontSize: '13px',
                   borderBottom: '1px solid #404040'
                 }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#3c3c3c';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                }}
               >
                 ✏️ Edit Collection
               </div>
@@ -421,6 +456,12 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                   cursor: 'pointer',
                   color: '#f44747',
                   fontSize: '13px'
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#3c3c3c';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
                 }}
               >
                 🗑️ Delete Collection
@@ -438,6 +479,12 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                   fontSize: '13px',
                   borderBottom: '1px solid #404040'
                 }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#3c3c3c';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                }}
               >
                 ✏️ Edit Request
               </div>
@@ -451,6 +498,12 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                   fontSize: '13px',
                   borderBottom: '1px solid #404040'
                 }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#3c3c3c';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                }}
               >
                 📋 Duplicate Request
               </div>
@@ -462,6 +515,12 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                   cursor: 'pointer',
                   color: '#f44747',
                   fontSize: '13px'
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = '#3c3c3c';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'transparent';
                 }}
               >
                 🗑️ Delete Request

@@ -40,10 +40,25 @@ export const RequestDialog: React.FC<RequestDialogProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      if (request) {
+      if (request && request.id !== -1) {
         // Editing existing request
         setFormData({
           name: request.name,
+          method: request.method,
+          url: request.url,
+          collectionId: request.collectionId,
+          headers: typeof request.headers === 'string' ? request.headers : JSON.stringify(request.headers),
+          body: request.body || '',
+          params: typeof request.params === 'string' ? request.params : JSON.stringify(request.params),
+          auth: typeof request.auth === 'string' ? request.auth : JSON.stringify(request.auth),
+          tests: request.tests || '',
+          soap: request.soap || '',
+          grpc: request.grpc || ''
+        });
+      } else if (request && request.id === -1) {
+        // Duplicating request (special case)
+        setFormData({
+          name: request.name, // Already has "Copy of" prefix
           method: request.method,
           url: request.url,
           collectionId: request.collectionId,
@@ -140,11 +155,11 @@ export const RequestDialog: React.FC<RequestDialogProps> = ({
       grpc: formData.grpc
     };
 
-    if (request) {
+    if (request && request.id !== -1) {
       // Update existing request
       onUpdate(request.id, requestData);
     } else {
-      // Create new request
+      // Create new request (including duplicates)
       onSave(requestData);
     }
   };
@@ -471,7 +486,7 @@ export const RequestDialog: React.FC<RequestDialogProps> = ({
               (e.target as HTMLElement).style.backgroundColor = '#007acc';
             }}
           >
-            {request ? 'Update' : 'Create'}
+            {request && request.id !== -1 ? 'Update' : 'Create'}
           </button>
         </div>
       </div>
