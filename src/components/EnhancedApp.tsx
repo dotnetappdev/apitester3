@@ -11,6 +11,9 @@ import { ImportExportDialog } from './ImportExportDialog';
 import { DocumentationDialog } from './DocumentationDialog';
 import { InputDialog } from './InputDialog';
 import { CodeGenerationDialog } from './CodeGenerationDialog';
+import { RequestDialog } from './RequestDialog';
+import { TestSuiteDialog } from './TestSuiteDialog';
+import { ConfirmDialog } from './ConfirmDialog';
 import { CollectionIcon } from './ModernButton';
 import { Splitter } from './Splitter';
 import { DockableLayout } from './DockableLayout';
@@ -35,6 +38,14 @@ export const EnhancedApp: React.FC = () => {
   const [showNewCollectionDialog, setShowNewCollectionDialog] = useState(false);
   const [showCodeGeneration, setShowCodeGeneration] = useState(false);
   const [documentationType, setDocumentationType] = useState<'overview' | 'unit-testing' | null>(null);
+  
+  // Request and Test CRUD dialogs
+  const [showRequestDialog, setShowRequestDialog] = useState(false);
+  const [showTestSuiteDialog, setShowTestSuiteDialog] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editingRequest, setEditingRequest] = useState<Request | null>(null);
+  const [editingTestSuite, setEditingTestSuite] = useState<any | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{type: 'request' | 'testSuite' | 'collection', id: number, name: string} | null>(null);
   const [splitterPosition, setSplitterPosition] = useState(50);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [enableSyntaxHighlighting, setEnableSyntaxHighlighting] = useState(true);
@@ -329,33 +340,9 @@ export const EnhancedApp: React.FC = () => {
 
   const handleNewRequest = async () => {
     if (!currentUser || collections.length === 0) return;
-
-    const newRequest = {
-      collectionId: collections[0].id,
-      name: 'New Request',
-      method: 'GET',
-      url: '',
-      headers: JSON.stringify({}),
-      body: '',
-      params: JSON.stringify({}),
-      auth: JSON.stringify({ type: 'none' })
-    };
-
-    try {
-      const requestId = await dbManager.createRequest(newRequest);
-      const createdRequest = { ...newRequest, id: requestId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-      
-      setActiveRequest(createdRequest);
-      await loadUserCollections(currentUser.id);
-      
-      // Broadcast real-time update
-      broadcastUpdate({
-        type: 'request_updated',
-        data: createdRequest
-      });
-    } catch (error) {
-      console.error('Failed to create request:', error);
-    }
+    
+    setEditingRequest(null); // Clear any existing request being edited
+    setShowRequestDialog(true);
   };
 
   const handleNewCollection = async () => {
@@ -387,6 +374,166 @@ export const EnhancedApp: React.FC = () => {
 
   const handleNewCollectionCancel = () => {
     setShowNewCollectionDialog(false);
+  };
+
+  // Request CRUD handlers
+  const handleEditRequest = (request: Request) => {
+    setEditingRequest(request);
+    setShowRequestDialog(true);
+  };
+
+  const handleSaveRequest = async (requestData: Omit<Request, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (!currentUser) return;
+
+    try {
+      const requestId = await dbManager.createRequest(requestData);
+      const createdRequest = { 
+        ...requestData, 
+        id: requestId, 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString() 
+      };
+      
+      setActiveRequest(createdRequest);
+      await loadUserCollections(currentUser.id);
+      setShowRequestDialog(false);
+      
+      // Broadcast real-time update
+      broadcastUpdate({
+        type: 'request_updated',
+        data: createdRequest
+      });
+    } catch (error) {
+      console.error('Failed to create request:', error);
+    }
+  };
+
+  const handleUpdateRequest = async (id: number, requestData: Partial<Request>) => {
+    if (!currentUser) return;
+
+    try {
+      await dbManager.updateRequest(id, requestData);
+      await loadUserCollections(currentUser.id);
+      setShowRequestDialog(false);
+      
+      // Update active request if it's the one being edited
+      if (activeRequest && activeRequest.id === id) {
+        const updatedRequest = { ...activeRequest, ...requestData, updatedAt: new Date().toISOString() };
+        setActiveRequest(updatedRequest);
+      }
+      
+      // Broadcast real-time update
+      broadcastUpdate({
+        type: 'request_updated',
+        data: { id, ...requestData }
+      });
+    } catch (error) {
+      console.error('Failed to update request:', error);
+    }
+  };
+
+  const handleDeleteRequest = (request: Request) => {
+    setDeleteTarget({ type: 'request', id: request.id, name: request.name });
+    setShowDeleteConfirm(true);
+  };
+
+  // Test Suite CRUD handlers
+  const handleNewTestSuite = (requestId: number) => {
+    setEditingTestSuite(null);
+    setShowTestSuiteDialog(true);
+  };
+
+  const handleEditTestSuite = (testSuite: any) => {
+    setEditingTestSuite(testSuite);
+    setShowTestSuiteDialog(true);
+  };
+
+  const handleSaveTestSuite = async (testSuiteData: any) => {
+    if (!currentUser) return;
+
+    try {
+      const testSuiteId = await dbManager.saveTestSuite(testSuiteData);
+      await loadUserCollections(currentUser.id);
+      setShowTestSuiteDialog(false);
+      
+      // Broadcast real-time update
+      broadcastUpdate({
+        type: 'test_suite_updated',
+        data: { ...testSuiteData, id: testSuiteId }
+      });
+    } catch (error) {
+      console.error('Failed to create test suite:', error);
+    }
+  };
+
+  const handleUpdateTestSuite = async (id: number, testSuiteData: any) => {
+    if (!currentUser) return;
+
+    try {
+      await dbManager.updateTestSuite(id, testSuiteData);
+      await loadUserCollections(currentUser.id);
+      setShowTestSuiteDialog(false);
+      
+      // Broadcast real-time update
+      broadcastUpdate({
+        type: 'test_suite_updated',
+        data: { id, ...testSuiteData }
+      });
+    } catch (error) {
+      console.error('Failed to update test suite:', error);
+    }
+  };
+
+  const handleDeleteTestSuite = (testSuite: any) => {
+    setDeleteTarget({ type: 'testSuite', id: testSuite.id, name: testSuite.name });
+    setShowDeleteConfirm(true);
+  };
+
+  // Collection delete handler
+  const handleDeleteCollection = (collection: Collection) => {
+    setDeleteTarget({ type: 'collection', id: collection.id, name: collection.name });
+    setShowDeleteConfirm(true);
+  };
+
+  // Generic delete confirmation handler
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget || !currentUser) return;
+
+    try {
+      switch (deleteTarget.type) {
+        case 'request':
+          await dbManager.deleteRequest(deleteTarget.id);
+          // Clear active request if it's the one being deleted
+          if (activeRequest && activeRequest.id === deleteTarget.id) {
+            setActiveRequest(null);
+            setResponse(null);
+          }
+          break;
+        case 'testSuite':
+          await dbManager.deleteTestSuite(deleteTarget.id);
+          break;
+        case 'collection':
+          await dbManager.deleteCollection(deleteTarget.id);
+          break;
+      }
+      
+      await loadUserCollections(currentUser.id);
+      setShowDeleteConfirm(false);
+      setDeleteTarget(null);
+      
+      // Broadcast real-time update
+      broadcastUpdate({
+        type: `${deleteTarget.type}_deleted`,
+        data: { id: deleteTarget.id }
+      });
+    } catch (error) {
+      console.error(`Failed to delete ${deleteTarget.type}:`, error);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setDeleteTarget(null);
   };
 
   const loadTestResults = async (requestId: number) => {
@@ -537,6 +684,12 @@ export const EnhancedApp: React.FC = () => {
         onSendRequest={handleSendRequest}
         onNewRequest={handleNewRequest}
         onNewCollection={handleNewCollection}
+        onEditRequest={handleEditRequest}
+        onDeleteRequest={handleDeleteRequest}
+        onNewTestSuite={handleNewTestSuite}
+        onEditTestSuite={handleEditTestSuite}
+        onDeleteTestSuite={handleDeleteTestSuite}
+        onDeleteCollection={handleDeleteCollection}
         onRunTest={handleRunTest}
         onRunAllTests={handleRunAllTests}
         onRunTestSuite={handleRunTestSuite}
@@ -593,6 +746,37 @@ export const EnhancedApp: React.FC = () => {
           if (value.length > 50) return 'Collection name must be less than 50 characters';
           return null;
         }}
+      />
+
+      <RequestDialog
+        isOpen={showRequestDialog}
+        title={editingRequest ? 'Edit Request' : 'Create New Request'}
+        request={editingRequest}
+        collections={collections}
+        onSave={handleSaveRequest}
+        onUpdate={handleUpdateRequest}
+        onCancel={() => setShowRequestDialog(false)}
+      />
+
+      <TestSuiteDialog
+        isOpen={showTestSuiteDialog}
+        title={editingTestSuite ? 'Edit Test Suite' : 'Create New Test Suite'}
+        testSuite={editingTestSuite}
+        requestId={activeRequest?.id || 0}
+        onSave={handleSaveTestSuite}
+        onUpdate={handleUpdateTestSuite}
+        onCancel={() => setShowTestSuiteDialog(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title={`Delete ${deleteTarget?.type || 'Item'}`}
+        message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
       />
     </div>
   );
