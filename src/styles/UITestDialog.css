@@ -1,0 +1,397 @@
+/* UI Test Dialog Styles */
+.ui-test-dialog {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 90vw;
+  max-width: 1400px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.ui-test-dialog .dialog-header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ui-test-dialog .dialog-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ui-test-dialog .close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.ui-test-dialog .close-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.ui-test-dialog .dialog-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.ui-test-dialog .dialog-left {
+  width: 450px;
+  padding: 20px;
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  background: var(--bg-primary);
+}
+
+.ui-test-dialog .dialog-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ui-test-dialog .test-cases-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ui-test-dialog .test-cases-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.ui-test-dialog .test-cases-header label {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.ui-test-dialog .add-test-btn {
+  background: var(--accent-color);
+  border: none;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.ui-test-dialog .add-test-btn:hover {
+  background: var(--accent-hover);
+}
+
+.ui-test-dialog .test-cases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.ui-test-dialog .test-case-tab {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ui-test-dialog .test-case-tab:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-color);
+}
+
+.ui-test-dialog .test-case-tab.active {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.ui-test-dialog .test-case-name {
+  font-size: 12px;
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-test-dialog .remove-test-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.ui-test-dialog .test-case-tab.active .remove-test-btn {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.ui-test-dialog .remove-test-btn:hover {
+  background: var(--error-color);
+  color: white;
+}
+
+.ui-test-dialog .form-group {
+  margin-bottom: 16px;
+}
+
+.ui-test-dialog .form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.ui-test-dialog .form-row .form-group {
+  flex: 1;
+}
+
+.ui-test-dialog .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.ui-test-dialog .form-group input,
+.ui-test-dialog .form-group select,
+.ui-test-dialog .form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.ui-test-dialog .form-group input:focus,
+.ui-test-dialog .form-group select:focus,
+.ui-test-dialog .form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+.ui-test-dialog .form-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
+
+.ui-test-dialog .template-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.ui-test-dialog .template-section label {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.ui-test-dialog .template-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ui-test-dialog .template-buttons button {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.ui-test-dialog .template-buttons button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--accent-color);
+}
+
+.ui-test-dialog .script-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.ui-test-dialog .script-section label {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.ui-test-dialog .script-editor {
+  flex: 1;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.ui-test-dialog .script-help {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.ui-test-dialog .script-help p {
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ui-test-dialog .script-help ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.ui-test-dialog .script-help li {
+  margin: 4px 0;
+}
+
+.ui-test-dialog .script-help code {
+  background: var(--bg-code);
+  padding: 2px 4px;
+  border-radius: 2px;
+  color: var(--color-keyword);
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.ui-test-dialog .dialog-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.ui-test-dialog .btn-primary,
+.ui-test-dialog .btn-secondary {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.ui-test-dialog .btn-primary {
+  background: var(--accent-color);
+  color: white;
+}
+
+.ui-test-dialog .btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.ui-test-dialog .btn-secondary {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.ui-test-dialog .btn-secondary:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .ui-test-dialog {
+    width: 95vw;
+    max-height: 95vh;
+  }
+  
+  .ui-test-dialog .dialog-content {
+    flex-direction: column;
+  }
+  
+  .ui-test-dialog .dialog-left {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    max-height: 50vh;
+  }
+  
+  .ui-test-dialog .script-section {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ui-test-dialog .form-row {
+    flex-direction: column;
+  }
+  
+  .ui-test-dialog .template-buttons {
+    flex-direction: column;
+  }
+  
+  .ui-test-dialog .template-buttons button {
+    width: 100%;
+  }
+  
+  .ui-test-dialog .test-cases-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+}
