@@ -8,6 +8,7 @@ import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
 import { Collection, Request, TestResult, User } from '../database/DatabaseManager';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
+import { UITestSuite, UITestExecutionResult } from '../testing/UITestRunner';
 import { ApiResponse } from '../types';
 
 interface DockableLayoutProps {
@@ -19,6 +20,8 @@ interface DockableLayoutProps {
   testResults: Map<number, TestResult[]>;
   testSuites: TestSuite[];
   testExecutionResults: Map<number, TestExecutionResult[]>;
+  uiTestSuites: Map<string, UITestSuite>;
+  uiTestExecutionResults: Map<string, UITestExecutionResult[]>;
   theme: 'dark' | 'light';
   enableSyntaxHighlighting: boolean;
   onRequestSelect: (request: Request) => void;
@@ -31,10 +34,15 @@ interface DockableLayoutProps {
   onNewTestSuite: (requestId: number) => void;
   onEditTestSuite: (testSuite: TestSuite) => void;
   onDeleteTestSuite: (testSuite: TestSuite) => void;
+  onNewUITestSuite: () => void;
+  onEditUITestSuite: (testSuite: UITestSuite) => void;
+  onDeleteUITestSuite: (testSuite: UITestSuite) => void;
   onDeleteCollection: (collection: Collection) => void;
   onRunTest: (requestId: number) => Promise<TestResult>;
   onRunAllTests: () => Promise<TestResult[]>;
   onRunTestSuite: (requestId: number, testSuite: TestSuite, response: ApiResponse, request: any) => Promise<TestExecutionResult[]>;
+  onRunUITestSuite: (testSuite: UITestSuite) => Promise<UITestExecutionResult[]>;
+  onRunAllUITests: () => Promise<UITestExecutionResult[]>;
   onUserProfile: () => void;
   onSettings: () => void;
 }
@@ -48,6 +56,8 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
   testResults,
   testSuites,
   testExecutionResults,
+  uiTestSuites,
+  uiTestExecutionResults,
   theme,
   enableSyntaxHighlighting,
   onRequestSelect,
@@ -60,10 +70,15 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
   onNewTestSuite,
   onEditTestSuite,
   onDeleteTestSuite,
+  onNewUITestSuite,
+  onEditUITestSuite,
+  onDeleteUITestSuite,
   onDeleteCollection,
   onRunTest,
   onRunAllTests,
   onRunTestSuite,
+  onRunUITestSuite,
+  onRunAllUITests,
   onUserProfile,
   onSettings
 }) => {
@@ -191,8 +206,21 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                   onDeleteCollection={onDeleteCollection}
                   activeRequest={activeRequest}
                   testResults={testResults}
+                  testSuites={testSuitesMap}
+                  uiTestSuites={uiTestSuites}
+                  testExecutionResults={testExecutionResults}
+                  uiTestExecutionResults={uiTestExecutionResults}
                   onRunTest={onRunTest}
                   onRunAllTests={onRunAllTests}
+                  onRunTestSuite={onRunTestSuite}
+                  onRunUITestSuite={onRunUITestSuite}
+                  onRunAllUITests={onRunAllUITests}
+                  onNewTestSuite={onNewTestSuite}
+                  onEditTestSuite={onEditTestSuite}
+                  onDeleteTestSuite={onDeleteTestSuite}
+                  onNewUITestSuite={onNewUITestSuite}
+                  onEditUITestSuite={onEditUITestSuite}
+                  onDeleteUITestSuite={onDeleteUITestSuite}
                   onUserProfile={onUserProfile}
                   onSettings={onSettings}
                   enableTestExplorer={false} // Separate panel on mobile
@@ -386,8 +414,21 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                       onDeleteCollection={onDeleteCollection}
                       activeRequest={activeRequest}
                       testResults={testResults}
+                      testSuites={testSuitesMap}
+                      uiTestSuites={uiTestSuites}
+                      testExecutionResults={testExecutionResults}
+                      uiTestExecutionResults={uiTestExecutionResults}
                       onRunTest={onRunTest}
                       onRunAllTests={onRunAllTests}
+                      onRunTestSuite={onRunTestSuite}
+                      onRunUITestSuite={onRunUITestSuite}
+                      onRunAllUITests={onRunAllUITests}
+                      onNewTestSuite={onNewTestSuite}
+                      onEditTestSuite={onEditTestSuite}
+                      onDeleteTestSuite={onDeleteTestSuite}
+                      onNewUITestSuite={onNewUITestSuite}
+                      onEditUITestSuite={onEditUITestSuite}
+                      onDeleteUITestSuite={onDeleteUITestSuite}
                       onUserProfile={onUserProfile}
                       onSettings={onSettings}
                       enableTestExplorer={false} // Now separate

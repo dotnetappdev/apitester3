@@ -195,7 +195,11 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
     if (editingUITestSuite) {
       onEditUITestSuite?.(updatedTestSuite);
     } else {
-      onNewUITestSuite?.();
+      // For new test suites, we need a way to save them
+      if (onNewUITestSuite) {
+        // Pass the test suite data to the parent handler
+        (onNewUITestSuite as any)(updatedTestSuite);
+      }
     }
     setShowUITestDialog(false);
     setEditingUITestSuite(undefined);

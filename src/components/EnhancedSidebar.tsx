@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Collection, Request, TestResult, User } from '../database/DatabaseManager';
-import { TestExplorer } from './TestExplorer';
+import { EnhancedTestExplorer } from './EnhancedTestExplorer';
+import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
+import { UITestSuite, UITestExecutionResult } from '../testing/UITestRunner';
 import { ModernButton, CollectionIcon, TestIcon, AddIcon } from './ModernButton';
+import { ApiResponse } from '../types';
 
 interface EnhancedSidebarProps {
   user: User;
@@ -14,8 +17,21 @@ interface EnhancedSidebarProps {
   onDeleteCollection: (collection: Collection) => void;
   activeRequest: Request | null;
   testResults: Map<number, TestResult[]>;
+  testSuites: Map<number, TestSuite>;
+  uiTestSuites: Map<string, UITestSuite>;
+  testExecutionResults: Map<number, TestExecutionResult[]>;
+  uiTestExecutionResults: Map<string, UITestExecutionResult[]>;
   onRunTest: (requestId: number) => Promise<TestResult>;
   onRunAllTests: () => Promise<TestResult[]>;
+  onRunTestSuite: (requestId: number, testSuite: TestSuite, response: ApiResponse, request: any) => Promise<TestExecutionResult[]>;
+  onRunUITestSuite: (testSuite: UITestSuite) => Promise<UITestExecutionResult[]>;
+  onRunAllUITests: () => Promise<UITestExecutionResult[]>;
+  onNewTestSuite?: (requestId: number) => void;
+  onEditTestSuite?: (testSuite: TestSuite) => void;
+  onDeleteTestSuite?: (testSuite: TestSuite) => void;
+  onNewUITestSuite?: () => void;
+  onEditUITestSuite?: (testSuite: UITestSuite) => void;
+  onDeleteUITestSuite?: (testSuite: UITestSuite) => void;
   onUserProfile: () => void;
   onSettings: () => void;
   onToggleOutput?: () => void;
@@ -33,8 +49,21 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
   onDeleteCollection,
   activeRequest,
   testResults,
+  testSuites,
+  uiTestSuites,
+  testExecutionResults,
+  uiTestExecutionResults,
   onRunTest,
   onRunAllTests,
+  onRunTestSuite,
+  onRunUITestSuite,
+  onRunAllUITests,
+  onNewTestSuite,
+  onEditTestSuite,
+  onDeleteTestSuite,
+  onNewUITestSuite,
+  onEditUITestSuite,
+  onDeleteUITestSuite,
   onUserProfile,
   onSettings,
   onToggleOutput,
@@ -299,14 +328,24 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
 
         {activeTab === 'tests' && enableTestExplorer && (
           <div className="tests-panel">
-            <TestExplorer
+            <EnhancedTestExplorer
               requests={allRequests}
-              testSuites={new Map()}
+              testSuites={testSuites}
+              uiTestSuites={uiTestSuites}
               onRunTest={onRunTest}
               onRunAllTests={onRunAllTests}
-              onRunTestSuite={async () => []}
+              onRunTestSuite={onRunTestSuite}
+              onRunUITestSuite={onRunUITestSuite}
+              onRunAllUITests={onRunAllUITests}
+              onNewTestSuite={onNewTestSuite}
+              onEditTestSuite={onEditTestSuite}
+              onDeleteTestSuite={onDeleteTestSuite}
+              onNewUITestSuite={onNewUITestSuite}
+              onEditUITestSuite={onEditUITestSuite}
+              onDeleteUITestSuite={onDeleteUITestSuite}
               testResults={testResults}
-              testExecutionResults={new Map()}
+              testExecutionResults={testExecutionResults}
+              uiTestExecutionResults={uiTestExecutionResults}
             />
           </div>
         )}

@@ -20,6 +20,7 @@ import { DockableLayout } from './DockableLayout';
 import { ApiClient } from '../utils/api';
 import { ApiResponse } from '../types';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
+import { UITestSuite, UITestExecutionResult, UITestRunner } from '../testing/UITestRunner';
 import { useRealTimeData } from '../hooks/useRealTimeData';
 
 export const EnhancedApp: React.FC = () => {
@@ -56,11 +57,20 @@ export const EnhancedApp: React.FC = () => {
   const [testSuites] = useState<TestSuite[]>([]);
   const [testExecutionResults, setTestExecutionResults] = useState<Map<number, TestExecutionResult[]>>(new Map());
   
+  // UI Test suites and results
+  const [uiTestSuites, setUITestSuites] = useState<Map<string, UITestSuite>>(new Map());
+  const [uiTestExecutionResults, setUITestExecutionResults] = useState<Map<string, UITestExecutionResult[]>>(new Map());
+  
   // Managers
   const [dbManager] = useState(() => new DatabaseManager());
   const [authManager] = useState(() => AuthManager.getInstance(dbManager));
   const [settingsManager] = useState(() => SettingsManager.getInstance());
   const { subscribeToUpdates, broadcastUpdate, updateDataCache } = useRealTimeData();
+
+  // Computed values for test explorer
+  const testSuitesMap = new Map<number, TestSuite>(
+    testSuites.map(suite => [suite.requestId, suite])
+  );
 
   // Initialize the application
   useEffect(() => {
@@ -93,10 +103,50 @@ export const EnhancedApp: React.FC = () => {
       setCurrentUser(session?.user || null);
       if (session?.user) {
         loadUserCollections(session.user.id);
+        
+        // Initialize with sample UI test suite for demonstration
+        const sampleUITestSuite: UITestSuite = {
+          id: 'sample_ui_test_' + Date.now(),
+          name: 'Sample UI Tests',
+          testCases: [
+            {
+              id: 'test_homepage_' + Date.now(),
+              name: 'Homepage Loads Correctly',
+              description: 'Verify that the homepage loads and displays correctly',
+              enabled: true,
+              script: `// Sample UI Test - Homepage
+await page.goto('https://example.com');
+await page.waitForLoadState('networkidle');
+
+// Check page title
+assert.assertPageTitle('Example Domain', 'Page should have correct title');
+
+// Check main heading
+assert.assertElementExists('h1', 'Page should have a main heading');
+assert.assertElementText('h1', 'Example Domain', 'Heading should display correct text');
+
+// Check if the page is visible
+assert.assertElementVisible('h1', 'Heading should be visible to users');
+
+console.log('Homepage test completed successfully');`,
+              timeout: 30000,
+              browser: 'chromium',
+              headless: true,
+              viewport: { width: 1280, height: 720 },
+              tags: ['smoke', 'homepage']
+            }
+          ]
+        };
+        
+        const initialUITestSuites = new Map<string, UITestSuite>();
+        initialUITestSuites.set(sampleUITestSuite.id, sampleUITestSuite);
+        setUITestSuites(initialUITestSuites);
       } else {
         setCollections([]);
         setActiveRequest(null);
         setResponse(null);
+        setUITestSuites(new Map());
+        setUITestExecutionResults(new Map());
       }
     });
 
@@ -592,6 +642,65 @@ export const EnhancedApp: React.FC = () => {
     return [];
   };
 
+  // UI Test Suite handlers
+  const handleNewUITestSuite = (testSuite?: UITestSuite) => {
+    if (testSuite) {
+      // Save the new test suite
+      handleSaveUITestSuite(testSuite);
+    } else {
+      // This will trigger the UI test dialog in EnhancedTestExplorer
+      console.log('Creating new UI test suite');
+    }
+  };
+
+  const handleEditUITestSuite = (testSuite: UITestSuite) => {
+    console.log('Editing UI test suite:', testSuite.name);
+  };
+
+  const handleDeleteUITestSuite = (testSuite: UITestSuite) => {
+    const updatedSuites = new Map(uiTestSuites);
+    updatedSuites.delete(testSuite.id);
+    setUITestSuites(updatedSuites);
+    
+    // Also remove execution results
+    const updatedResults = new Map(uiTestExecutionResults);
+    updatedResults.delete(testSuite.id);
+    setUITestExecutionResults(updatedResults);
+  };
+
+  const handleRunUITestSuite = async (testSuite: UITestSuite): Promise<UITestExecutionResult[]> => {
+    try {
+      const results = await UITestRunner.getInstance().executeUITestSuite(testSuite);
+      
+      // Store results
+      const updatedResults = new Map(uiTestExecutionResults);
+      updatedResults.set(testSuite.id, results);
+      setUITestExecutionResults(updatedResults);
+      
+      return results;
+    } catch (error) {
+      console.error('Failed to run UI test suite:', error);
+      return [];
+    }
+  };
+
+  const handleRunAllUITests = async (): Promise<UITestExecutionResult[]> => {
+    const allResults: UITestExecutionResult[] = [];
+    
+    for (const testSuite of uiTestSuites.values()) {
+      const results = await handleRunUITestSuite(testSuite);
+      allResults.push(...results);
+    }
+    
+    return allResults;
+  };
+
+  const handleSaveUITestSuite = (testSuite: UITestSuite) => {
+    const updatedSuites = new Map(uiTestSuites);
+    updatedSuites.set(testSuite.id, testSuite);
+    setUITestSuites(updatedSuites);
+  };
+
   const handleExportCollections = async (selectedCollections: Collection[], selectedTestSuites: TestSuite[]) => {
     if (!currentUser) return;
 
@@ -677,6 +786,8 @@ export const EnhancedApp: React.FC = () => {
         testResults={testResults}
         testSuites={testSuites}
         testExecutionResults={testExecutionResults}
+        uiTestSuites={uiTestSuites}
+        uiTestExecutionResults={uiTestExecutionResults}
         theme={theme}
         enableSyntaxHighlighting={enableSyntaxHighlighting}
         onRequestSelect={handleRequestSelect}
@@ -689,10 +800,15 @@ export const EnhancedApp: React.FC = () => {
         onNewTestSuite={handleNewTestSuite}
         onEditTestSuite={handleEditTestSuite}
         onDeleteTestSuite={handleDeleteTestSuite}
+        onNewUITestSuite={handleNewUITestSuite}
+        onEditUITestSuite={handleEditUITestSuite}
+        onDeleteUITestSuite={handleDeleteUITestSuite}
         onDeleteCollection={handleDeleteCollection}
         onRunTest={handleRunTest}
         onRunAllTests={handleRunAllTests}
         onRunTestSuite={handleRunTestSuite}
+        onRunUITestSuite={handleRunUITestSuite}
+        onRunAllUITests={handleRunAllUITests}
         onUserProfile={() => {/* TODO: Profile dialog */}}
         onSettings={() => setShowSettings(true)}
       />
