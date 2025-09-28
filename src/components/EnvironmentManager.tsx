@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Environment } from '../types';
+import { DynamicVariablesDialog } from './DynamicVariablesDialog';
 
 interface EnvironmentManagerProps {
   environments: Environment[];
@@ -25,6 +26,7 @@ export const EnvironmentManager: React.FC<EnvironmentManagerProps> = ({
   const [editingEnvironment, setEditingEnvironment] = useState<Environment | null>(null);
   const [newVariableKey, setNewVariableKey] = useState('');
   const [newVariableValue, setNewVariableValue] = useState('');
+  const [showDynamicVariables, setShowDynamicVariables] = useState(false);
 
   if (!isOpen) return null;
 
@@ -167,7 +169,16 @@ export const EnvironmentManager: React.FC<EnvironmentManagerProps> = ({
               </div>
 
               <div className="variables-section">
-                <h4>Variables</h4>
+                <div className="variables-section-header">
+                  <h4>Variables</h4>
+                  <button
+                    className="btn btn-info btn-sm"
+                    onClick={() => setShowDynamicVariables(true)}
+                    title="View available dynamic variables"
+                  >
+                    🎲 Dynamic Variables
+                  </button>
+                </div>
                 
                 <div className="add-variable">
                   <input
@@ -231,6 +242,11 @@ export const EnvironmentManager: React.FC<EnvironmentManagerProps> = ({
             </div>
           )}
         </div>
+
+        <DynamicVariablesDialog
+          isOpen={showDynamicVariables}
+          onClose={() => setShowDynamicVariables(false)}
+        />
       </div>
     </div>
   );
