@@ -161,9 +161,24 @@ npx electron-builder --linux
 - **Linux**: Tested on Ubuntu 18.04+, CentOS 7+, Debian 10+, Fedora 32+.
 
 **Package Formats by Platform:**
-- Windows: `.exe` installer, `.zip` portable
-- macOS: `.dmg` disk image, `.app` application bundle  
-- Linux: `.AppImage` universal, `.deb` (Debian/Ubuntu), `.rpm` (Red Hat/CentOS), `.snap` (Universal Linux)
+- **Windows**: `.appx` package for Windows Store (MSIX format, x64 and x86/32-bit support)
+- **macOS**: `.dmg` disk image, `.zip` application bundle (Universal: Intel + Apple Silicon)
+- **Linux**: `.AppImage` universal, `.deb` (Debian/Ubuntu), `.rpm` (Red Hat/CentOS), `.tar.gz` archive
+
+**Verified Working Packages:**
+- ✅ Linux: AppImage, DEB, RPM, TAR.GZ (tested on Ubuntu)
+- 🔧 Windows: APPX/MSIX for Windows Store (x64 + x86 architectures ready)  
+- 🔧 macOS: DMG, ZIP (configuration ready)
+
+**Quick Build Commands:**
+```bash
+npm run package:linux    # Linux packages
+npm run package:win      # Windows packages  
+npm run package:mac      # macOS packages
+npm run package:all      # All platforms
+```
+
+📋 **For detailed build instructions and installer configuration, see [docs/INSTALLERS.md](docs/INSTALLERS.md) and [docs/BUILD.md](docs/BUILD.md)**
 
 ## Architecture
 

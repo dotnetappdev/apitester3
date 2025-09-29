@@ -1,0 +1,6 @@
+# macOS ICNS Icon Placeholder
+# This file should be replaced with a proper .icns file
+# Use iconutil on macOS or png2icns tool
+# 1. Create icon.iconset directory
+# 2. Add properly sized PNG files (icon_16x16.png, icon_32x32.png, etc.)
+# 3. Run: iconutil -c icns icon.iconset

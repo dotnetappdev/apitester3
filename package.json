@@ -10,7 +10,18 @@
     "build": "npm run build-react && npm run build-electron",
     "build-react": "vite build",
     "build-electron": "tsc -p electron/tsconfig.json",
+    "postinstall": "electron-builder install-app-deps",
+    "generate-icons": "node build/generate-icons.js",
     "package": "npm run build && electron-builder",
+    "package:win": "npm run build && electron-builder --win",
+    "package:mac": "npm run build && electron-builder --mac",
+    "package:linux": "npm run build && electron-builder --linux",
+    "package:all": "npm run build && electron-builder --win --mac --linux",
+    "installer:prepare": "npm run generate-icons",
+    "installer:win": "npm run package:win",
+    "installer:mac": "npm run package:mac",
+    "installer:linux": "npm run package:linux",
+    "installer:all": "npm run package:all",
     "test": "jest",
     "test:ui": "playwright test",
     "test:ui:headed": "playwright test --headed",
@@ -26,7 +37,11 @@
     "typescript",
     "react"
   ],
-  "author": "dotnetappdev",
+  "author": {
+    "name": "dotnetappdev",
+    "email": "dotnetappdev@users.noreply.github.com",
+    "url": "https://github.com/dotnetappdev"
+  },
   "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.55.1",
@@ -40,6 +55,7 @@
     "concurrently": "^8.0.0",
     "electron": "^25.0.0",
     "electron-builder": "^24.0.0",
+    "electron-rebuild": "^3.2.9",
     "eslint": "^8.0.0",
     "eslint-plugin-react": "^7.32.0",
     "eslint-plugin-react-hooks": "^4.6.0",
@@ -70,15 +86,148 @@
     "appId": "com.dotnetappdev.apitester3",
     "productName": "API Tester 3",
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "assets"
     },
     "files": [
       "dist/**/*",
-      "node_modules/**/*"
+      "node_modules/**/*",
+      "!node_modules/.cache",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}",
+      "!**/node_modules/playwright*/**/*",
+      "!**/node_modules/@playwright*/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "assets/",
+        "to": "assets/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "nodeGypRebuild": false,
+    "buildDependenciesFromSource": false,
+    "npmRebuild": false,
     "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
+      "target": [
+        {
+          "target": "appx",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png",
+      "requestedExecutionLevel": "asInvoker",
+      "publisherName": "dotnetappdev"
+    },
+    "appx": {
+      "displayName": "API Tester 3",
+      "publisherDisplayName": "dotnetappdev",
+      "identityName": "dotnetappdev.APITester3",
+      "backgroundColor": "#007ACC",
+      "languages": ["en-US"],
+      "showNameOnTiles": true,
+      "setBuildNumber": true
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png",
+      "category": "public.app-category.developer-tools",
+      "darkModeSupport": true
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "title": "API Tester 3 ${version}",
+      "icon": "assets/icon.png"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "rpm",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "tar.gz",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png",
+      "category": "Development",
+      "synopsis": "Professional desktop API testing tool",
+      "description": "A comprehensive API testing application built with Electron, featuring request management, response analysis, and test automation capabilities."
+    },
+    "deb": {
+      "depends": [
+        "gconf2",
+        "gconf-service",
+        "libnotify4",
+        "libappindicator1",
+        "libxtst6",
+        "libnss3"
+      ],
+      "priority": "optional"
+    },
+    "rpm": {
+      "depends": [
+        "libXScrnSaver",
+        "libnotify",
+        "nss"
+      ]
     }
   }
 }
