@@ -74,6 +74,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
   const [expandedCollections, setExpandedCollections] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState<'collections' | 'tests'>('collections');
   const [contextMenu, setContextMenu] = useState<{type: 'collection' | 'request', id: number, x: number, y: number} | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const toggleCollection = (collectionId: number) => {
     const newExpanded = new Set(expandedCollections);
@@ -169,6 +170,33 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
     collection.requests?.map(req => ({ ...req, collectionId: collection.id })) || []
   );
 
+  // Filter collections and requests based on search query
+  const filteredCollections = searchQuery.trim() === '' 
+    ? collections 
+    : collections.map(collection => {
+        const matchesCollection = collection.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const filteredRequests = collection.requests?.filter(request => 
+          request.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          request.method.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          request.url.toLowerCase().includes(searchQuery.toLowerCase())
+        ) || [];
+        
+        if (matchesCollection || filteredRequests.length > 0) {
+          return {
+            ...collection,
+            requests: filteredRequests
+          };
+        }
+        return null;
+      }).filter(c => c !== null) as Collection[];
+
+  // Expand all collections when searching
+  React.useEffect(() => {
+    if (searchQuery.trim() !== '') {
+      setExpandedCollections(new Set(filteredCollections.map(c => c.id)));
+    }
+  }, [searchQuery, filteredCollections]);
+
   return (
     <div className="enhanced-sidebar">
       {/* User Profile Header */}
@@ -205,6 +233,35 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
         </div>
       </div>
 
+      {/* Search Bar - VS Code Style */}
+      <div className="sidebar-search">
+        <div className="search-input-wrapper">
+          <span className="search-icon">🔍</span>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search collections and requests... (Ctrl+P)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setSearchQuery('');
+                e.currentTarget.blur();
+              }
+            }}
+          />
+          {searchQuery && (
+            <button 
+              className="search-clear"
+              onClick={() => setSearchQuery('')}
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Tab Navigation */}
       <div className="sidebar-tabs">
         <button
@@ -234,24 +291,36 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
       <div className="sidebar-content">
         {activeTab === 'collections' && (
           <div className="collections-panel">
-            {collections.length === 0 ? (
+            {filteredCollections.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">📁</div>
-                <p>No collections yet</p>
-                <p className="text-small text-muted">
-                  Create your first collection to organize your requests
-                </p>
-                <ModernButton
-                  onClick={onNewCollection}
-                  variant="success"
-                  icon={<CollectionIcon />}
-                  style={{ marginTop: '12px' }}
-                >
-                  Create Collection
-                </ModernButton>
+                {searchQuery ? (
+                  <>
+                    <div className="empty-icon">🔍</div>
+                    <p>No results found</p>
+                    <p className="text-small text-muted">
+                      Try a different search query
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="empty-icon">📁</div>
+                    <p>No collections yet</p>
+                    <p className="text-small text-muted">
+                      Create your first collection to organize your requests
+                    </p>
+                    <ModernButton
+                      onClick={onNewCollection}
+                      variant="success"
+                      icon={<CollectionIcon />}
+                      style={{ marginTop: '12px' }}
+                    >
+                      Create Collection
+                    </ModernButton>
+                  </>
+                )}
               </div>
             ) : (
-              collections.map(collection => (
+              filteredCollections.map(collection => (
                 <div key={collection.id} className="collection-item">
                   <div
                     className="collection-header"

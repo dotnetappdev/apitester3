@@ -46,7 +46,10 @@ interface DockableLayoutProps {
   onUserProfile: () => void;
   onSettings: () => void;
   onTeamManager: () => void;
+  onShowAbout?: () => void;
+  onReportProblem?: () => void;
 }
+
 
 export const DockableLayout: React.FC<DockableLayoutProps> = ({
   user,
@@ -82,11 +85,23 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
   onRunAllUITests,
   onUserProfile,
   onSettings,
-  onTeamManager
+  onTeamManager,
+  onShowAbout,
+  onReportProblem
 }) => {
   const [layoutManager] = useState(() => LayoutManager.getInstance());
+  const [showHelpMenu, setShowHelpMenu] = useState(false);
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(() => layoutManager.loadLayout());
   const [isResponsive, setIsResponsive] = useState(() => layoutManager.getResponsiveConfig());
+
+  // Close help menu when clicking outside
+  useEffect(() => {
+    if (showHelpMenu) {
+      const handleClickOutside = () => setShowHelpMenu(false);
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showHelpMenu]);
 
   // Handle window resize for responsive design with debouncing
   useEffect(() => {
@@ -356,6 +371,65 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
             🧪 {!isTablet && 'Tests'}
           </button>
           <div className="toolbar-spacer"></div>
+          <div className="help-menu-container">
+            <button 
+              className={`help-menu-toggle ${showHelpMenu ? 'active' : ''}`}
+              onClick={() => setShowHelpMenu(!showHelpMenu)}
+              title="Help Menu"
+              aria-label="Help Menu"
+            >
+              ❓ {!isTablet && 'Help'}
+            </button>
+            {showHelpMenu && (
+              <div className="help-dropdown">
+                <button 
+                  className="help-menu-item"
+                  onClick={() => {
+                    setShowHelpMenu(false);
+                    onShowAbout?.();
+                  }}
+                >
+                  ℹ️ About API Tester 3
+                </button>
+                <button 
+                  className="help-menu-item"
+                  onClick={() => {
+                    setShowHelpMenu(false);
+                    onReportProblem?.();
+                  }}
+                >
+                  🐛 Report a Problem
+                </button>
+                <div className="help-menu-separator"></div>
+                <button 
+                  className="help-menu-item"
+                  onClick={() => {
+                    setShowHelpMenu(false);
+                    if (typeof window !== 'undefined' && window.electron) {
+                      window.electron.openExternal('https://github.com/dotnetappdev/apitester3');
+                    } else {
+                      window.open('https://github.com/dotnetappdev/apitester3', '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                >
+                  🔗 GitHub Repository
+                </button>
+                <button 
+                  className="help-menu-item"
+                  onClick={() => {
+                    setShowHelpMenu(false);
+                    if (typeof window !== 'undefined' && window.electron) {
+                      window.electron.openExternal('https://github.com/dotnetappdev/apitester3#readme');
+                    } else {
+                      window.open('https://github.com/dotnetappdev/apitester3#readme', '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                >
+                  📖 Documentation
+                </button>
+              </div>
+            )}
+          </div>
           <button 
             className="reset-layout"
             onClick={resetLayout}
@@ -624,6 +698,68 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
           background: var(--bg-hover);
           border-color: var(--border-color);
           color: var(--text-primary);
+        }
+
+        /* Help Menu */
+        .help-menu-container {
+          position: relative;
+        }
+
+        .help-menu-toggle {
+          background: transparent;
+          border: 1px solid transparent;
+          color: var(--text-muted);
+          padding: 4px 8px;
+          border-radius: 3px;
+          cursor: pointer;
+          font-size: 12px;
+          transition: all 0.2s ease;
+        }
+
+        .help-menu-toggle:hover,
+        .help-menu-toggle.active {
+          background: var(--bg-hover);
+          border-color: var(--border-color);
+          color: var(--text-primary);
+        }
+
+        .help-dropdown {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          margin-top: 4px;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 4px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          min-width: 200px;
+          z-index: 1000;
+          padding: 4px 0;
+        }
+
+        .help-menu-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+          padding: 8px 12px;
+          background: transparent;
+          border: none;
+          color: var(--text-primary);
+          cursor: pointer;
+          font-size: 13px;
+          text-align: left;
+          transition: background-color 0.15s ease;
+        }
+
+        .help-menu-item:hover {
+          background: var(--bg-hover);
+        }
+
+        .help-menu-separator {
+          height: 1px;
+          background: var(--border-color);
+          margin: 4px 0;
         }
 
         .panel-container {
