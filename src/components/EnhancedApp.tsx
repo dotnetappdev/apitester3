@@ -10,6 +10,8 @@ import { ResponsePanel } from './ResponsePanel';
 import { SettingsDialog } from './SettingsDialog';
 import { ImportExportDialog } from './ImportExportDialog';
 import { DocumentationDialog } from './DocumentationDialog';
+import { AboutDialog } from './AboutDialog';
+import { ReportProblemDialog } from './ReportProblemDialog';
 import { InputDialog } from './InputDialog';
 import { CodeGenerationDialog } from './CodeGenerationDialog';
 import { RequestDialog } from './RequestDialog';
@@ -42,6 +44,8 @@ export const EnhancedApp: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showImportExport, setShowImportExport] = useState<'import' | 'export' | null>(null);
   const [showDocumentation, setShowDocumentation] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
+  const [showReportProblem, setShowReportProblem] = useState(false);
   const [showNewCollectionDialog, setShowNewCollectionDialog] = useState(false);
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false); // New project dialog
   const [showCodeGeneration, setShowCodeGeneration] = useState(false);
@@ -920,6 +924,8 @@ console.log('Homepage test completed successfully');`,
         onUserProfile={() => {/* TODO: Profile dialog */}}
         onSettings={() => setShowSettings(true)}
         onTeamManager={() => setShowTeamManager(true)}
+        onShowAbout={() => setShowAbout(true)}
+        onReportProblem={() => setShowReportProblem(true)}
       />
 
       {showTeamManager && currentUser && (
@@ -966,6 +972,20 @@ console.log('Homepage test completed successfully');`,
           isOpen={showDocumentation}
           onClose={() => setShowDocumentation(false)}
           documentType={documentationType}
+        />
+      )}
+
+      {showAbout && (
+        <AboutDialog
+          isOpen={showAbout}
+          onClose={() => setShowAbout(false)}
+        />
+      )}
+
+      {showReportProblem && (
+        <ReportProblemDialog
+          isOpen={showReportProblem}
+          onClose={() => setShowReportProblem(false)}
         />
       )}
 
