@@ -52,6 +52,26 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
   const [showUITestDialog, setShowUITestDialog] = useState(false);
   const [editingUITestSuite, setEditingUITestSuite] = useState<UITestSuite | undefined>();
 
+  // Keyboard shortcuts for test runner
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F5' && !isRunning) {
+        e.preventDefault();
+        if (requests.length > 0 || uiTestSuites.size > 0) {
+          handleRunAllTests();
+        }
+      } else if (e.key === 'F6' && !isRunning) {
+        e.preventDefault();
+        // TODO: Implement debug mode
+        console.log('Debug tests (F6) - not yet implemented');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRunning, requests.length, uiTestSuites.size]);
+
   // Get combined test status (both simple and execution tests)
   const getTestStatus = (requestId: number): 'pass' | 'fail' | 'none' => {
     const executionResults = testExecutionResults.get(requestId);
@@ -218,18 +238,35 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           Test Explorer
         </div>
         <div className="test-actions">
+          {isRunning ? (
+            <button
+              className="test-action-button stop"
+              onClick={() => setIsRunning(false)}
+              title="Stop Tests"
+            >
+              ⏹️
+            </button>
+          ) : (
+            <button
+              className="test-action-button play"
+              onClick={handleRunAllTests}
+              disabled={requests.length === 0 && uiTestSuites.size === 0}
+              title="Run All Tests (F5)"
+            >
+              ▶️
+            </button>
+          )}
           <button
-            className="test-action-button"
-            onClick={handleRunAllTests}
+            className="test-action-button debug"
             disabled={isRunning || (requests.length === 0 && uiTestSuites.size === 0)}
-            title="Run All Tests"
+            title="Debug Tests (F6)"
           >
-            ⚡
+            🐛
           </button>
           <button
             className="test-action-button"
             onClick={() => {/* TODO: Refresh tests */}}
-            title="Refresh"
+            title="Refresh Tests"
           >
             🔄
           </button>
@@ -563,6 +600,33 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           border-radius: 3px;
           font-size: 12px;
           transition: all 0.1s;
+        }
+
+        .test-action-button.play {
+          color: var(--success-color);
+        }
+
+        .test-action-button.play:hover:not(:disabled) {
+          background: rgba(76, 175, 80, 0.1);
+          color: var(--success-color);
+        }
+
+        .test-action-button.stop {
+          color: var(--error-color);
+        }
+
+        .test-action-button.stop:hover {
+          background: rgba(244, 71, 71, 0.1);
+          color: var(--error-color);
+        }
+
+        .test-action-button.debug {
+          color: var(--warning-color);
+        }
+
+        .test-action-button.debug:hover:not(:disabled) {
+          background: rgba(255, 193, 7, 0.1);
+          color: var(--warning-color);
         }
 
         .test-action-button:hover:not(:disabled) {
