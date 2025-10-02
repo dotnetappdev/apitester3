@@ -51,6 +51,9 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
   const [expandedUITestSuites, setExpandedUITestSuites] = useState<Set<string>>(new Set());
   const [showUITestDialog, setShowUITestDialog] = useState(false);
   const [editingUITestSuite, setEditingUITestSuite] = useState<UITestSuite | undefined>();
+  const [isDiscovering, setIsDiscovering] = useState(false);
+  const [discoveredTests, setDiscoveredTests] = useState<Map<string, 'discovered' | 'not-discovered'>>(new Map());
+  const [showTestTypeSelector, setShowTestTypeSelector] = useState(false);
 
   // Keyboard shortcuts for test runner
   React.useEffect(() => {
@@ -92,23 +95,75 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
     return hasFailures ? 'fail' : 'pass';
   };
 
-  const getTestIcon = (status: 'pass' | 'fail' | 'none' | 'skip') => {
+  const getTestIcon = (status: 'pass' | 'fail' | 'none' | 'skip', testId?: string) => {
+    // Check discovery status first
+    if (testId && discoveredTests.get(testId) === 'not-discovered') {
+      return '🔍';
+    }
+    if (testId && discoveredTests.get(testId) === 'discovered' && status === 'none') {
+      return '✅';
+    }
+    
     switch (status) {
-      case 'pass': return '✓';
-      case 'fail': return '✗';
-      case 'skip': return '○';
+      case 'pass': return '✔️';
+      case 'fail': return '❌';
+      case 'skip': return '⚠️';
       case 'none': 
       default: return '○';
     }
   };
 
-  const getTestIconColor = (status: 'pass' | 'fail' | 'none' | 'skip') => {
+  const getTestIconColor = (status: 'pass' | 'fail' | 'none' | 'skip', testId?: string) => {
+    // Check discovery status first
+    if (testId && discoveredTests.get(testId) === 'not-discovered') {
+      return 'var(--text-muted)';
+    }
+    if (testId && discoveredTests.get(testId) === 'discovered' && status === 'none') {
+      return 'var(--success-color)';
+    }
+    
     switch (status) {
       case 'pass': return 'var(--success-color)';
       case 'fail': return 'var(--error-color)';
       case 'skip': return 'var(--warning-color)';
       case 'none':
       default: return 'var(--text-muted)';
+    }
+  };
+
+  // Discover all tests
+  const handleDiscoverTests = async () => {
+    setIsDiscovering(true);
+    const newDiscoveredTests = new Map<string, 'discovered' | 'not-discovered'>();
+
+    try {
+      // Discover API Request Tests
+      requests.forEach(request => {
+        const testSuite = testSuites.get(request.id);
+        if (testSuite) {
+          testSuite.testCases.forEach(testCase => {
+            const testId = `request-${request.id}-${testCase.id}`;
+            newDiscoveredTests.set(testId, 'discovered');
+          });
+        }
+      });
+
+      // Discover UI Tests
+      Array.from(uiTestSuites.values()).forEach(uiTestSuite => {
+        uiTestSuite.testCases.forEach(testCase => {
+          const testId = `ui-${uiTestSuite.id}-${testCase.id}`;
+          newDiscoveredTests.set(testId, 'discovered');
+        });
+      });
+
+      setDiscoveredTests(newDiscoveredTests);
+      
+      // Simulate discovery time
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (error) {
+      console.error('Test discovery failed:', error);
+    } finally {
+      setIsDiscovering(false);
     }
   };
 
@@ -238,6 +293,14 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           Test Explorer
         </div>
         <div className="test-actions">
+          <button
+            className="test-action-button discover"
+            onClick={handleDiscoverTests}
+            disabled={isRunning || isDiscovering}
+            title="Discover All Tests"
+          >
+            {isDiscovering ? '🔄' : '🔍'}
+          </button>
           {isRunning ? (
             <button
               className="test-action-button stop"
@@ -278,10 +341,13 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           <div className="test-summary">
             <div className="summary-stats">
               <span className="stat-item">
-                <span style={{ color: 'var(--success-color)' }}>✓ {passedTests}</span>
+                <span style={{ color: 'var(--info-color)' }}>🔍 {discoveredTests.size}</span>
               </span>
               <span className="stat-item">
-                <span style={{ color: 'var(--error-color)' }}>✗ {failedTests}</span>
+                <span style={{ color: 'var(--success-color)' }}>✔️ {passedTests}</span>
+              </span>
+              <span className="stat-item">
+                <span style={{ color: 'var(--error-color)' }}>❌ {failedTests}</span>
               </span>
               <span className="stat-item">
                 <span style={{ color: 'var(--text-muted)' }}>○ {totalTests - passedTests - failedTests}</span>
@@ -333,9 +399,9 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                           )}
                           <span 
                             className="test-status-icon"
-                            style={{ color: getTestIconColor(status) }}
+                            style={{ color: getTestIconColor(status, `request-${request.id}`) }}
                           >
-                            {getTestIcon(status)}
+                            {getTestIcon(status, `request-${request.id}`)}
                           </span>
                           <div className="test-request-info">
                             <div className="test-request-name">{request.name}</div>
@@ -361,14 +427,15 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                               const testResult = executionResults.find(r => r.testCaseId === testCase.id);
                               const testStatus = testResult ? 
                                 (testResult.status === 'error' ? 'fail' : testResult.status) : 'none';
+                              const testId = `request-${request.id}-${testCase.id}`;
 
                               return (
                                 <div key={testCase.id} className="test-case-item">
                                   <span 
                                     className="test-case-icon"
-                                    style={{ color: getTestIconColor(testStatus) }}
+                                    style={{ color: getTestIconColor(testStatus, testId) }}
                                   >
-                                    {getTestIcon(testStatus)}
+                                    {getTestIcon(testStatus, testId)}
                                   </span>
                                   <div className="test-case-info">
                                     <div className="test-case-name">
@@ -447,9 +514,9 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                             </span>
                             <span 
                               className="test-status-icon"
-                              style={{ color: getTestIconColor(status) }}
+                              style={{ color: getTestIconColor(status, `ui-${uiTestSuite.id}`) }}
                             >
-                              {getTestIcon(status)}
+                              {getTestIcon(status, `ui-${uiTestSuite.id}`)}
                             </span>
                             <div className="test-request-info">
                               <div className="test-request-name">
@@ -490,14 +557,15 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                                 const testResult = executionResults.find(r => r.testCaseId === testCase.id);
                                 const testStatus = testResult ? 
                                   (testResult.status === 'error' ? 'fail' : testResult.status) : 'none';
+                                const testId = `ui-${uiTestSuite.id}-${testCase.id}`;
 
                                 return (
                                   <div key={testCase.id} className="test-case-item ui-test-case">
                                     <span 
                                       className="test-case-icon"
-                                      style={{ color: getTestIconColor(testStatus) }}
+                                      style={{ color: getTestIconColor(testStatus, testId) }}
                                     >
-                                      {getTestIcon(testStatus)}
+                                      {getTestIcon(testStatus, testId)}
                                     </span>
                                     <div className="test-case-info">
                                       <div className="test-case-name">
@@ -627,6 +695,15 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
         .test-action-button.debug:hover:not(:disabled) {
           background: rgba(255, 193, 7, 0.1);
           color: var(--warning-color);
+        }
+
+        .test-action-button.discover {
+          color: var(--info-color);
+        }
+
+        .test-action-button.discover:hover:not(:disabled) {
+          background: rgba(33, 150, 243, 0.1);
+          color: var(--info-color);
         }
 
         .test-action-button:hover:not(:disabled) {
