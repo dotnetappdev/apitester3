@@ -385,16 +385,23 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           )}
 
           <div className="test-sections">
-            {/* API Tests Section */}
-            <div className="test-section">
+            {/* Request Tests Section - Uses Live Data */}
+            <div className="test-section request-tests-section">
               <div className="test-section-header">
-                <span className="section-title">API Tests</span>
-                <span className="test-count">({requests.length})</span>
+                <div className="section-title-wrapper">
+                  <span className="section-icon">🌐</span>
+                  <span className="section-title">Request Tests</span>
+                  <span className="test-count">({requests.length})</span>
+                  <span className="data-type-badge live-data">Live Data</span>
+                </div>
+                <div className="section-description">
+                  API endpoint tests using live request/response data
+                </div>
               </div>
               <div className="test-list">
                 {requests.length === 0 ? (
                   <div className="no-tests">
-                    <p>No API tests available</p>
+                    <p>No request tests available</p>
                     <p className="text-small text-muted">Create requests with test scripts to see them here</p>
                   </div>
                 ) : (
@@ -485,25 +492,32 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
               </div>
             </div>
 
-            {/* UI Tests Section */}
-            <div className="test-section">
+            {/* UI Tests Section - Browser Automation */}
+            <div className="test-section ui-tests-section">
               <div className="test-section-header">
-                <div 
-                  className="section-title-container"
-                  onClick={() => setIsUITestsExpanded(!isUITestsExpanded)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <span className={`expand-icon ${isUITestsExpanded ? 'expanded' : ''}`}>▶</span>
-                  <span className="section-title">UI Tests</span>
-                  <span className="test-count">({uiTestSuites.size})</span>
+                <div className="section-title-wrapper">
+                  <div 
+                    className="section-title-container"
+                    onClick={() => setIsUITestsExpanded(!isUITestsExpanded)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <span className={`expand-icon ${isUITestsExpanded ? 'expanded' : ''}`}>▶</span>
+                    <span className="section-icon">🖥️</span>
+                    <span className="section-title">UI Tests</span>
+                    <span className="test-count">({uiTestSuites.size})</span>
+                    <span className="data-type-badge mock-data">Mock Data</span>
+                  </div>
+                  <button
+                    className="create-test-btn"
+                    onClick={handleCreateUITestSuite}
+                    title="Create new UI test suite"
+                  >
+                    +
+                  </button>
                 </div>
-                <button
-                  className="create-test-btn"
-                  onClick={handleCreateUITestSuite}
-                  title="Create new UI test suite"
-                >
-                  +
-                </button>
+                <div className="section-description">
+                  Browser automation tests using Playwright with mock data for assertions
+                </div>
               </div>
               
               {isUITestsExpanded && (
@@ -619,6 +633,28 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                   )}
                 </div>
               )}
+            </div>
+
+            {/* Unit Tests Section - Standalone Tests with Mock Data */}
+            <div className="test-section unit-tests-section">
+              <div className="test-section-header">
+                <div className="section-title-wrapper">
+                  <span className="section-icon">🧪</span>
+                  <span className="section-title">Unit Tests</span>
+                  <span className="test-count">(0)</span>
+                  <span className="data-type-badge mock-data">Mock Data</span>
+                </div>
+                <div className="section-description">
+                  Standalone unit tests for testing logic and utilities with mock data
+                </div>
+              </div>
+              <div className="test-list">
+                <div className="no-tests">
+                  <p>No unit tests available</p>
+                  <p className="text-small text-muted">Unit tests are standalone tests independent of requests</p>
+                  <p className="text-small text-muted">Coming soon: Create unit tests for your utilities and business logic</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -852,21 +888,40 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
         .test-sections {
           flex: 1;
           overflow-y: auto;
-          padding: 4px;
+          padding: 8px;
         }
 
         .test-section {
-          margin-bottom: 12px;
+          margin-bottom: 16px;
+          border: 1px solid var(--border-color);
+          border-radius: 6px;
+          background: var(--bg-secondary);
+          overflow: hidden;
+        }
+
+        /* Visual distinction for different test types */
+        .request-tests-section {
+          border-left: 3px solid #4fc3f7;
+        }
+
+        .ui-tests-section {
+          border-left: 3px solid #9c27b0;
+        }
+
+        .unit-tests-section {
+          border-left: 3px solid #4caf50;
         }
 
         .test-section-header {
+          padding: 12px;
+          border-bottom: 1px solid var(--border-color);
+          background: var(--bg-tertiary);
+        }
+
+        .section-title-wrapper {
           display: flex;
-          justify-content: space-between;
           align-items: center;
-          padding: 6px 8px;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          border-radius: 4px;
+          gap: 8px;
           margin-bottom: 4px;
         }
 
@@ -877,10 +932,42 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           flex: 1;
         }
 
+        .section-icon {
+          font-size: 16px;
+        }
+
         .section-title {
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 600;
           color: var(--text-primary);
+        }
+
+        .section-description {
+          font-size: 11px;
+          color: var(--text-secondary);
+          margin-top: 4px;
+          padding-left: 24px;
+        }
+
+        .data-type-badge {
+          font-size: 10px;
+          font-weight: 600;
+          padding: 2px 8px;
+          border-radius: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .data-type-badge.live-data {
+          background: rgba(79, 195, 247, 0.2);
+          color: #4fc3f7;
+          border: 1px solid rgba(79, 195, 247, 0.4);
+        }
+
+        .data-type-badge.mock-data {
+          background: rgba(156, 39, 176, 0.2);
+          color: #ce93d8;
+          border: 1px solid rgba(156, 39, 176, 0.4);
         }
 
         .test-count {
