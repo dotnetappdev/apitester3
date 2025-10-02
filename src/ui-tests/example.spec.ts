@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('VeriAPI UI Tests', () => {
+test.describe('VerifyApi UI Tests', () => {
   test('should display main application', async ({ page }) => {
     await page.goto('/');
     

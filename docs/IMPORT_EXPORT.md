@@ -1,6 +1,6 @@
 # Import/Export Collections and Tests
 
-VeriAPI provides a robust import/export system that allows teams to share collections and test suites using a secure binary format. This feature enables seamless collaboration between team members and across different environments.
+VerifyApi provides a robust import/export system that allows teams to share collections and test suites using a secure binary format. This feature enables seamless collaboration between team members and across different environments.
 
 ## Overview
 
@@ -13,7 +13,7 @@ The import/export functionality allows you to:
 
 ## File Format
 
-VeriAPI uses a custom binary format with the `.apit` extension:
+VerifyApi uses a custom binary format with the `.apit` extension:
 
 - **Magic Header**: `APITEXPORT` (identifies the file type)
 - **Version Info**: Ensures compatibility across different versions

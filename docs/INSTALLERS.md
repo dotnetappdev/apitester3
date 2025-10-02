@@ -1,10 +1,10 @@
-# Installer Setup for VeriAPI
+# Installer Setup for VerifyApi
 
-This document describes how to build and distribute installers for VeriAPI across Windows, macOS, and Linux platforms.
+This document describes how to build and distribute installers for VerifyApi across Windows, macOS, and Linux platforms.
 
 ## Overview
 
-VeriAPI uses **electron-builder** as the primary packaging tool with platform-specific enhancements:
+VerifyApi uses **electron-builder** as the primary packaging tool with platform-specific enhancements:
 
 - **Windows**: NSIS installer + Inno Setup script + Portable executable + ZIP archive
 - **macOS**: DMG disk image + ZIP archive (with universal binaries for Intel/Apple Silicon)
@@ -36,7 +36,7 @@ npm run installer:all     # All platforms (requires proper setup)
 
 #### APPX/MSIX Package (Primary - Windows Store)
 - **Built by**: electron-builder with APPX target (generates MSIX packages)
-- **Output**: `VeriAPI-{version}.appx` (MSIX format)
+- **Output**: `VerifyApi-{version}.appx` (MSIX format)
 - **Architecture**: Both x64 and x86 (32-bit) support
 - **Features**: 
   - Windows Store distribution ready
@@ -49,7 +49,7 @@ npm run installer:all     # All platforms (requires proper setup)
 ### macOS Installers
 
 #### DMG Disk Image (Primary)
-- **Output**: `VeriAPI-{version}.dmg`
+- **Output**: `VerifyApi-{version}.dmg`
 - **Features**:
   - Custom background image
   - Drag-to-Applications layout
@@ -64,7 +64,7 @@ npm run installer:all     # All platforms (requires proper setup)
 ### Linux Installers
 
 #### AppImage (Universal)
-- **Output**: `VeriAPI-{version}.AppImage`
+- **Output**: `VerifyApi-{version}.AppImage`
 - **Features**: 
   - Runs on any Linux distribution
   - No installation required

@@ -1,5 +1,5 @@
 /**
- * Dynamic Variables System for VeriAPI
+ * Dynamic Variables System for VerifyApi
  * Provides built-in dynamic variables similar to Postman
  * Supports variables like {{$timestamp}}, {{$randomInt}}, {{$guid}}, etc.
  */

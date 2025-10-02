@@ -1,5 +1,5 @@
 {
-  "name": "veriapi",
+  "name": "verifyapi",
   "version": "1.0.0",
   "description": "Professional desktop API testing tool inspired by Postman",
   "main": "dist/electron/main.js",
@@ -62,8 +62,8 @@
     "sqlite3": "^5.1.7"
   },
   "build": {
-    "appId": "com.dotnetappdev.veriapi",
-    "productName": "VeriAPI",
+    "appId": "com.dotnetappdev.verifyapi",
+    "productName": "VerifyApi",
     "directories": {
       "output": "release"
     },

@@ -1,4 +1,4 @@
-# Icon Assets for VeriAPI
+# Icon Assets for VerifyApi
 
 This directory contains icon assets for different platforms:
 

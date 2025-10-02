@@ -33,7 +33,7 @@ ${expectedBehavior}
 ${actualBehavior}
 
 **Environment:**
-- VeriAPI Version: ${APP_INFO.version}
+- VerifyApi Version: ${APP_INFO.version}
 - OS: ${navigator.platform}
 - User Agent: ${navigator.userAgent}
 
@@ -71,7 +71,7 @@ ${stepsToReproduce}
 ${expectedBehavior}
 
 **Environment:**
-- VeriAPI Version: ${APP_INFO.version}
+- VerifyApi Version: ${APP_INFO.version}
 `;
     }
   };

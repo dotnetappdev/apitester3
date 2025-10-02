@@ -1,4 +1,4 @@
-# VeriAPI
+# VerifyApi
 
 A professional, local-first desktop API testing tool inspired by Postman, built with Electron, React, and TypeScript.
 
@@ -72,7 +72,7 @@ npm run dev
 
 ## Email Notifications (SendGrid)
 
-VeriAPI can send test run notifications via SendGrid. To enable email notifications:
+VerifyApi can send test run notifications via SendGrid. To enable email notifications:
 
 1. In the app open Settings → Advanced → Email Notifications and enable the feature.
 2. Enter your SendGrid API key and default From/To addresses.
@@ -131,7 +131,7 @@ npm run build
 npm run package
 
 # The built application will be in release/ directory
-# Look for VeriAPI.dmg or VeriAPI.app
+# Look for VerifyApi.dmg or VerifyApi.app
 ```
 
 **Linux:**
@@ -149,7 +149,7 @@ npm run build
 npm run package
 
 # The built application will be in release/ directory
-# Look for VeriAPI.AppImage or .deb/.rpm files
+# Look for VerifyApi.AppImage or .deb/.rpm files
 ```
 
 **Build for Specific Platforms (Cross-compilation):**
@@ -218,7 +218,7 @@ docs/
 
 ## Import/Export Collections
 
-VeriAPI includes a powerful import/export system for sharing collections and tests between team members:
+VerifyApi includes a powerful import/export system for sharing collections and tests between team members:
 
 ### Key Features
 - **Binary Format (.apit)**: Secure, encrypted binary files for portability
@@ -237,7 +237,7 @@ For detailed documentation, see [docs/IMPORT_EXPORT.md](docs/IMPORT_EXPORT.md)
 
 ## Code Generation
 
-VeriAPI includes a powerful code generation feature that creates client and server code from Swagger/OpenAPI specifications:
+VerifyApi includes a powerful code generation feature that creates client and server code from Swagger/OpenAPI specifications:
 
 ### How to Use
 
@@ -352,7 +352,7 @@ CREATE TABLE collections (
 
 ### Testing Documentation
 
-VeriAPI includes comprehensive testing documentation:
+VerifyApi includes comprehensive testing documentation:
 
 - **[TEST_ASSERTIONS.md](TEST_ASSERTIONS.md)** - Complete reference guide for all test assertions
   - Test Discovery workflow

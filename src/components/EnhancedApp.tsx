@@ -873,7 +873,7 @@ console.log('Homepage test completed successfully');`,
     return (
       <div className="app-loading">
         <div className="spinner"></div>
-        <p>Initializing VeriAPI...</p>
+        <p>Initializing VerifyApi...</p>
       </div>
     );
   }
