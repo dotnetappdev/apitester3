@@ -1,7 +1,7 @@
-# API Tester 3 - UI Improvements Showcase
+# VeriAPI - UI Improvements Showcase
 
 ## Overview
-This document showcases the UI improvements made to API Tester 3 to enhance its professional appearance and user experience.
+This document showcases the UI improvements made to VeriAPI to enhance its professional appearance and user experience.
 
 ## Statistics
 - **Files Created**: 5 (2 components, 1 constants file, 2 documentation files)
@@ -54,17 +54,17 @@ Top-right corner of the application toolbar, next to the Reset button.
 ## Feature 2: About Dialog
 
 ### Trigger
-Help Menu → "ℹ️ About API Tester 3"
+Help Menu → "ℹ️ About VeriAPI"
 
 ### Visual Layout
 
 ```
 ╔════════════════════════════════════════════════╗
-║ About API Tester 3                          ✕ ║
+║ About VeriAPI                          ✕ ║
 ╠════════════════════════════════════════════════╣
 ║                                                ║
 ║                    🚀                          ║
-║              API Tester 3                      ║
+║              VeriAPI                      ║
 ║              Version 1.0.0                     ║
 ║                                                ║
 ║  Professional API testing tool with Visual     ║

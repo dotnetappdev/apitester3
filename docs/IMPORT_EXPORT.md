@@ -1,6 +1,6 @@
 # Import/Export Collections and Tests
 
-API Tester 3 provides a robust import/export system that allows teams to share collections and test suites using a secure binary format. This feature enables seamless collaboration between team members and across different environments.
+VeriAPI provides a robust import/export system that allows teams to share collections and test suites using a secure binary format. This feature enables seamless collaboration between team members and across different environments.
 
 ## Overview
 
@@ -13,7 +13,7 @@ The import/export functionality allows you to:
 
 ## File Format
 
-API Tester 3 uses a custom binary format with the `.apit` extension:
+VeriAPI uses a custom binary format with the `.apit` extension:
 
 - **Magic Header**: `APITEXPORT` (identifies the file type)
 - **Version Info**: Ensures compatibility across different versions

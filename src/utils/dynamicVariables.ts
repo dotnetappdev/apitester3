@@ -1,5 +1,5 @@
 /**
- * Dynamic Variables System for API Tester 3
+ * Dynamic Variables System for VeriAPI
  * Provides built-in dynamic variables similar to Postman
  * Supports variables like {{$timestamp}}, {{$randomInt}}, {{$guid}}, etc.
  */

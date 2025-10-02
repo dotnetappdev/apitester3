@@ -1,4 +1,4 @@
-# 🧪 Test Assertions Guide - API Tester 3
+# 🧪 Test Assertions Guide - VeriAPI
 
 ## Table of Contents
 - [Overview](#overview)
@@ -12,7 +12,7 @@
 
 ## Overview
 
-API Tester 3 provides a comprehensive testing framework similar to Visual Studio Test Explorer. Tests can be discovered, organized, and executed with detailed assertion capabilities.
+VeriAPI provides a comprehensive testing framework similar to Visual Studio Test Explorer. Tests can be discovered, organized, and executed with detailed assertion capabilities.
 
 ### Key Features
 - **Test Discovery**: Automatically discover tests before running

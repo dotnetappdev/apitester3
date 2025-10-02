@@ -1,4 +1,4 @@
-# API Tester 3
+# VeriAPI
 
 A professional, local-first desktop API testing tool inspired by Postman, built with Electron, React, and TypeScript.
 
@@ -218,7 +218,7 @@ docs/
 
 ## Import/Export Collections
 
-API Tester 3 includes a powerful import/export system for sharing collections and tests between team members:
+VeriAPI includes a powerful import/export system for sharing collections and tests between team members:
 
 ### Key Features
 - **Binary Format (.apit)**: Secure, encrypted binary files for portability
@@ -352,7 +352,7 @@ CREATE TABLE collections (
 
 ### Testing Documentation
 
-API Tester 3 includes comprehensive testing documentation:
+VeriAPI includes comprehensive testing documentation:
 
 - **[TEST_ASSERTIONS.md](TEST_ASSERTIONS.md)** - Complete reference guide for all test assertions
   - Test Discovery workflow

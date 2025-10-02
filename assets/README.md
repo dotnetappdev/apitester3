@@ -1,4 +1,4 @@
-# Icon Assets for API Tester 3
+# Icon Assets for VeriAPI
 
 This directory contains icon assets for different platforms:
 

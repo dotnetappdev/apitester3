@@ -1,5 +1,5 @@
 {
-  "name": "apitester3",
+  "name": "veriapi",
   "version": "1.0.0",
   "description": "Professional desktop API testing tool inspired by Postman",
   "main": "dist/electron/main.js",
@@ -62,8 +62,8 @@
     "sqlite3": "^5.1.7"
   },
   "build": {
-    "appId": "com.dotnetappdev.apitester3",
-    "productName": "API Tester 3",
+    "appId": "com.dotnetappdev.veriapi",
+    "productName": "VeriAPI",
     "directories": {
       "output": "release"
     },

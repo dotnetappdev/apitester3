@@ -195,7 +195,7 @@ class AppManager {
           },
           { type: 'separator' },
           {
-            label: 'About API Tester 3',
+            label: 'About VeriAPI',
             click: () => {
               this.mainWindow?.webContents.send('menu-about');
             }
