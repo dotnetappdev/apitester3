@@ -1,6 +1,18 @@
 // UI Test Runner with Playwright integration
-import { Browser, BrowserContext, Page, chromium, firefox, webkit } from 'playwright';
+// IMPORTANT: Playwright is a Node-only package and pulls in native/node-only
+// dependencies (chromium-bidi, etc.). To avoid bundlers (vite/esbuild)
+// trying to resolve Playwright from the renderer bundle, we dynamically
+// require Playwright at runtime inside the functions that need it. This
+// keeps the module safe to import from renderer-only code for types and
+// helpers, while preventing bundlers from including Playwright.
 import { TestExecutionResult, TestAssertion } from './TestRunner';
+
+// Use loose `any` types for browser objects so we don't force TypeScript
+// to resolve Playwright types during compilation in environments where
+// Playwright isn't installed for the renderer bundle.
+type Browser = any;
+type BrowserContext = any;
+type Page = any;
 
 // JWT Claims and Cookies utilities
 export interface JWTClaims {
@@ -216,8 +228,11 @@ export class UITestUtils {
       // Add padding if needed
       const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
       
-      // Decode base64url
-      const decodedPayload = atob(paddedPayload.replace(/-/g, '+').replace(/_/g, '/'));
+      // Decode base64url. Use Buffer fallback when atob is not available (Node).
+      const base64 = paddedPayload.replace(/-/g, '+').replace(/_/g, '/');
+      const decodedPayload = (typeof atob !== 'undefined')
+        ? atob(base64)
+        : Buffer.from(base64, 'base64').toString('binary');
       
       return JSON.parse(decodedPayload);
     } catch (error) {
@@ -240,7 +255,7 @@ export class UITestUtils {
   // Parse cookies from page context
   static async getCookies(page: Page): Promise<ParsedCookie[]> {
     const cookies = await page.context().cookies();
-    return cookies.map(cookie => ({
+    return cookies.map((cookie: any) => ({
       name: cookie.name,
       value: cookie.value,
       domain: cookie.domain,
@@ -263,16 +278,16 @@ export class UITestUtils {
     try {
       // Try specified localStorage key first
       if (storageKey) {
-        const localStorageToken = await page.evaluate((key) => {
-          return localStorage.getItem(key);
-        }, storageKey);
+        const localStorageToken = await page.evaluate((key: any) => {
+            return localStorage.getItem(key);
+          }, storageKey);
         if (localStorageToken) return localStorageToken;
       }
       
       // Try common localStorage keys
       const commonKeys = ['token', 'authToken', 'accessToken', 'jwt', 'auth_token', 'access_token'];
       for (const key of commonKeys) {
-        const token = await page.evaluate((k) => {
+        const token = await page.evaluate((k: any) => {
           return localStorage.getItem(k) || sessionStorage.getItem(k);
         }, key);
         if (token) return token;
@@ -328,8 +343,12 @@ export class UITestRunner {
       page = await context.newPage();
       
       // Collect console logs
-      page.on('console', msg => {
-        browserLogs.push(`${msg.type()}: ${msg.text()}`);
+      page.on('console', (msg: any) => {
+        try {
+          browserLogs.push(`${msg.type()}: ${msg.text()}`);
+        } catch {
+          // ignore console serialization failures
+        }
       });
       
       // Set up test environment
@@ -477,15 +496,23 @@ export class UITestRunner {
       headless,
       args: headless ? ['--no-sandbox', '--disable-setuid-sandbox'] : undefined
     };
-    
+    // Dynamically require Playwright at runtime. If not available, return a clear error.
+    let playwright: any = null;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      playwright = require('playwright');
+    } catch (err) {
+      throw new Error('Playwright is not available in this environment. UI test execution requires Playwright installed in the Electron/main process.');
+    }
+
     switch (browserType) {
       case 'firefox':
-        return await firefox.launch(options);
+        return await playwright.firefox.launch(options);
       case 'webkit':
-        return await webkit.launch(options);
+        return await playwright.webkit.launch(options);
       case 'chromium':
       default:
-        return await chromium.launch(options);
+        return await playwright.chromium.launch(options);
     }
   }
 
@@ -507,7 +534,7 @@ export class UITestRunner {
         } else if (assertion.path === 'title') {
           await this.validateTitleAssertion(assertion, page);
         } else if (assertion.path?.startsWith('jwt:')) {
-          await this.validateJWTAssertion(assertion, page);
+          await this.validateJWTAssertion(assertion);
         } else if (assertion.path?.startsWith('cookie:')) {
           await this.validateCookieAssertion(assertion, page);
         }
@@ -553,7 +580,7 @@ export class UITestRunner {
     assertion.passed = assertion.actual === assertion.expected;
   }
 
-  private async validateJWTAssertion(assertion: TestAssertion, page: Page): Promise<void> {
+  private async validateJWTAssertion(assertion: TestAssertion): Promise<void> {
     const pathParts = assertion.path!.split(':');
     const token = pathParts[1];
     const property = pathParts[2];

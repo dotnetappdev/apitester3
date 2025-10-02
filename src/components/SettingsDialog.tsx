@@ -120,6 +120,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     checked={settings.autoSave}
                     onChange={(e) => handleSettingChange('autoSave', e.target.checked)}
                     className="setting-checkbox"
+                    title="Toggle auto save"
+                    aria-label="Auto save"
                   />
                   <span className="setting-description">
                     Automatically save changes to requests and collections
@@ -133,6 +135,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     checked={settings.enableTestExplorer}
                     onChange={(e) => handleSettingChange('enableTestExplorer', e.target.checked)}
                     className="setting-checkbox"
+                    title="Show the Test Explorer panel"
+                    aria-label="Enable Test Explorer"
                   />
                   <span className="setting-description">
                     Show the Test Explorer panel in the sidebar
@@ -148,6 +152,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                       onChange={(e) => handleSettingChange('databasePath', e.target.value)}
                       placeholder="Default location"
                       className="setting-input"
+                      title="Path to database file"
+                      aria-label="Database path"
                     />
                     <button onClick={selectDatabasePath} className="browse-button">
                       Browse
@@ -170,6 +176,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     value={settings.theme}
                     onChange={(e) => handleSettingChange('theme', e.target.value)}
                     className="setting-select"
+                    title="Choose theme"
+                    aria-label="Theme"
                   >
                     <option value="dark">Dark Theme</option>
                     <option value="light">Light Theme</option>
@@ -186,6 +194,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     checked={settings.enableSyntaxHighlighting}
                     onChange={(e) => handleSettingChange('enableSyntaxHighlighting', e.target.checked)}
                     className="setting-checkbox"
+                    title="Toggle syntax highlighting"
+                    aria-label="Enable syntax highlighting"
                   />
                   <span className="setting-description">
                     Highlight JSON and XML syntax in request/response bodies
@@ -201,6 +211,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     value={settings.sidebarWidth}
                     onChange={(e) => handleSettingChange('sidebarWidth', parseInt(e.target.value))}
                     className="setting-range"
+                    title="Adjust sidebar width"
+                    aria-label="Sidebar width"
                   />
                   <span className="setting-value">{settings.sidebarWidth}px</span>
                   <span className="setting-description">
@@ -217,6 +229,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     value={settings.splitterPosition}
                     onChange={(e) => handleSettingChange('splitterPosition', parseInt(e.target.value))}
                     className="setting-range"
+                    title="Adjust splitter position"
+                    aria-label="Splitter position"
                   />
                   <span className="setting-value">{settings.splitterPosition}%</span>
                   <span className="setting-description">
@@ -239,6 +253,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     value={settings.requestTimeout / 1000}
                     onChange={(e) => handleSettingChange('requestTimeout', parseInt(e.target.value) * 1000)}
                     className="setting-input number"
+                    title="Request timeout in seconds"
+                    aria-label="Request timeout"
                   />
                   <span className="setting-unit">seconds</span>
                   <span className="setting-description">
@@ -255,6 +271,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     value={settings.maxResponseSize / (1024 * 1024)}
                     onChange={(e) => handleSettingChange('maxResponseSize', parseInt(e.target.value) * 1024 * 1024)}
                     className="setting-input number"
+                    title="Max response size in MB"
+                    aria-label="Max response size"
                   />
                   <span className="setting-unit">MB</span>
                   <span className="setting-description">
@@ -278,6 +296,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                           }}
                           placeholder="Header name"
                           className="header-input"
+                          title="Header name"
+                          aria-label="Default header name"
                         />
                         <input
                           type="text"
@@ -289,6 +309,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                           }}
                           placeholder="Header value"
                           className="header-input"
+                          title="Header value"
+                          aria-label="Default header value"
                         />
                         <button
                           onClick={() => {
@@ -352,6 +374,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     onChange={(e) => handleSettingChange('reportFormat', e.target.value as any)}
                     className="setting-select"
                     aria-label="Default report format"
+                    title="Default report format"
                   >
                     <option value="html">HTML</option>
                     <option value="json">JSON</option>
@@ -429,6 +452,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     checked={!!settings.emailNotifications?.enabled}
                     onChange={(e) => handleSettingChange('emailNotifications', { ...settings.emailNotifications, enabled: e.target.checked })}
                     className="setting-checkbox"
+                    title="Enable email notifications"
+                    aria-label="Enable email notifications"
                   />
                   <span className="setting-description">Send emails on test run events (fail/pass)</span>
 

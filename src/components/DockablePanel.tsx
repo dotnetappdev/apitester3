@@ -62,8 +62,10 @@ export const DockablePanel: React.FC<DockablePanelProps> = ({
   return (
     <div
       ref={rootRef}
-      className={`dock-panel ${mode === 'floating' ? 'floating' : 'docked-' + mode}`}
-      style={mode === 'floating' ? { left: pos.x, top: pos.y, zIndex } : {}}
+      className={`dock-panel ${mode === 'floating' ? 'floating' : 'docked-' + mode} ${mode === 'floating' ? 'floating-positioned' : ''}`}
+      data-x={pos.x}
+      data-y={pos.y}
+      data-z={zIndex}
       onMouseDown={bringToFront}
       id={id}
     >

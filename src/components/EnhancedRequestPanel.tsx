@@ -76,11 +76,6 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
     updateRequest({ params: JSON.stringify(params) });
   };
 
-  const addRow = () => {
-    // This function will be used by both params and headers to add new rows
-    return {};
-  };
-
   const removeRow = (index: number, data: Record<string, string>, onUpdate: (key: string, value: string, index: number) => void) => {
     const entries = Object.entries(data);
     if (index < entries.length) {
@@ -88,10 +83,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
     }
   };
 
-  const clearAll = (onUpdate: (key: string, value: string, index: number) => void) => {
-    // Clear all entries by removing them one by one
-    onUpdate('', '', 0);
-  };
+  // Removed unused helpers addRow/clearAll — the editor directly manipulates rows now.
 
   const renderKeyValueEditor = (
     data: Record<string, string>,
@@ -129,6 +121,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
               <input 
                 type="checkbox" 
                 className="kv-checkbox" 
+                title={key && value ? 'Unselect this row' : 'Select this row'}
                 checked={!!(key && value)} 
                 onChange={(e) => {
                   if (!e.target.checked && key && value) {
@@ -142,6 +135,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
               type="text"
               className="form-input kv-input"
               placeholder={placeholder.key}
+              title={placeholder.key}
               value={key}
               onChange={(e) => onUpdate(e.target.value, value, index)}
             />
@@ -149,6 +143,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
               type="text"
               className="form-input kv-input"
               placeholder={placeholder.value}
+              title={placeholder.value}
               value={value}
               onChange={(e) => onUpdate(key, e.target.value, index)}
             />
@@ -156,6 +151,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
               type="text"
               className="form-input kv-input kv-description"
               placeholder="Description (optional)"
+              title="Description (optional)"
               value=""
               onChange={() => {}} // Description functionality could be added later
             />
@@ -242,6 +238,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
             value={request.name}
             onChange={(e) => updateRequest({ name: e.target.value })}
             placeholder="Request Name"
+            title="Request Name"
           />
         </div>
 
@@ -270,6 +267,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
             value={request.url}
             onChange={(e) => updateRequest({ url: e.target.value })}
             placeholder="https://api.example.com/endpoint"
+            title="Request URL"
           />
           
           <button

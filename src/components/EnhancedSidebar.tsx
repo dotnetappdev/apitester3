@@ -16,27 +16,27 @@ interface EnhancedSidebarProps {
   onDeleteRequest: (request: Request) => void;
   onDeleteCollection: (collection: Collection) => void;
   activeRequest: Request | null;
-  testResults: Map<number, TestResult[]>;
-  testSuites: Map<number, TestSuite>;
-  uiTestSuites: Map<string, UITestSuite>;
-  testExecutionResults: Map<number, TestExecutionResult[]>;
-  uiTestExecutionResults: Map<string, UITestExecutionResult[]>;
-  onRunTest: (requestId: number) => Promise<TestResult>;
-  onRunAllTests: () => Promise<TestResult[]>;
-  onRunTestSuite: (requestId: number, testSuite: TestSuite, response: ApiResponse, request: any) => Promise<TestExecutionResult[]>;
-  onRunUITestSuite: (testSuite: UITestSuite) => Promise<UITestExecutionResult[]>;
-  onRunAllUITests: () => Promise<UITestExecutionResult[]>;
+  testResults?: Map<number, TestResult[]>;
+  testSuites?: Map<number, TestSuite>;
+  uiTestSuites?: Map<string, UITestSuite>;
+  testExecutionResults?: Map<number, TestExecutionResult[]>;
+  uiTestExecutionResults?: Map<string, UITestExecutionResult[]>;
+  onRunTest?: (requestId: number) => Promise<TestResult>;
+  onRunAllTests?: () => Promise<TestResult[]>;
+  onRunTestSuite?: (requestId: number, testSuite: TestSuite, response: ApiResponse, request: any) => Promise<TestExecutionResult[]>;
+  onRunUITestSuite?: (testSuite: UITestSuite) => Promise<UITestExecutionResult[]>;
+  onRunAllUITests?: () => Promise<UITestExecutionResult[]>;
   onNewTestSuite?: (requestId: number) => void;
   onEditTestSuite?: (testSuite: TestSuite) => void;
   onDeleteTestSuite?: (testSuite: TestSuite) => void;
   onNewUITestSuite?: () => void;
   onEditUITestSuite?: (testSuite: UITestSuite) => void;
   onDeleteUITestSuite?: (testSuite: UITestSuite) => void;
-  onUserProfile: () => void;
-  onSettings: () => void;
+  onUserProfile?: () => void;
+  onSettings?: () => void;
   onTeamManager?: () => void;
   onToggleOutput?: () => void;
-  enableTestExplorer: boolean;
+  enableTestExplorer?: boolean;
 }
 
 export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
@@ -86,18 +86,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
     setExpandedCollections(newExpanded);
   };
 
-  const getMethodColor = (method: string): string => {
-    switch (method) {
-      case 'GET': return '#4ec9b0';
-      case 'POST': return '#ffcc02';
-      case 'PUT': return '#007acc';
-      case 'DELETE': return '#f44747';
-      case 'PATCH': return '#ff8c00';
-      case 'HEAD': return '#9370db';
-      case 'OPTIONS': return '#20b2aa';
-      default: return '#cccccc';
-    }
-  };
+  // Method color mapping moved to CSS classes; helper removed to avoid unused symbol warnings.
 
   const getRoleIcon = (role: string) => {
     return role === 'admin' ? '👑' : '👤';
@@ -141,16 +130,16 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
           onDeleteRequest(request);
           break;
         case 'duplicate':
-          // Create a duplicate request with "Copy of" prefix
+          // Duplicate request: create a new request object suitable for editing/creation flow
           const duplicateData = {
             ...request,
             name: `Copy of ${request.name}`,
-            id: undefined, // Remove ID so a new one gets created
-            createdAt: undefined,
-            updatedAt: undefined
-          };
-          // Remove the id, createdAt, updatedAt fields and call onSave instead
-          onEditRequest({ ...duplicateData, id: -1 } as Request); // Use -1 as a flag for duplication
+            id: -1, // Use -1 as a flag for duplication/new
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            collectionId: request.collectionId
+          } as Request;
+          onEditRequest(duplicateData);
           break;
       }
     }
@@ -264,11 +253,10 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
 
       {/* Tab Navigation */}
       <div className="sidebar-tabs">
-        <button
-          className={`sidebar-tab ${activeTab === 'collections' ? 'active' : ''}`}
-          onClick={() => setActiveTab('collections')}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-        >
+          <button
+            className={`sidebar-tab ${activeTab === 'collections' ? 'active' : ''} sidebar-tab-flex`}
+            onClick={() => setActiveTab('collections')}
+          >
           <CollectionIcon />
           Collections
           <span className="tab-count">{collections.length}</span>
@@ -276,9 +264,8 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
         
         {enableTestExplorer && (
           <button
-            className={`sidebar-tab ${activeTab === 'tests' ? 'active' : ''}`}
+            className={`sidebar-tab ${activeTab === 'tests' ? 'active' : ''} sidebar-tab-flex`}
             onClick={() => setActiveTab('tests')}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           >
             <TestIcon />
             Tests
@@ -403,23 +390,23 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
         {activeTab === 'tests' && enableTestExplorer && (
           <div className="tests-panel">
             <EnhancedTestExplorer
-              requests={allRequests}
-              testSuites={testSuites}
-              uiTestSuites={uiTestSuites}
-              onRunTest={onRunTest}
-              onRunAllTests={onRunAllTests}
-              onRunTestSuite={onRunTestSuite}
-              onRunUITestSuite={onRunUITestSuite}
-              onRunAllUITests={onRunAllUITests}
-              onNewTestSuite={onNewTestSuite}
-              onEditTestSuite={onEditTestSuite}
-              onDeleteTestSuite={onDeleteTestSuite}
-              onNewUITestSuite={onNewUITestSuite}
-              onEditUITestSuite={onEditUITestSuite}
-              onDeleteUITestSuite={onDeleteUITestSuite}
-              testResults={testResults}
-              testExecutionResults={testExecutionResults}
-              uiTestExecutionResults={uiTestExecutionResults}
+          requests={allRequests}
+          testSuites={testSuites ?? new Map<number, TestSuite>()}
+          uiTestSuites={uiTestSuites ?? new Map<string, UITestSuite>()}
+              onRunTest={onRunTest ?? (async () => { throw new Error('Not implemented'); }) as any}
+          onRunAllTests={onRunAllTests ?? (async () => [])}
+          onRunTestSuite={onRunTestSuite ?? (async () => [])}
+          onRunUITestSuite={onRunUITestSuite ?? (async () => [])}
+          onRunAllUITests={onRunAllUITests ?? (async () => [])}
+          onNewTestSuite={onNewTestSuite}
+          onEditTestSuite={onEditTestSuite}
+          onDeleteTestSuite={onDeleteTestSuite}
+          onNewUITestSuite={onNewUITestSuite}
+          onEditUITestSuite={onEditUITestSuite}
+          onDeleteUITestSuite={onDeleteUITestSuite}
+          testResults={testResults ?? new Map<number, TestResult[]>()}
+          testExecutionResults={testExecutionResults ?? new Map<number, TestExecutionResult[]>()}
+          uiTestExecutionResults={uiTestExecutionResults ?? new Map<string, UITestExecutionResult[]>()}
             />
           </div>
         )}
@@ -438,8 +425,8 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
       </div>
 
       {/* Context Menu */}
-      {contextMenu && (
-        <div className="context-menu" style={{ left: contextMenu.x, top: contextMenu.y }} onClick={(e) => e.stopPropagation()}>
+  {contextMenu && (
+  <div className="context-menu context-menu-positioned" data-x={contextMenu.x} data-y={contextMenu.y} onClick={(e) => e.stopPropagation()}>
           {contextMenu.type === 'collection' ? (
             <>
               <div className="context-menu-item" onClick={() => handleContextMenuAction('edit', 'collection', contextMenu.id)}>✏️ Edit Collection</div>
