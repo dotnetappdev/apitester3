@@ -24,7 +24,19 @@ A professional, local-first desktop API testing tool inspired by Postman, built 
   - **Export Options**: Download as ZIP or save to directory
 - **Import/Export Collections**: Share collections and tests in binary format (.apit) with team members
 - **User ID Remapping**: Seamlessly import collections with automatic user ownership mapping
-- **Test Suites**: Advanced test runner with Visual Studio-style assertions
+- **Advanced Test Suite**:
+  - **Test Discovery**: Professional workflow with explicit test discovery and validation
+  - **Visual Test Explorer**: Visual Studio-style test runner with status indicators
+  - **Multiple Test Types**: Request Tests (API), UI Tests (Browser), and Unit Tests
+  - **Rich Assertions**: 25+ assertion methods for comprehensive validation
+  - **Test Type Selector**: Guided dialog to choose the right test type
+  - **Discovery Banner**: Clear prompts to discover and validate tests
+  - **Status Indicators**: 6 different status icons (Not Discovered, Discovered, Running, Passed, Failed, Skipped)
+  - **Comprehensive Documentation**: Detailed guides for all testing features
+- **Enhanced Team Collaboration**:
+  - **Prominent Teams Button**: Gradient-styled button for easy access to team features
+  - **Team Management**: Share collections and collaborate with team members
+  - **User Roles**: Admin, member, and viewer permissions
 - **Enterprise Security**: Local-first approach with secure request handling
 
 ## Tech Stack
@@ -335,6 +347,49 @@ CREATE TABLE collections (
 - **No Node Integration**: Frontend runs in sandboxed environment
 - **Local Storage**: All data stored locally for privacy
 - **Secure HTTP**: Proper SSL/TLS certificate validation
+
+## Documentation
+
+### Testing Documentation
+
+API Tester 3 includes comprehensive testing documentation:
+
+- **[TEST_ASSERTIONS.md](TEST_ASSERTIONS.md)** - Complete reference guide for all test assertions
+  - Test Discovery workflow
+  - Test Types (Request, UI, Unit)
+  - API Test Assertions (15 methods)
+  - UI Test Assertions (10 methods)
+  - Best practices and examples
+
+- **[UI_CHANGES_GUIDE.md](UI_CHANGES_GUIDE.md)** - Technical documentation of recent UI improvements
+  - Teams button enhancement details
+  - Test discovery system architecture
+  - Component specifications
+  - Color schemes and styling
+
+- **[VISUAL_MOCKUPS.md](VISUAL_MOCKUPS.md)** - Visual mockups and before/after comparisons
+  - ASCII art mockups
+  - UI element examples
+  - Icon usage guide
+  - Color palette reference
+
+- **[TEST_DISCOVERY_FLOW.md](TEST_DISCOVERY_FLOW.md)** - Detailed workflow documentation
+  - User journey diagrams
+  - Component architecture
+  - State flow diagrams
+  - Keyboard shortcuts
+
+- **[public/docs/unit-testing.html](public/docs/unit-testing.html)** - In-app HTML documentation
+  - Interactive guides
+  - Code examples
+  - Assertion tables
+  - Getting started tutorials
+
+### Additional Documentation
+
+- **[SETUP.md](SETUP.md)** - Development environment setup
+- **[UI_COMPONENTS_GUIDE.md](UI_COMPONENTS_GUIDE.md)** - Component library
+- **[UI_IMPROVEMENTS.md](UI_IMPROVEMENTS.md)** - UI enhancement history
 
 ## License
 
