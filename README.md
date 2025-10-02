@@ -72,7 +72,7 @@ npm run dev
 
 ## Email Notifications (SendGrid)
 
-API Tester 3 can send test run notifications via SendGrid. To enable email notifications:
+VeriAPI can send test run notifications via SendGrid. To enable email notifications:
 
 1. In the app open Settings → Advanced → Email Notifications and enable the feature.
 2. Enter your SendGrid API key and default From/To addresses.
@@ -131,7 +131,7 @@ npm run build
 npm run package
 
 # The built application will be in release/ directory
-# Look for API Tester 3.dmg or API Tester 3.app
+# Look for VeriAPI.dmg or VeriAPI.app
 ```
 
 **Linux:**
@@ -149,7 +149,7 @@ npm run build
 npm run package
 
 # The built application will be in release/ directory
-# Look for API Tester 3.AppImage or .deb/.rpm files
+# Look for VeriAPI.AppImage or .deb/.rpm files
 ```
 
 **Build for Specific Platforms (Cross-compilation):**
@@ -237,7 +237,7 @@ For detailed documentation, see [docs/IMPORT_EXPORT.md](docs/IMPORT_EXPORT.md)
 
 ## Code Generation
 
-API Tester 3 includes a powerful code generation feature that creates client and server code from Swagger/OpenAPI specifications:
+VeriAPI includes a powerful code generation feature that creates client and server code from Swagger/OpenAPI specifications:
 
 ### How to Use
 
