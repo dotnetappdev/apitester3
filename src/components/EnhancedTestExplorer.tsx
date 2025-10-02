@@ -364,6 +364,26 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
             )}
           </div>
 
+          {/* Discovery Banner - shown when tests exist but haven't been discovered */}
+          {(requests.length > 0 || uiTestSuites.size > 0) && discoveredTests.size === 0 && !isDiscovering && (
+            <div className="discovery-banner">
+              <div className="discovery-banner-icon">🔍</div>
+              <div className="discovery-banner-content">
+                <div className="discovery-banner-title">Tests need to be discovered</div>
+                <div className="discovery-banner-description">
+                  Discover tests to validate and prepare them for execution
+                </div>
+              </div>
+              <button 
+                className="discovery-banner-button"
+                onClick={handleDiscoverTests}
+                disabled={isRunning}
+              >
+                Discover Now
+              </button>
+            </div>
+          )}
+
           <div className="test-sections">
             {/* API Tests Section */}
             <div className="test-section">
@@ -746,6 +766,78 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
         .stat-total {
           color: var(--text-muted);
           margin-left: auto;
+        }
+
+        .discovery-banner {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 16px;
+          margin: 8px 12px;
+          background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(79, 195, 247, 0.1) 100%);
+          border: 1px solid rgba(33, 150, 243, 0.3);
+          border-radius: 6px;
+          animation: fadeInSlide 0.3s ease;
+        }
+
+        @keyframes fadeInSlide {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .discovery-banner-icon {
+          font-size: 24px;
+          flex-shrink: 0;
+        }
+
+        .discovery-banner-content {
+          flex: 1;
+        }
+
+        .discovery-banner-title {
+          font-weight: 600;
+          font-size: 13px;
+          color: var(--text-primary);
+          margin-bottom: 2px;
+        }
+
+        .discovery-banner-description {
+          font-size: 11px;
+          color: var(--text-secondary);
+        }
+
+        .discovery-banner-button {
+          background: var(--info-color);
+          color: white;
+          border: none;
+          padding: 6px 16px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+        }
+
+        .discovery-banner-button:hover:not(:disabled) {
+          background: #1976d2;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        }
+
+        .discovery-banner-button:active {
+          transform: translateY(0);
+        }
+
+        .discovery-banner-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
 
         .test-running {
