@@ -34,6 +34,20 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
   const [bodyMode, setBodyMode] = useState<'raw' | 'json' | 'form'>('raw');
   const [headersMode, setHeadersMode] = useState<'kv' | 'raw'>('kv');
 
+  // Helper function to parse query parameters from URL
+  const parseUrlParams = (url: string): Record<string, string> => {
+    try {
+      const urlObj = new URL(url.startsWith('http') ? url : `http://placeholder${url}`);
+      const params: Record<string, string> = {};
+      urlObj.searchParams.forEach((value, key) => {
+        params[key] = value;
+      });
+      return params;
+    } catch {
+      return {};
+    }
+  };
+
   const updateRequest = (updates: Partial<Request>) => {
     onRequestChange({ ...request, ...updates });
   };
@@ -265,7 +279,19 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
             type="text"
             className="url-input"
             value={request.url}
-            onChange={(e) => updateRequest({ url: e.target.value })}
+            onChange={(e) => {
+              const newUrl = e.target.value;
+              const urlParams = parseUrlParams(newUrl);
+              
+              // Merge URL params with existing params (URL params take precedence)
+              const existingParams = request.params ? JSON.parse(request.params) : {};
+              const mergedParams = { ...existingParams, ...urlParams };
+              
+              updateRequest({ 
+                url: newUrl,
+                params: JSON.stringify(mergedParams)
+              });
+            }}
             placeholder="https://api.example.com/endpoint"
             title="Request URL"
           />

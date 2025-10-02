@@ -72,6 +72,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
   enableTestExplorer
 }) => {
   const [expandedCollections, setExpandedCollections] = useState<Set<number>>(new Set());
+  const [activeView, setActiveView] = useState<'collections' | 'environments' | 'history' | 'ui-tests' | 'tests'>('collections');
   const [activeTab, setActiveTab] = useState<'collections' | 'tests'>('collections');
   const [contextMenu, setContextMenu] = useState<{type: 'collection' | 'request', id: number, x: number, y: number} | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -254,8 +255,60 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="sidebar-tabs">
+      {/* Icon Navigation Menu - Postman Style */}
+      <div className="sidebar-icon-nav">
+        <button
+          className={`icon-nav-button ${activeView === 'collections' ? 'active' : ''}`}
+          onClick={() => setActiveView('collections')}
+          title="Collections"
+        >
+          <span className="icon-nav-icon">📁</span>
+          <span className="icon-nav-label">Collections</span>
+        </button>
+        
+        <button
+          className={`icon-nav-button ${activeView === 'environments' ? 'active' : ''}`}
+          onClick={() => setActiveView('environments')}
+          title="Environments"
+        >
+          <span className="icon-nav-icon">🌍</span>
+          <span className="icon-nav-label">Environments</span>
+        </button>
+        
+        <button
+          className={`icon-nav-button ${activeView === 'history' ? 'active' : ''}`}
+          onClick={() => setActiveView('history')}
+          title="History"
+        >
+          <span className="icon-nav-icon">📜</span>
+          <span className="icon-nav-label">History</span>
+        </button>
+        
+        {enableTestExplorer && (
+          <>
+            <button
+              className={`icon-nav-button ${activeView === 'ui-tests' ? 'active' : ''}`}
+              onClick={() => setActiveView('ui-tests')}
+              title="UI Tests"
+            >
+              <span className="icon-nav-icon">🖥️</span>
+              <span className="icon-nav-label">UI Tests</span>
+            </button>
+            
+            <button
+              className={`icon-nav-button ${activeView === 'tests' ? 'active' : ''}`}
+              onClick={() => setActiveView('tests')}
+              title="Tests"
+            >
+              <span className="icon-nav-icon">🧪</span>
+              <span className="icon-nav-label">Tests</span>
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Tab Navigation - Old style, kept for backward compatibility */}
+      <div className="sidebar-tabs" style={{ display: 'none' }}>
           <button
             className={`sidebar-tab ${activeTab === 'collections' ? 'active' : ''} sidebar-tab-flex`}
             onClick={() => setActiveTab('collections')}
@@ -277,9 +330,9 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
         )}
       </div>
 
-      {/* Tab Content */}
+      {/* View Content */}
       <div className="sidebar-content">
-        {activeTab === 'collections' && (
+        {activeView === 'collections' && (
           <div className="collections-panel">
             {filteredCollections.length === 0 ? (
               <div className="empty-state">
@@ -390,8 +443,120 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
           </div>
         )}
 
-        {activeTab === 'tests' && enableTestExplorer && (
+        {activeView === 'environments' && (
+          <div className="environments-panel">
+            <div className="panel-header">
+              <h3>Environments</h3>
+              <p className="panel-description">Switch between different deployment contexts</p>
+            </div>
+            <div className="empty-state">
+              <div className="empty-icon">🌍</div>
+              <p>Environment Management</p>
+              <p className="text-small text-muted">
+                Create environments for dev, sys, live, and prod with different variable sets
+              </p>
+              <div className="environment-presets">
+                <button className="env-preset-button">🔧 Development</button>
+                <button className="env-preset-button">🔬 System Test</button>
+                <button className="env-preset-button">📡 Live</button>
+                <button className="env-preset-button">🚀 Production</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeView === 'history' && (
+          <div className="history-panel">
+            <div className="panel-header">
+              <h3>History</h3>
+              <p className="panel-description">Audit trail of all API requests</p>
+            </div>
+            <div className="empty-state">
+              <div className="empty-icon">📜</div>
+              <p>Request History</p>
+              <p className="text-small text-muted">
+                Track who ran what request, when, with what payload, and what results
+              </p>
+              <div className="history-info">
+                <div className="history-info-item">
+                  <span className="history-info-icon">👤</span>
+                  <span>User tracking</span>
+                </div>
+                <div className="history-info-item">
+                  <span className="history-info-icon">⏰</span>
+                  <span>Timestamp logging</span>
+                </div>
+                <div className="history-info-item">
+                  <span className="history-info-icon">📦</span>
+                  <span>Payload storage</span>
+                </div>
+                <div className="history-info-item">
+                  <span className="history-info-icon">✅</span>
+                  <span>Result capture</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeView === 'ui-tests' && enableTestExplorer && (
+          <div className="ui-tests-panel">
+            <div className="panel-header">
+              <h3>UI Tests</h3>
+              <p className="panel-description">Browser automation tests</p>
+            </div>
+            <EnhancedTestExplorer
+              requests={allRequests}
+              testSuites={testSuites ?? new Map<number, TestSuite>()}
+              uiTestSuites={uiTestSuites ?? new Map<string, UITestSuite>()}
+              onRunTest={onRunTest ?? (async () => { throw new Error('Not implemented'); }) as any}
+              onRunAllTests={onRunAllTests ?? (async () => [])}
+              onRunTestSuite={onRunTestSuite ?? (async () => [])}
+              onRunUITestSuite={onRunUITestSuite ?? (async () => [])}
+              onRunAllUITests={onRunAllUITests ?? (async () => [])}
+              onNewTestSuite={onNewTestSuite}
+              onEditTestSuite={onEditTestSuite}
+              onDeleteTestSuite={onDeleteTestSuite}
+              onNewUITestSuite={onNewUITestSuite}
+              onEditUITestSuite={onEditUITestSuite}
+              onDeleteUITestSuite={onDeleteUITestSuite}
+              testResults={testResults ?? new Map<number, TestResult[]>()}
+              testExecutionResults={testExecutionResults ?? new Map<number, TestExecutionResult[]>()}
+              uiTestExecutionResults={uiTestExecutionResults ?? new Map<string, UITestExecutionResult[]>()}
+            />
+          </div>
+        )}
+
+        {activeView === 'tests' && enableTestExplorer && (
           <div className="tests-panel">
+            <div className="panel-header">
+              <h3>API Tests</h3>
+              <p className="panel-description">Request and unit tests</p>
+            </div>
+            <EnhancedTestExplorer
+              requests={allRequests}
+              testSuites={testSuites ?? new Map<number, TestSuite>()}
+              uiTestSuites={uiTestSuites ?? new Map<string, UITestSuite>()}
+              onRunTest={onRunTest ?? (async () => { throw new Error('Not implemented'); }) as any}
+              onRunAllTests={onRunAllTests ?? (async () => [])}
+              onRunTestSuite={onRunTestSuite ?? (async () => [])}
+              onRunUITestSuite={onRunUITestSuite ?? (async () => [])}
+              onRunAllUITests={onRunAllUITests ?? (async () => [])}
+              onNewTestSuite={onNewTestSuite}
+              onEditTestSuite={onEditTestSuite}
+              onDeleteTestSuite={onDeleteTestSuite}
+              onNewUITestSuite={onNewUITestSuite}
+              onEditUITestSuite={onEditUITestSuite}
+              onDeleteUITestSuite={onDeleteUITestSuite}
+              testResults={testResults ?? new Map<number, TestResult[]>()}
+              testExecutionResults={testExecutionResults ?? new Map<number, TestExecutionResult[]>()}
+              uiTestExecutionResults={uiTestExecutionResults ?? new Map<string, UITestExecutionResult[]>()}
+            />
+          </div>
+        )}
+
+        {activeTab === 'tests' && enableTestExplorer && (
+          <div className="tests-panel" style={{ display: 'none' }}>
             <EnhancedTestExplorer
           requests={allRequests}
           testSuites={testSuites ?? new Map<number, TestSuite>()}
