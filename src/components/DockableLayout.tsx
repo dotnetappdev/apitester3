@@ -6,6 +6,7 @@ import { EnhancedSidebar } from './EnhancedSidebar';
 import { TestExplorer } from './TestExplorer';
 import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
+import { DockablePanel } from './DockablePanel';
 import { Collection, Request, TestResult, User } from '../database/DatabaseManager';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
 import { UITestSuite, UITestExecutionResult } from '../testing/UITestRunner';
@@ -93,6 +94,12 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
   const [showHelpMenu, setShowHelpMenu] = useState(false);
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(() => layoutManager.loadLayout());
   const [isResponsive, setIsResponsive] = useState(() => layoutManager.getResponsiveConfig());
+  
+  // Panel docking states
+  const [collectionsPanelMode, setCollectionsPanelMode] = useState<'left' | 'right' | 'top' | 'bottom' | 'floating'>('left');
+  const [testExplorerPanelMode, setTestExplorerPanelMode] = useState<'left' | 'right' | 'top' | 'bottom' | 'floating'>('left');
+  const [collectionsPanelVisible, setCollectionsPanelVisible] = useState(true);
+  const [testExplorerPanelVisible, setTestExplorerPanelVisible] = useState(true);
 
   // Close help menu when clicking outside
   useEffect(() => {
@@ -148,10 +155,16 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
   }, [layoutManager]);
 
   const togglePanel = useCallback((panelId: string) => {
+    if (panelId === 'sidebar') {
+      setCollectionsPanelVisible(!collectionsPanelVisible);
+    } else if (panelId === 'testRunner') {
+      setTestExplorerPanelVisible(!testExplorerPanelVisible);
+    }
+    // Keep the old layout config toggle for backwards compatibility
     const panel = layoutConfig.panels[panelId as keyof typeof layoutConfig.panels];
     const updatedConfig = layoutManager.updatePanelVisibility(panelId, !panel.visible);
     setLayoutConfig(updatedConfig);
-  }, [layoutConfig, layoutManager]);
+  }, [collectionsPanelVisible, testExplorerPanelVisible, layoutConfig, layoutManager]);
 
   const resetLayout = useCallback(() => {
     const defaultConfig = layoutManager.resetLayout();
@@ -355,7 +368,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
       <div className="layout-toolbar">
         <div className="panel-controls">
           <button 
-            className={`panel-toggle ${layoutConfig.panels.sidebar.visible ? 'active' : ''}`}
+            className={`panel-toggle ${collectionsPanelVisible ? 'active' : ''}`}
             onClick={() => togglePanel('sidebar')}
             title="Toggle Collections Panel"
             aria-label="Toggle Collections Panel"
@@ -363,7 +376,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
             📁 {!isTablet && 'Collections'}
           </button>
           <button 
-            className={`panel-toggle ${layoutConfig.panels.testRunner.visible ? 'active' : ''}`}
+            className={`panel-toggle ${testExplorerPanelVisible ? 'active' : ''}`}
             onClick={() => togglePanel('testRunner')}
             title="Toggle Test Explorer Panel"
             aria-label="Toggle Test Explorer Panel"
@@ -456,100 +469,82 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
           transition: 'background-color 0.2s ease'
         }}
       >
-        {/* Left Panel - Sidebar + Test Runner */}
+        {/* Left Panel - Sidebar + Test Runner - Stackable */}
         <Allotment.Pane 
           minSize={layoutConfig.panels.sidebar.minSize}
           maxSize={layoutConfig.panels.sidebar.maxSize}
-          visible={layoutConfig.panels.sidebar.visible || layoutConfig.panels.testRunner.visible}
+          visible={(collectionsPanelMode === 'left' && collectionsPanelVisible) || (testExplorerPanelMode === 'left' && testExplorerPanelVisible)}
         >
-          <Allotment vertical>
-            {layoutConfig.panels.sidebar.visible && (
-              <Allotment.Pane 
-                minSize={200}
-                maxSize={600}
+          <div className="stacked-panels-container">
+            {/* Collections Panel */}
+            {collectionsPanelMode === 'left' && collectionsPanelVisible && (
+              <DockablePanel
+                id="collections-panel"
+                title="Collections"
+                defaultDock="left"
+                stackable={true}
+                onDockChange={(mode) => setCollectionsPanelMode(mode)}
+                onClose={() => setCollectionsPanelVisible(false)}
               >
-                <div className="panel-container sidebar-panel">
-                  <div className="panel-header">
-                    <span className="panel-title">Collections</span>
-                    <button 
-                      className="panel-close"
-                      onClick={() => togglePanel('sidebar')}
-                      title="Close Panel"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div className="panel-content">
-                    <EnhancedSidebar
-                      user={user}
-                      collections={collections}
-                      onRequestSelect={onRequestSelect}
-                      onNewRequest={onNewRequest}
-                      onNewCollection={onNewCollection}
-                      onEditRequest={onEditRequest}
-                      onDeleteRequest={onDeleteRequest}
-                      onDeleteCollection={onDeleteCollection}
-                      activeRequest={activeRequest}
-                      testResults={testResults}
-                      testSuites={testSuitesMap}
-                      uiTestSuites={uiTestSuites}
-                      testExecutionResults={testExecutionResults}
-                      uiTestExecutionResults={uiTestExecutionResults}
-                      onRunTest={onRunTest}
-                      onRunAllTests={onRunAllTests}
-                      onRunTestSuite={onRunTestSuite}
-                      onRunUITestSuite={onRunUITestSuite}
-                      onRunAllUITests={onRunAllUITests}
-                      onNewTestSuite={onNewTestSuite}
-                      onEditTestSuite={onEditTestSuite}
-                      onDeleteTestSuite={onDeleteTestSuite}
-                      onNewUITestSuite={onNewUITestSuite}
-                      onEditUITestSuite={onEditUITestSuite}
-                      onDeleteUITestSuite={onDeleteUITestSuite}
-                      onUserProfile={onUserProfile}
-                      onSettings={onSettings}
-                      onTeamManager={onTeamManager}
-                      enableTestExplorer={false} // Now separate
-                    />
-                  </div>
-                </div>
-              </Allotment.Pane>
+                <EnhancedSidebar
+                  user={user}
+                  collections={collections}
+                  onRequestSelect={onRequestSelect}
+                  onNewRequest={onNewRequest}
+                  onNewCollection={onNewCollection}
+                  onEditRequest={onEditRequest}
+                  onDeleteRequest={onDeleteRequest}
+                  onDeleteCollection={onDeleteCollection}
+                  activeRequest={activeRequest}
+                  testResults={testResults}
+                  testSuites={testSuitesMap}
+                  uiTestSuites={uiTestSuites}
+                  testExecutionResults={testExecutionResults}
+                  uiTestExecutionResults={uiTestExecutionResults}
+                  onRunTest={onRunTest}
+                  onRunAllTests={onRunAllTests}
+                  onRunTestSuite={onRunTestSuite}
+                  onRunUITestSuite={onRunUITestSuite}
+                  onRunAllUITests={onRunAllUITests}
+                  onNewTestSuite={onNewTestSuite}
+                  onEditTestSuite={onEditTestSuite}
+                  onDeleteTestSuite={onDeleteTestSuite}
+                  onNewUITestSuite={onNewUITestSuite}
+                  onEditUITestSuite={onEditUITestSuite}
+                  onDeleteUITestSuite={onDeleteUITestSuite}
+                  onUserProfile={onUserProfile}
+                  onSettings={onSettings}
+                  onTeamManager={onTeamManager}
+                  enableTestExplorer={false}
+                />
+              </DockablePanel>
             )}
 
-            {layoutConfig.panels.testRunner.visible && (
-              <Allotment.Pane 
-                minSize={layoutConfig.panels.testRunner.minSize}
-                maxSize={layoutConfig.panels.testRunner.maxSize}
+            {/* Test Explorer Panel */}
+            {testExplorerPanelMode === 'left' && testExplorerPanelVisible && (
+              <DockablePanel
+                id="test-explorer-panel"
+                title="Test Explorer"
+                defaultDock="left"
+                stackable={true}
+                onDockChange={(mode) => setTestExplorerPanelMode(mode)}
+                onClose={() => setTestExplorerPanelVisible(false)}
               >
-                <div className="panel-container test-runner-panel">
-                  <div className="panel-header">
-                    <span className="panel-title">Test Explorer</span>
-                    <button 
-                      className="panel-close"
-                      onClick={() => togglePanel('testRunner')}
-                      title="Close Panel"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div className="panel-content">
-                    <TestExplorer
-                      requests={allRequests}
-                      testSuites={testSuitesMap}
-                      onRunTest={onRunTest}
-                      onRunAllTests={onRunAllTests}
-                      onRunTestSuite={onRunTestSuite}
-                      onNewTestSuite={onNewTestSuite}
-                      onEditTestSuite={onEditTestSuite}
-                      onDeleteTestSuite={onDeleteTestSuite}
-                      testResults={testResults}
-                      testExecutionResults={testExecutionResults}
-                    />
-                  </div>
-                </div>
-              </Allotment.Pane>
+                <TestExplorer
+                  requests={allRequests}
+                  testSuites={testSuitesMap}
+                  onRunTest={onRunTest}
+                  onRunAllTests={onRunAllTests}
+                  onRunTestSuite={onRunTestSuite}
+                  onNewTestSuite={onNewTestSuite}
+                  onEditTestSuite={onEditTestSuite}
+                  onDeleteTestSuite={onDeleteTestSuite}
+                  testResults={testResults}
+                  testExecutionResults={testExecutionResults}
+                />
+              </DockablePanel>
             )}
-          </Allotment>
+          </div>
         </Allotment.Pane>
 
         {/* Main Content Area */}
@@ -638,7 +633,87 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         </Allotment.Pane>
       </Allotment>
 
+      {/* Floating Panels Overlay */}
+      {collectionsPanelMode === 'floating' && collectionsPanelVisible && (
+        <DockablePanel
+          id="collections-panel-floating"
+          title="Collections"
+          floating={true}
+          defaultDock="left"
+          onDockChange={(mode) => setCollectionsPanelMode(mode)}
+          onClose={() => setCollectionsPanelVisible(false)}
+        >
+          <EnhancedSidebar
+            user={user}
+            collections={collections}
+            onRequestSelect={onRequestSelect}
+            onNewRequest={onNewRequest}
+            onNewCollection={onNewCollection}
+            onEditRequest={onEditRequest}
+            onDeleteRequest={onDeleteRequest}
+            onDeleteCollection={onDeleteCollection}
+            activeRequest={activeRequest}
+            testResults={testResults}
+            testSuites={testSuitesMap}
+            uiTestSuites={uiTestSuites}
+            testExecutionResults={testExecutionResults}
+            uiTestExecutionResults={uiTestExecutionResults}
+            onRunTest={onRunTest}
+            onRunAllTests={onRunAllTests}
+            onRunTestSuite={onRunTestSuite}
+            onRunUITestSuite={onRunUITestSuite}
+            onRunAllUITests={onRunAllUITests}
+            onNewTestSuite={onNewTestSuite}
+            onEditTestSuite={onEditTestSuite}
+            onDeleteTestSuite={onDeleteTestSuite}
+            onNewUITestSuite={onNewUITestSuite}
+            onEditUITestSuite={onEditUITestSuite}
+            onDeleteUITestSuite={onDeleteUITestSuite}
+            onUserProfile={onUserProfile}
+            onSettings={onSettings}
+            onTeamManager={onTeamManager}
+            enableTestExplorer={false}
+          />
+        </DockablePanel>
+      )}
+
+      {testExplorerPanelMode === 'floating' && testExplorerPanelVisible && (
+        <DockablePanel
+          id="test-explorer-panel-floating"
+          title="Test Explorer"
+          floating={true}
+          defaultDock="left"
+          onDockChange={(mode) => setTestExplorerPanelMode(mode)}
+          onClose={() => setTestExplorerPanelVisible(false)}
+        >
+          <TestExplorer
+            requests={allRequests}
+            testSuites={testSuitesMap}
+            onRunTest={onRunTest}
+            onRunAllTests={onRunAllTests}
+            onRunTestSuite={onRunTestSuite}
+            onNewTestSuite={onNewTestSuite}
+            onEditTestSuite={onEditTestSuite}
+            onDeleteTestSuite={onDeleteTestSuite}
+            testResults={testResults}
+            testExecutionResults={testExecutionResults}
+          />
+        </DockablePanel>
+      )}
+
       <style>{`
+        .stacked-panels-container {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          gap: 4px;
+        }
+
+        .stacked-panels-container > * {
+          flex: 1;
+          min-height: 200px;
+        }
+
         .dockable-layout {
           height: 100vh;
           display: flex;
