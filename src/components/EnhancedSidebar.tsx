@@ -214,7 +214,10 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
         <div className="header-actions">
           <button className="header-action-button" onClick={onSettings} title="Settings">⚙️</button>
           {onTeamManager && (
-            <button className="header-action-button" onClick={onTeamManager} title="Team Management">👥</button>
+            <button className="header-action-button teams-button" onClick={onTeamManager} title="Team Management">
+              <span>👥</span>
+              <span className="teams-button-text">Teams</span>
+            </button>
           )}
           <button className="header-action-button" onClick={onNewCollection} title="New Collection">📁+</button>
           <ModernButton onClick={onNewRequest} variant="primary" size="small" icon={<AddIcon />}>New</ModernButton>

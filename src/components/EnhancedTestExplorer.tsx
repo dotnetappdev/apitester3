@@ -51,6 +51,9 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
   const [expandedUITestSuites, setExpandedUITestSuites] = useState<Set<string>>(new Set());
   const [showUITestDialog, setShowUITestDialog] = useState(false);
   const [editingUITestSuite, setEditingUITestSuite] = useState<UITestSuite | undefined>();
+  const [isDiscovering, setIsDiscovering] = useState(false);
+  const [discoveredTests, setDiscoveredTests] = useState<Map<string, 'discovered' | 'not-discovered'>>(new Map());
+  const [showTestTypeSelector, setShowTestTypeSelector] = useState(false);
 
   // Keyboard shortcuts for test runner
   React.useEffect(() => {
@@ -92,23 +95,75 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
     return hasFailures ? 'fail' : 'pass';
   };
 
-  const getTestIcon = (status: 'pass' | 'fail' | 'none' | 'skip') => {
+  const getTestIcon = (status: 'pass' | 'fail' | 'none' | 'skip', testId?: string) => {
+    // Check discovery status first
+    if (testId && discoveredTests.get(testId) === 'not-discovered') {
+      return '🔍';
+    }
+    if (testId && discoveredTests.get(testId) === 'discovered' && status === 'none') {
+      return '✅';
+    }
+    
     switch (status) {
-      case 'pass': return '✓';
-      case 'fail': return '✗';
-      case 'skip': return '○';
+      case 'pass': return '✔️';
+      case 'fail': return '❌';
+      case 'skip': return '⚠️';
       case 'none': 
       default: return '○';
     }
   };
 
-  const getTestIconColor = (status: 'pass' | 'fail' | 'none' | 'skip') => {
+  const getTestIconColor = (status: 'pass' | 'fail' | 'none' | 'skip', testId?: string) => {
+    // Check discovery status first
+    if (testId && discoveredTests.get(testId) === 'not-discovered') {
+      return 'var(--text-muted)';
+    }
+    if (testId && discoveredTests.get(testId) === 'discovered' && status === 'none') {
+      return 'var(--success-color)';
+    }
+    
     switch (status) {
       case 'pass': return 'var(--success-color)';
       case 'fail': return 'var(--error-color)';
       case 'skip': return 'var(--warning-color)';
       case 'none':
       default: return 'var(--text-muted)';
+    }
+  };
+
+  // Discover all tests
+  const handleDiscoverTests = async () => {
+    setIsDiscovering(true);
+    const newDiscoveredTests = new Map<string, 'discovered' | 'not-discovered'>();
+
+    try {
+      // Discover API Request Tests
+      requests.forEach(request => {
+        const testSuite = testSuites.get(request.id);
+        if (testSuite) {
+          testSuite.testCases.forEach(testCase => {
+            const testId = `request-${request.id}-${testCase.id}`;
+            newDiscoveredTests.set(testId, 'discovered');
+          });
+        }
+      });
+
+      // Discover UI Tests
+      Array.from(uiTestSuites.values()).forEach(uiTestSuite => {
+        uiTestSuite.testCases.forEach(testCase => {
+          const testId = `ui-${uiTestSuite.id}-${testCase.id}`;
+          newDiscoveredTests.set(testId, 'discovered');
+        });
+      });
+
+      setDiscoveredTests(newDiscoveredTests);
+      
+      // Simulate discovery time
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (error) {
+      console.error('Test discovery failed:', error);
+    } finally {
+      setIsDiscovering(false);
     }
   };
 
@@ -238,6 +293,14 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           Test Explorer
         </div>
         <div className="test-actions">
+          <button
+            className="test-action-button discover"
+            onClick={handleDiscoverTests}
+            disabled={isRunning || isDiscovering}
+            title="Discover All Tests"
+          >
+            {isDiscovering ? '🔄' : '🔍'}
+          </button>
           {isRunning ? (
             <button
               className="test-action-button stop"
@@ -278,10 +341,13 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           <div className="test-summary">
             <div className="summary-stats">
               <span className="stat-item">
-                <span style={{ color: 'var(--success-color)' }}>✓ {passedTests}</span>
+                <span style={{ color: 'var(--info-color)' }}>🔍 {discoveredTests.size}</span>
               </span>
               <span className="stat-item">
-                <span style={{ color: 'var(--error-color)' }}>✗ {failedTests}</span>
+                <span style={{ color: 'var(--success-color)' }}>✔️ {passedTests}</span>
+              </span>
+              <span className="stat-item">
+                <span style={{ color: 'var(--error-color)' }}>❌ {failedTests}</span>
               </span>
               <span className="stat-item">
                 <span style={{ color: 'var(--text-muted)' }}>○ {totalTests - passedTests - failedTests}</span>
@@ -298,17 +364,44 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
             )}
           </div>
 
+          {/* Discovery Banner - shown when tests exist but haven't been discovered */}
+          {(requests.length > 0 || uiTestSuites.size > 0) && discoveredTests.size === 0 && !isDiscovering && (
+            <div className="discovery-banner">
+              <div className="discovery-banner-icon">🔍</div>
+              <div className="discovery-banner-content">
+                <div className="discovery-banner-title">Tests need to be discovered</div>
+                <div className="discovery-banner-description">
+                  Discover tests to validate and prepare them for execution
+                </div>
+              </div>
+              <button 
+                className="discovery-banner-button"
+                onClick={handleDiscoverTests}
+                disabled={isRunning}
+              >
+                Discover Now
+              </button>
+            </div>
+          )}
+
           <div className="test-sections">
-            {/* API Tests Section */}
-            <div className="test-section">
+            {/* Request Tests Section - Uses Live Data */}
+            <div className="test-section request-tests-section">
               <div className="test-section-header">
-                <span className="section-title">API Tests</span>
-                <span className="test-count">({requests.length})</span>
+                <div className="section-title-wrapper">
+                  <span className="section-icon">🌐</span>
+                  <span className="section-title">Request Tests</span>
+                  <span className="test-count">({requests.length})</span>
+                  <span className="data-type-badge live-data">Live Data</span>
+                </div>
+                <div className="section-description">
+                  API endpoint tests using live request/response data
+                </div>
               </div>
               <div className="test-list">
                 {requests.length === 0 ? (
                   <div className="no-tests">
-                    <p>No API tests available</p>
+                    <p>No request tests available</p>
                     <p className="text-small text-muted">Create requests with test scripts to see them here</p>
                   </div>
                 ) : (
@@ -333,9 +426,9 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                           )}
                           <span 
                             className="test-status-icon"
-                            style={{ color: getTestIconColor(status) }}
+                            style={{ color: getTestIconColor(status, `request-${request.id}`) }}
                           >
-                            {getTestIcon(status)}
+                            {getTestIcon(status, `request-${request.id}`)}
                           </span>
                           <div className="test-request-info">
                             <div className="test-request-name">{request.name}</div>
@@ -361,14 +454,15 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                               const testResult = executionResults.find(r => r.testCaseId === testCase.id);
                               const testStatus = testResult ? 
                                 (testResult.status === 'error' ? 'fail' : testResult.status) : 'none';
+                              const testId = `request-${request.id}-${testCase.id}`;
 
                               return (
                                 <div key={testCase.id} className="test-case-item">
                                   <span 
                                     className="test-case-icon"
-                                    style={{ color: getTestIconColor(testStatus) }}
+                                    style={{ color: getTestIconColor(testStatus, testId) }}
                                   >
-                                    {getTestIcon(testStatus)}
+                                    {getTestIcon(testStatus, testId)}
                                   </span>
                                   <div className="test-case-info">
                                     <div className="test-case-name">
@@ -398,25 +492,32 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
               </div>
             </div>
 
-            {/* UI Tests Section */}
-            <div className="test-section">
+            {/* UI Tests Section - Browser Automation */}
+            <div className="test-section ui-tests-section">
               <div className="test-section-header">
-                <div 
-                  className="section-title-container"
-                  onClick={() => setIsUITestsExpanded(!isUITestsExpanded)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <span className={`expand-icon ${isUITestsExpanded ? 'expanded' : ''}`}>▶</span>
-                  <span className="section-title">UI Tests</span>
-                  <span className="test-count">({uiTestSuites.size})</span>
+                <div className="section-title-wrapper">
+                  <div 
+                    className="section-title-container"
+                    onClick={() => setIsUITestsExpanded(!isUITestsExpanded)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <span className={`expand-icon ${isUITestsExpanded ? 'expanded' : ''}`}>▶</span>
+                    <span className="section-icon">🖥️</span>
+                    <span className="section-title">UI Tests</span>
+                    <span className="test-count">({uiTestSuites.size})</span>
+                    <span className="data-type-badge mock-data">Mock Data</span>
+                  </div>
+                  <button
+                    className="create-test-btn"
+                    onClick={handleCreateUITestSuite}
+                    title="Create new UI test suite"
+                  >
+                    +
+                  </button>
                 </div>
-                <button
-                  className="create-test-btn"
-                  onClick={handleCreateUITestSuite}
-                  title="Create new UI test suite"
-                >
-                  +
-                </button>
+                <div className="section-description">
+                  Browser automation tests using Playwright with mock data for assertions
+                </div>
               </div>
               
               {isUITestsExpanded && (
@@ -447,9 +548,9 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                             </span>
                             <span 
                               className="test-status-icon"
-                              style={{ color: getTestIconColor(status) }}
+                              style={{ color: getTestIconColor(status, `ui-${uiTestSuite.id}`) }}
                             >
-                              {getTestIcon(status)}
+                              {getTestIcon(status, `ui-${uiTestSuite.id}`)}
                             </span>
                             <div className="test-request-info">
                               <div className="test-request-name">
@@ -490,14 +591,15 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                                 const testResult = executionResults.find(r => r.testCaseId === testCase.id);
                                 const testStatus = testResult ? 
                                   (testResult.status === 'error' ? 'fail' : testResult.status) : 'none';
+                                const testId = `ui-${uiTestSuite.id}-${testCase.id}`;
 
                                 return (
                                   <div key={testCase.id} className="test-case-item ui-test-case">
                                     <span 
                                       className="test-case-icon"
-                                      style={{ color: getTestIconColor(testStatus) }}
+                                      style={{ color: getTestIconColor(testStatus, testId) }}
                                     >
-                                      {getTestIcon(testStatus)}
+                                      {getTestIcon(testStatus, testId)}
                                     </span>
                                     <div className="test-case-info">
                                       <div className="test-case-name">
@@ -531,6 +633,28 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                   )}
                 </div>
               )}
+            </div>
+
+            {/* Unit Tests Section - Standalone Tests with Mock Data */}
+            <div className="test-section unit-tests-section">
+              <div className="test-section-header">
+                <div className="section-title-wrapper">
+                  <span className="section-icon">🧪</span>
+                  <span className="section-title">Unit Tests</span>
+                  <span className="test-count">(0)</span>
+                  <span className="data-type-badge mock-data">Mock Data</span>
+                </div>
+                <div className="section-description">
+                  Standalone unit tests for testing logic and utilities with mock data
+                </div>
+              </div>
+              <div className="test-list">
+                <div className="no-tests">
+                  <p>No unit tests available</p>
+                  <p className="text-small text-muted">Unit tests are standalone tests independent of requests</p>
+                  <p className="text-small text-muted">Coming soon: Create unit tests for your utilities and business logic</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -629,6 +753,15 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           color: var(--warning-color);
         }
 
+        .test-action-button.discover {
+          color: var(--info-color);
+        }
+
+        .test-action-button.discover:hover:not(:disabled) {
+          background: rgba(33, 150, 243, 0.1);
+          color: var(--info-color);
+        }
+
         .test-action-button:hover:not(:disabled) {
           background: var(--bg-hover);
           color: var(--text-primary);
@@ -671,6 +804,78 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           margin-left: auto;
         }
 
+        .discovery-banner {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 16px;
+          margin: 8px 12px;
+          background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(79, 195, 247, 0.1) 100%);
+          border: 1px solid rgba(33, 150, 243, 0.3);
+          border-radius: 6px;
+          animation: fadeInSlide 0.3s ease;
+        }
+
+        @keyframes fadeInSlide {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .discovery-banner-icon {
+          font-size: 24px;
+          flex-shrink: 0;
+        }
+
+        .discovery-banner-content {
+          flex: 1;
+        }
+
+        .discovery-banner-title {
+          font-weight: 600;
+          font-size: 13px;
+          color: var(--text-primary);
+          margin-bottom: 2px;
+        }
+
+        .discovery-banner-description {
+          font-size: 11px;
+          color: var(--text-secondary);
+        }
+
+        .discovery-banner-button {
+          background: var(--info-color);
+          color: white;
+          border: none;
+          padding: 6px 16px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+        }
+
+        .discovery-banner-button:hover:not(:disabled) {
+          background: #1976d2;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        }
+
+        .discovery-banner-button:active {
+          transform: translateY(0);
+        }
+
+        .discovery-banner-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
         .test-running {
           display: flex;
           align-items: center;
@@ -683,21 +888,40 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
         .test-sections {
           flex: 1;
           overflow-y: auto;
-          padding: 4px;
+          padding: 8px;
         }
 
         .test-section {
-          margin-bottom: 12px;
+          margin-bottom: 16px;
+          border: 1px solid var(--border-color);
+          border-radius: 6px;
+          background: var(--bg-secondary);
+          overflow: hidden;
+        }
+
+        /* Visual distinction for different test types */
+        .request-tests-section {
+          border-left: 3px solid #4fc3f7;
+        }
+
+        .ui-tests-section {
+          border-left: 3px solid #9c27b0;
+        }
+
+        .unit-tests-section {
+          border-left: 3px solid #4caf50;
         }
 
         .test-section-header {
+          padding: 12px;
+          border-bottom: 1px solid var(--border-color);
+          background: var(--bg-tertiary);
+        }
+
+        .section-title-wrapper {
           display: flex;
-          justify-content: space-between;
           align-items: center;
-          padding: 6px 8px;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          border-radius: 4px;
+          gap: 8px;
           margin-bottom: 4px;
         }
 
@@ -708,10 +932,42 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           flex: 1;
         }
 
+        .section-icon {
+          font-size: 16px;
+        }
+
         .section-title {
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 600;
           color: var(--text-primary);
+        }
+
+        .section-description {
+          font-size: 11px;
+          color: var(--text-secondary);
+          margin-top: 4px;
+          padding-left: 24px;
+        }
+
+        .data-type-badge {
+          font-size: 10px;
+          font-weight: 600;
+          padding: 2px 8px;
+          border-radius: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .data-type-badge.live-data {
+          background: rgba(79, 195, 247, 0.2);
+          color: #4fc3f7;
+          border: 1px solid rgba(79, 195, 247, 0.4);
+        }
+
+        .data-type-badge.mock-data {
+          background: rgba(156, 39, 176, 0.2);
+          color: #ce93d8;
+          border: 1px solid rgba(156, 39, 176, 0.4);
         }
 
         .test-count {
