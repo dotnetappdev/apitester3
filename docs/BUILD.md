@@ -1,6 +1,6 @@
-# Build Guide for API Tester 3
+# Build Guide for VerifyApi
 
-Quick reference for building and packaging API Tester 3 across platforms.
+Quick reference for building and packaging VerifyApi across platforms.
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ npm run package:all
 
 ### Linux (Confirmed Working)
 - ✅ **TAR.GZ** - `apitester3-1.0.0.tar.gz` (~107MB)
-- ✅ **AppImage** - `API Tester 3-1.0.0.AppImage` (~113MB)
+- ✅ **AppImage** - `VerifyApi-1.0.0.AppImage` (~113MB)
 - ✅ **DEB Package** - `apitester3_1.0.0_amd64.deb` (~77MB)
 
 ### Windows (Configuration Ready)
@@ -49,7 +49,7 @@ All packages are created in the `release/` directory:
 
 ```
 release/
-├── API Tester 3-1.0.0.AppImage          # Linux AppImage (universal)
+├── VerifyApi-1.0.0.AppImage          # Linux AppImage (universal)
 ├── apitester3-1.0.0.tar.gz              # Linux TAR.GZ
 ├── apitester3_1.0.0_amd64.deb           # Linux DEB package
 ├── linux-unpacked/                      # Unpacked Linux build

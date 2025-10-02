@@ -1,10 +1,10 @@
 /**
- * Application constants for API Tester 3
+ * Application constants for VerifyApi
  * Contains version info, GitHub links, and other application metadata
  */
 
 export const APP_INFO = {
-  name: 'API Tester 3',
+  name: 'VerifyApi',
   version: '1.0.0',
   description: 'Professional API testing tool with Visual Studio-style dockable layout',
   author: 'dotnetappdev',

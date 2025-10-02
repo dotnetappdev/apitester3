@@ -338,7 +338,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         {!activeRequest && (
           <div className="mobile-welcome">
             <div className="welcome-content">
-              <h2>API Tester 3</h2>
+              <h2>VerifyApi</h2>
               <p>Professional API testing on mobile</p>
               <div className="welcome-actions">
                 <button className="btn btn-primary" onClick={onNewRequest}>
@@ -402,7 +402,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                     onShowAbout?.();
                   }}
                 >
-                  ℹ️ About API Tester 3
+                  ℹ️ About VerifyApi
                 </button>
                 <button 
                   className="help-menu-item"
@@ -614,7 +614,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
           ) : (
             <div className="welcome-screen">
               <div className="welcome-content">
-                <h1>Welcome to API Tester 3</h1>
+                <h1>Welcome to VerifyApi</h1>
                 <p>Professional API testing tool with Visual Studio-style dockable layout</p>
                 <div className="welcome-actions">
                   <button className="btn btn-primary" onClick={onNewRequest}>

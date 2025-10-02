@@ -1,8 +1,8 @@
-# API Tester 3 - Development Setup Guide
+# VerifyApi - Development Setup Guide
 
 ## Overview
 
-API Tester 3 is a professional desktop API testing tool built with Electron, React, and TypeScript. This guide will help you set up the development environment and get the application running.
+VerifyApi is a professional desktop API testing tool built with Electron, React, and TypeScript. This guide will help you set up the development environment and get the application running.
 
 ## Prerequisites
 
@@ -111,7 +111,7 @@ After building and packaging the desktop application, you can start the Windows 
 
 #### Method 1: Using the Executable (Recommended)
 1. Navigate to the `release/` directory after running `npm run package`
-2. Find the Windows executable: `API Tester 3.exe` or `apitester3.exe`
+2. Find the Windows executable: `VerifyApi.exe` or `apitester3.exe`
 3. Double-click the executable to launch the application
 
 #### Method 2: Using NPM Scripts (Development)

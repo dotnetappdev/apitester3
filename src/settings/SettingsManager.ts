@@ -59,7 +59,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   },
   recentCollections: [],
   defaultHeaders: {
-    'User-Agent': 'API Tester 3'
+    'User-Agent': 'VerifyApi'
   }
 };
 
