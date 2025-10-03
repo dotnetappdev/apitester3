@@ -167,6 +167,28 @@ class AppManager {
       {
         label: 'View',
         submenu: [
+          {
+            label: 'Show Collections Panel',
+            accelerator: 'CmdOrCtrl+Shift+C',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-show-panel', 'collections');
+            }
+          },
+          {
+            label: 'Show Test Explorer Panel',
+            accelerator: 'CmdOrCtrl+Shift+T',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-show-panel', 'testExplorer');
+            }
+          },
+          {
+            label: 'Restore All Panels',
+            accelerator: 'CmdOrCtrl+Shift+R',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-restore-all-panels');
+            }
+          },
+          { type: 'separator' },
           { role: 'reload' },
           { role: 'forceReload' },
           { role: 'toggleDevTools' },
@@ -209,6 +231,15 @@ class AppManager {
   }
 
   private setupIpcHandlers(): void {
+    // Handle opening external URLs
+    ipcMain.handle('open-external', async (_event, url: string) => {
+      try {
+        await shell.openExternal(url);
+      } catch (error) {
+        console.error('Failed to open external URL:', error);
+      }
+    });
+
     // Handle API requests from renderer
     ipcMain.handle('make-api-request', async (event, requestData) => {
       // This will be implemented to handle API requests securely
