@@ -171,6 +171,47 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
     setLayoutConfig(defaultConfig);
   }, [layoutManager]);
 
+  const showPanel = useCallback((panelId: string) => {
+    if (panelId === 'collections' || panelId === 'sidebar') {
+      setCollectionsPanelVisible(true);
+      const updatedConfig = layoutManager.updatePanelVisibility('sidebar', true);
+      setLayoutConfig(updatedConfig);
+    } else if (panelId === 'testExplorer' || panelId === 'testRunner') {
+      setTestExplorerPanelVisible(true);
+      const updatedConfig = layoutManager.updatePanelVisibility('testRunner', true);
+      setLayoutConfig(updatedConfig);
+    }
+  }, [layoutManager]);
+
+  const restoreAllPanels = useCallback(() => {
+    setCollectionsPanelVisible(true);
+    setTestExplorerPanelVisible(true);
+    let updatedConfig = layoutManager.updatePanelVisibility('sidebar', true);
+    updatedConfig = layoutManager.updatePanelVisibility('testRunner', true);
+    setLayoutConfig(updatedConfig);
+  }, [layoutManager]);
+
+  // Listen for menu events to show/hide panels
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.electron) {
+      const handleShowPanel = (_event: any, panelId: string) => {
+        showPanel(panelId);
+      };
+
+      const handleRestoreAllPanels = () => {
+        restoreAllPanels();
+      };
+
+      window.electron.on('menu-show-panel', handleShowPanel);
+      window.electron.on('menu-restore-all-panels', handleRestoreAllPanels);
+
+      return () => {
+        window.electron.removeListener('menu-show-panel', handleShowPanel);
+        window.electron.removeListener('menu-restore-all-panels', handleRestoreAllPanels);
+      };
+    }
+  }, [showPanel, restoreAllPanels]);
+
   // Get all requests for test explorer
   const allRequests = collections.flatMap(c => c.requests || []);
 
@@ -519,6 +560,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                 title="Test Explorer"
                 defaultDock="left"
                 stackable={true}
+                hideDockingControls={false}
                 onDockChange={(mode) => setTestExplorerPanelMode(mode)}
                 onClose={() => setTestExplorerPanelVisible(false)}
               >
@@ -666,6 +708,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
           title="Test Explorer"
           floating={true}
           defaultDock="left"
+          hideDockingControls={false}
           onDockChange={(mode) => setTestExplorerPanelMode(mode)}
           onClose={() => setTestExplorerPanelVisible(false)}
         >

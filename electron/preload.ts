@@ -102,6 +102,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMenuSidebarWidth: (callback: any) => ipcRenderer.on('menu-sidebar-width', (_e, width) => callback(width)),
 });
 
+// Expose electron utilities
+contextBridge.exposeInMainWorld('electron', {
+  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+  on: (channel: string, callback: (...args: any[]) => void) => {
+    ipcRenderer.on(channel, (_event, ...args) => callback(...args));
+  },
+  removeListener: (channel: string, callback: (...args: any[]) => void) => {
+    ipcRenderer.removeListener(channel, (_event, ...args) => callback(...args));
+  }
+});
+
 // Type definitions for the renderer process
 declare global {
   interface Window {
@@ -152,6 +163,11 @@ declare global {
       removeAllListeners: (channel: string) => void;
       platform: string;
       version: string;
+    };
+    electron: {
+      openExternal: (url: string) => void;
+      on: (channel: string, callback: (...args: any[]) => void) => void;
+      removeListener: (channel: string, callback: (...args: any[]) => void) => void;
     };
   }
 }

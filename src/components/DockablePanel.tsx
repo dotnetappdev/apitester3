@@ -10,7 +10,8 @@ interface DockablePanelProps {
   children?: React.ReactNode;
   stackable?: boolean;
   stackIndex?: number;
-  // onStackOrderChange intentionally removed - not used
+  onStackOrderChange?: (newIndex: number) => void;
+  hideDockingControls?: boolean;
 }
 
 export const DockablePanel: React.FC<DockablePanelProps> = ({
@@ -23,7 +24,8 @@ export const DockablePanel: React.FC<DockablePanelProps> = ({
   children,
   stackable = false,
   stackIndex = 0,
-  
+  onStackOrderChange,
+  hideDockingControls = false
 }) => {
   const [mode, setMode] = useState<'bottom' | 'right' | 'left' | 'top' | 'floating'>(floating ? 'floating' : defaultDock);
   const [pos, setPos] = useState({ x: 120, y: 120 });
@@ -102,11 +104,15 @@ export const DockablePanel: React.FC<DockablePanelProps> = ({
       <div className="dock-panel-header" onMouseDown={handleMouseDown} role="toolbar" aria-label={title || 'Panel'}>
         <div className="dock-panel-title">{title}</div>
         <div className="dock-panel-actions">
-          <button className="dock-btn" onClick={() => handleDock('floating')} title="Float Panel">⤢</button>
-          <button className="dock-btn" onClick={() => handleDock('top')} title="Dock Top">▀</button>
-          <button className="dock-btn" onClick={() => handleDock('left')} title="Dock Left">▌</button>
-          <button className="dock-btn" onClick={() => handleDock('bottom')} title="Dock Bottom">▄</button>
-          <button className="dock-btn" onClick={() => handleDock('right')} title="Dock Right">▐</button>
+          {!hideDockingControls && (
+            <>
+              <button className="dock-btn" onClick={() => handleDock('floating')} title="Float Panel">⤢</button>
+              <button className="dock-btn" onClick={() => handleDock('top')} title="Dock Top">▀</button>
+              <button className="dock-btn" onClick={() => handleDock('left')} title="Dock Left">▌</button>
+              <button className="dock-btn" onClick={() => handleDock('bottom')} title="Dock Bottom">▄</button>
+              <button className="dock-btn" onClick={() => handleDock('right')} title="Dock Right">▐</button>
+            </>
+          )}
           {onClose && <button className="dock-btn" onClick={onClose} title="Close">✕</button>}
         </div>
       </div>

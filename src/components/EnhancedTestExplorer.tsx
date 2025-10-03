@@ -4,6 +4,7 @@ import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
 import { UITestSuite, UITestExecutionResult } from '../testing/UITestRunner';
 import { ApiResponse } from '../types';
 import UITestDialog from './UITestDialog';
+import TestDebugger from './TestDebugger';
 
 interface EnhancedTestExplorerProps {
   requests: Request[];
@@ -54,6 +55,10 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
   const [isDiscovering, setIsDiscovering] = useState(false);
   const [discoveredTests, setDiscoveredTests] = useState<Map<string, 'discovered' | 'not-discovered'>>(new Map());
   const [showTestTypeSelector, setShowTestTypeSelector] = useState(false);
+  const [showDebugger, setShowDebugger] = useState(false);
+  const [debugTestType, setDebugTestType] = useState<'api' | 'ui'>('api');
+  const [debugTestData, setDebugTestData] = useState<Request | UITestSuite | undefined>();
+  const [debugTestSuite, setDebugTestSuite] = useState<TestSuite | undefined>();
 
   // Keyboard shortcuts for test runner
   React.useEffect(() => {
@@ -65,8 +70,7 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
         }
       } else if (e.key === 'F6' && !isRunning) {
         e.preventDefault();
-        // TODO: Implement debug mode
-        console.log('Debug tests (F6) - not yet implemented');
+        handleOpenDebugger();
       }
     };
 
@@ -280,6 +284,29 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
     setEditingUITestSuite(undefined);
   };
 
+  const handleOpenDebugger = () => {
+    // Default to API tests if available, otherwise UI tests
+    if (requests.length > 0) {
+      const firstRequest = requests[0];
+      const testSuite = testSuites.get(firstRequest.id);
+      setDebugTestType('api');
+      setDebugTestData(firstRequest);
+      setDebugTestSuite(testSuite);
+    } else if (uiTestSuites.size > 0) {
+      const firstUITest = Array.from(uiTestSuites.values())[0];
+      setDebugTestType('ui');
+      setDebugTestData(firstUITest);
+      setDebugTestSuite(undefined);
+    }
+    setShowDebugger(true);
+  };
+
+  const handleRunDebug = async () => {
+    // Implement debug run logic here
+    console.log('Running debug for:', debugTestType, debugTestData);
+    // This would integrate with the actual test runner
+  };
+
   const { totalTests, passedTests, failedTests } = getTestCounts();
 
   return (
@@ -321,6 +348,7 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           )}
           <button
             className="test-action-button debug"
+            onClick={handleOpenDebugger}
             disabled={isRunning || (requests.length === 0 && uiTestSuites.size === 0)}
             title="Debug Tests (F6)"
           >
@@ -673,6 +701,15 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
         />
       )}
 
+      <TestDebugger
+        isOpen={showDebugger}
+        onClose={() => setShowDebugger(false)}
+        testType={debugTestType}
+        testData={debugTestData}
+        testSuite={debugTestSuite}
+        onRunDebug={handleRunDebug}
+      />
+
       <style>{`
         .enhanced-test-explorer {
           height: 100%;
@@ -716,41 +753,54 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
         }
 
         .test-action-button {
-          background: none;
-          border: none;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-color);
           color: var(--text-muted);
           cursor: pointer;
-          padding: 4px;
-          border-radius: 3px;
-          font-size: 12px;
-          transition: all 0.1s;
+          padding: 6px 10px;
+          border-radius: 4px;
+          font-size: 14px;
+          transition: all 0.2s ease;
+          font-weight: 500;
         }
 
         .test-action-button.play {
-          color: var(--success-color);
+          background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+          color: white;
+          border: 1px solid #45a049;
+          box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
         }
 
         .test-action-button.play:hover:not(:disabled) {
-          background: rgba(76, 175, 80, 0.1);
-          color: var(--success-color);
+          background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+          box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
+          transform: translateY(-1px);
         }
 
         .test-action-button.stop {
-          color: var(--error-color);
+          background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+          color: white;
+          border: 1px solid #d32f2f;
+          box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
         }
 
         .test-action-button.stop:hover {
-          background: rgba(244, 71, 71, 0.1);
-          color: var(--error-color);
+          background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+          box-shadow: 0 4px 8px rgba(244, 67, 54, 0.4);
+          transform: translateY(-1px);
         }
 
         .test-action-button.debug {
-          color: var(--warning-color);
+          background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+          color: white;
+          border: 1px solid #F57C00;
+          box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
         }
 
         .test-action-button.debug:hover:not(:disabled) {
-          background: rgba(255, 193, 7, 0.1);
-          color: var(--warning-color);
+          background: linear-gradient(135deg, #F57C00 0%, #E65100 100%);
+          box-shadow: 0 4px 8px rgba(255, 152, 0, 0.4);
+          transform: translateY(-1px);
         }
 
         .test-action-button.discover {
@@ -765,11 +815,14 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
         .test-action-button:hover:not(:disabled) {
           background: var(--bg-hover);
           color: var(--text-primary);
+          transform: translateY(-1px);
         }
 
         .test-action-button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
         }
 
         .test-explorer-content {
