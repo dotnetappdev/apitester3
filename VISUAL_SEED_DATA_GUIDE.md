@@ -27,7 +27,7 @@ Login Dialog
 └── User can immediately select and login
 
 Collections Panel
-├── JSONPlaceholder API Tests (📁 shared)
+├── JSONPlaceholder API Tests (📁 shared) - 7 API requests
 │   ├── Get All Posts
 │   ├── Get Post by ID
 │   ├── Create New Post
@@ -35,16 +35,23 @@ Collections Panel
 │   ├── Delete Post
 │   ├── Get All Users
 │   └── Get User Albums
-└── User Management APIs (📁 private)
+├── UI Test Examples (📁 shared) - 3 UI tests
+│   ├── Login Page UI Test
+│   ├── User Authentication Flow
+│   └── Navigation Menu Test
+└── Unit Test Examples (📁 private) - 4 unit tests
+    ├── String Utility Functions
+    ├── Array Operations Test
+    ├── Object Validation Test
     └── Search Users by Name
 
 Application Experience
-└── Ready to use immediately with sample data
+└── Ready to use with comprehensive test examples
 ```
 
 ## Sample Request Details
 
-### Example: "Get All Posts"
+### Example: API Test - "Get All Posts"
 ```http
 GET https://jsonplaceholder.typicode.com/posts
 Content-Type: application/json
@@ -72,7 +79,7 @@ console.log('✓ Successfully retrieved posts');
 ]
 ```
 
-### Example: "Create New Post"
+### Example: API Test - "Create New Post"
 ```http
 POST https://jsonplaceholder.typicode.com/posts
 Content-Type: application/json
@@ -93,6 +100,108 @@ assert.assertJsonPath('$.body', 'This is a test post created via VerifyApi', res
 assert.assertJsonPath('$.userId', 1, response.data);
 assert.assertType('number', response.data.id);
 console.log('✓ Post created with ID:', response.data.id);
+```
+
+### Example: UI Test - "Login Page UI Test"
+```http
+GET https://example.com/login
+```
+
+**Test Script (Playwright):**
+```javascript
+// UI Test: Login Page Elements
+await page.goto('https://example.com/login');
+
+// Check login form exists
+assert.assertElementExists('form#login-form', 'Login form should exist');
+assert.assertElementExists('input[name="username"]', 'Username field exists');
+assert.assertElementExists('input[name="password"]', 'Password field exists');
+assert.assertElementExists('button[type="submit"]', 'Submit button exists');
+
+console.log('✓ Login page elements validated');
+```
+
+### Example: UI Test - "User Authentication Flow"
+```http
+POST https://example.com/auth/login
+Body: { "username": "testuser", "password": "Test123!" }
+```
+
+**Test Script (Playwright):**
+```javascript
+// UI Test: Complete Login Flow
+await page.goto('https://example.com/login');
+
+// Fill in login form
+await page.fill('input[name="username"]', 'testuser');
+await page.fill('input[name="password"]', 'Test123!');
+await page.click('button[type="submit"]');
+
+// Wait for redirect to dashboard
+await page.waitForURL('**/dashboard', { timeout: 5000 });
+
+// Verify successful login
+assert.assertUrlContains('/dashboard', 'Should redirect to dashboard');
+assert.assertElementExists('.user-profile', 'User profile should display');
+assert.assertElementText('.welcome-message', 'Welcome, testuser');
+
+console.log('✓ User authentication flow completed');
+```
+
+### Example: Unit Test - "Array Operations Test"
+```http
+GET https://jsonplaceholder.typicode.com/users
+```
+
+**Test Script:**
+```javascript
+// Unit Test: Array operations
+const numbers = [1, 2, 3, 4, 5, 6];
+
+// Test filtering
+const evens = numbers.filter(n => n % 2 === 0);
+assert.assertArrayLength(3, evens, 'Should have 3 even numbers');
+
+// Test mapping
+const doubled = numbers.map(n => n * 2);
+assert.assertEquals(2, doubled[0], 'First element doubled is 2');
+
+// Test reducing
+const sum = numbers.reduce((acc, n) => acc + n, 0);
+assert.assertEquals(21, sum, 'Sum of 1-6 should be 21');
+
+console.log('✓ Array operation tests passed');
+```
+
+### Example: Unit Test - "Object Validation Test"
+```http
+GET https://jsonplaceholder.typicode.com/users/1
+```
+
+**Test Script:**
+```javascript
+// Unit Test: Object validation
+const user = {
+  id: 1,
+  name: 'John Doe',
+  email: 'john@example.com',
+  age: 30,
+  active: true
+};
+
+// Test property existence
+assert.assertObjectHasProperty(user, 'id', 'User should have id');
+assert.assertObjectHasProperty(user, 'email', 'User should have email');
+
+// Test property types
+assert.assertType('number', user.id, 'ID should be a number');
+assert.assertType('string', user.name, 'Name should be a string');
+assert.assertType('boolean', user.active, 'Active should be boolean');
+
+// Test email format
+assert.assertRegexMatch(/@example\.com$/, user.email, 'Email valid');
+
+console.log('✓ Object validation tests passed');
 ```
 
 ## Login Flow
@@ -177,18 +286,21 @@ SELECT * FROM collections;
 │ id │ name                      │ ownerId │ isShared │ created   │
 ├────┼───────────────────────────┼─────────┼──────────┼───────────┤
 │ 1  │ JSONPlaceholder API Tests │ 1       │ 1        │ 2024...   │
-│ 2  │ User Management APIs      │ 3       │ 0        │ 2024...   │
+│ 2  │ UI Test Examples          │ 1       │ 1        │ 2024...   │
+│ 3  │ Unit Test Examples        │ 3       │ 0        │ 2024...   │
 └────┴───────────────────────────┴─────────┴──────────┴───────────┘
 
 -- Requests table
-SELECT * FROM requests LIMIT 3;
-┌────┬──────────────┬──────────────┬────────┬─────────────────────┐
-│ id │ collectionId │ name         │ method │ url                 │
-├────┼──────────────┼──────────────┼────────┼─────────────────────┤
-│ 1  │ 1            │ Get All Posts│ GET    │ .../posts           │
-│ 2  │ 1            │ Get Post...  │ GET    │ .../posts/1         │
-│ 3  │ 1            │ Create New...│ POST   │ .../posts           │
-└────┴──────────────┴──────────────┴────────┴─────────────────────┘
+SELECT * FROM requests LIMIT 5;
+┌────┬──────────────┬──────────────────┬────────┬─────────────────────┐
+│ id │ collectionId │ name             │ method │ url                 │
+├────┼──────────────┼──────────────────┼────────┼─────────────────────┤
+│ 1  │ 1            │ Get All Posts    │ GET    │ .../posts           │
+│ 2  │ 1            │ Get Post by ID   │ GET    │ .../posts/1         │
+│ 3  │ 1            │ Create New Post  │ POST   │ .../posts           │
+│ 4  │ 2            │ Login Page UI... │ GET    │ .../login           │
+│ 5  │ 3            │ String Utility...│ GET    │ .../posts/1         │
+└────┴──────────────┴──────────────────┴────────┴─────────────────────┘
 ```
 
 ### Existing Database (Upgrade)
@@ -200,8 +312,8 @@ Before upgrade:
 
 After upgrade:
 ✓ Users exist (5 rows) - unchanged
-✓ Collections seeded (2 rows) - NEW
-✓ Requests seeded (8 rows) - NEW
+✓ Collections seeded (3 rows) - NEW
+✓ Requests seeded (14 rows) - NEW
 ```
 
 ## Console Output
@@ -210,16 +322,16 @@ After upgrade:
 ```
 SQLite database initialized at: /path/to/apitester3.db
 ✓ Seeded 5 users
-✓ Seeded 2 collections
-✓ Seeded 8 sample requests
+✓ Seeded 3 collections
+✓ Seeded 14 sample requests (7 API + 3 UI + 4 Unit tests)
 Seed data initialization complete
 ```
 
 ### Existing Database
 ```
 SQLite database initialized at: /path/to/apitester3.db
-✓ Seeded 2 collections
-✓ Seeded 8 sample requests
+✓ Seeded 3 collections
+✓ Seeded 14 sample requests (7 API + 3 UI + 4 Unit tests)
 Seed data initialization complete
 ```
 
@@ -280,13 +392,18 @@ Seed data initialization complete
 
 ### What Users Get
 ✅ **5 ready-to-use profiles** - Login immediately
-✅ **2 sample collections** - Learn by example
-✅ **8 API requests** - Real working examples
-✅ **Complete test scripts** - Understand testing patterns
+✅ **3 sample collections** - API, UI, and Unit test examples
+✅ **14 comprehensive examples** - Covering all test types
+✅ **Complete test scripts** - Learn testing patterns and assertions
 ✅ **Zero setup required** - Works out of the box
 
+### Test Type Coverage
+✅ **7 API Tests** - RESTful API patterns with JSONPlaceholder
+✅ **3 UI Tests** - Browser automation with Playwright
+✅ **4 Unit Tests** - Function and data structure testing
+
 ### Technical Achievement
-✅ **~230 lines added** to seed data function
+✅ **~250 lines added** to seed data function
 ✅ **Backwards compatible** - Existing data preserved
 ✅ **Idempotent** - Safe to run multiple times
 ✅ **Well documented** - Easy to understand and extend
@@ -294,9 +411,10 @@ Seed data initialization complete
 
 ### User Benefits
 ✅ **Immediate productivity** - Start testing APIs right away
-✅ **Learning resource** - Examples demonstrate best practices
+✅ **Comprehensive learning** - Examples for all test types
+✅ **Best practices** - Professional test patterns demonstrated
 ✅ **Quality assurance** - Pre-configured tests show what works
-✅ **Professional setup** - Realistic sample data included
+✅ **Real-world examples** - Working APIs and realistic scenarios
 
 ---
 

@@ -1,7 +1,7 @@
-# Seed Data Fix - Issue Resolution
+# Seed Data Fix - Comprehensive Test Examples
 
 ## Problem Statement
-The issue reported that default profiles were no longer showing in the account picker, and that the database needed sample collections and requests with test data from jsonplaceholder.typicode.com.
+The issue reported that default profiles were no longer showing in the account picker, and that the database needed sample collections and requests with comprehensive test data including API tests, UI tests, and unit tests.
 
 ## Root Cause Analysis
 The `initializeSeedData()` function in `electron/sqliteManager.ts` had a critical flaw:
@@ -42,29 +42,59 @@ if (shouldSeedCollections) {
 
 #### 2. Added Comprehensive Seed Data
 
-**Collections (2):**
+**Collections (3):**
 1. **JSONPlaceholder API Tests** - Shared collection owned by admin
-   - Contains 7 sample API requests using jsonplaceholder.typicode.com
-2. **User Management APIs** - Private collection owned by developer
-   - Contains 1 user search request
+   - Contains 7 API test examples using jsonplaceholder.typicode.com
+2. **UI Test Examples** - Shared collection owned by admin
+   - Contains 3 browser-based UI test examples using Playwright
+3. **Unit Test Examples** - Private collection owned by developer
+   - Contains 4 standalone unit test examples
 
-**Requests (8 total):**
-1. **Get All Posts** - `GET https://jsonplaceholder.typicode.com/posts`
-2. **Get Post by ID** - `GET https://jsonplaceholder.typicode.com/posts/1`
-3. **Create New Post** - `POST https://jsonplaceholder.typicode.com/posts`
-4. **Update Post** - `PUT https://jsonplaceholder.typicode.com/posts/1`
-5. **Delete Post** - `DELETE https://jsonplaceholder.typicode.com/posts/1`
-6. **Get All Users** - `GET https://jsonplaceholder.typicode.com/users`
-7. **Get User Albums** - `GET https://jsonplaceholder.typicode.com/users/1/albums`
-8. **Search Users by Name** - `GET https://jsonplaceholder.typicode.com/users?username=Bret`
+**Sample Requests (14 total):**
 
-#### 3. Added Test Scripts
-Each request includes example test scripts with assertions:
+**API Tests (7):**
+1. **Get All Posts** - `GET /posts` - List all posts
+2. **Get Post by ID** - `GET /posts/1` - Retrieve single post
+3. **Create New Post** - `POST /posts` - Create new post
+4. **Update Post** - `PUT /posts/1` - Update existing post
+5. **Delete Post** - `DELETE /posts/1` - Delete post
+6. **Get All Users** - `GET /users` - List all users
+7. **Get User Albums** - `GET /users/1/albums` - Get user's albums
+
+**UI Tests (3):**
+1. **Login Page UI Test** - Validates login form elements
+2. **User Authentication Flow** - Tests complete login workflow
+3. **Navigation Menu Test** - Tests menu navigation and routing
+
+**Unit Tests (4):**
+1. **String Utility Functions** - Tests string manipulation
+2. **Array Operations Test** - Tests array filtering, mapping, reducing
+3. **Object Validation Test** - Tests object properties and validation
+4. **Search Users by Name** - Tests search functionality
+
+#### 3. Added Comprehensive Test Scripts
+Each request includes example test scripts with assertions demonstrating:
+
+**For API Tests:**
 - Status code validation: `assert.assertStatusCode(200, response)`
 - Response time checks: `assert.assertResponseTime(2000, response.time)`
 - JSON path assertions: `assert.assertJsonPath('$.id', 1, response.data)`
 - Type checking: `assert.assertType('string', response.data.title)`
-- Console logging: `console.log('✓ Test passed')`
+- Array length validation: `assert.assertArrayLength(10, response.data)`
+
+**For UI Tests:**
+- Element existence: `assert.assertElementExists('form#login-form')`
+- Element visibility: `assert.assertElementVisible('#menu')`
+- Element text: `assert.assertElementText('.welcome', 'Welcome')`
+- URL validation: `assert.assertUrlContains('/dashboard')`
+- Page interactions: `await page.fill()`, `await page.click()`
+
+**For Unit Tests:**
+- Object properties: `assert.assertObjectHasProperty(obj, 'prop')`
+- Type validation: `assert.assertType('number', value)`
+- Comparisons: `assert.assertGreaterThan(value, 0)`
+- Pattern matching: `assert.assertRegexMatch(/pattern/, value)`
+- Boolean checks: `assert.assertTrue(condition)`
 
 These follow the patterns documented in `TEST_ASSERTIONS.md`.
 
@@ -76,8 +106,8 @@ These follow the patterns documented in `TEST_ASSERTIONS.md`.
 3. Check the console logs for:
    ```
    ✓ Seeded 5 users
-   ✓ Seeded 2 collections
-   ✓ Seeded 8 sample requests
+   ✓ Seeded 3 collections
+   ✓ Seeded 14 sample requests (7 API + 3 UI + 4 Unit tests)
    Seed data initialization complete
    ```
 4. Login with any of the default accounts:
@@ -93,26 +123,28 @@ These follow the patterns documented in `TEST_ASSERTIONS.md`.
 3. If collections don't exist, they will be seeded
 4. Check the console logs for:
    ```
-   ✓ Seeded 2 collections
-   ✓ Seeded 8 sample requests
+   ✓ Seeded 3 collections
+   ✓ Seeded 14 sample requests (7 API + 3 UI + 4 Unit tests)
    Seed data initialization complete
    ```
 
 ### Verifying in the UI
 1. **Login Dialog**: All 5 user profiles should appear in the account picker
 2. **Collections Panel**: Should show:
-   - "JSONPlaceholder API Tests" (shared)
-   - "User Management APIs" (for developer user)
+   - "JSONPlaceholder API Tests" (shared) - 7 API test requests
+   - "UI Test Examples" (shared) - 3 UI test requests
+   - "Unit Test Examples" (private for developer) - 4 unit test requests
 3. **Requests**: Click on a collection to see the seeded requests
-4. **Test Execution**: Select a request and click "Send" to test the API
-5. **Test Scripts**: Each request has pre-configured tests that can be run
+4. **Test Execution**: Select a request and click "Send" to test
+5. **Test Scripts**: Each request has pre-configured tests demonstrating different assertion types
 
 ## Benefits
 
 ### 1. Better User Experience
 - New users immediately see sample data and can test the application
 - Default profiles are always available in the login picker
-- Example requests demonstrate how to use the application
+- Example requests demonstrate API tests, UI tests, and unit tests
+- Comprehensive test coverage examples for learning
 
 ### 2. Backwards Compatible
 - Existing databases retain their users
@@ -120,13 +152,16 @@ These follow the patterns documented in `TEST_ASSERTIONS.md`.
 - No data loss or duplication
 
 ### 3. Educational Value
-- Sample requests show REST API patterns (GET, POST, PUT, DELETE)
-- Test scripts demonstrate assertion syntax
-- JSONPlaceholder is a well-known testing API
+- **API Tests**: Show REST API patterns (GET, POST, PUT, DELETE)
+- **UI Tests**: Demonstrate Playwright browser automation
+- **Unit Tests**: Illustrate testing functions and data structures
+- Test scripts demonstrate comprehensive assertion syntax
+- JSONPlaceholder provides working API examples
 
 ### 4. Development & Testing
 - Developers can quickly test features with realistic data
 - QA can verify functionality with pre-configured requests
+- Test engineers can learn assertion patterns
 - No need to manually create test data
 
 ## Technical Details
@@ -134,8 +169,8 @@ These follow the patterns documented in `TEST_ASSERTIONS.md`.
 ### Database Schema
 The seed data populates three tables:
 - `users`: 5 pre-configured user accounts with hashed passwords
-- `collections`: 2 sample collections with different ownership/sharing settings
-- `requests`: 8 sample HTTP requests with headers, body, and test scripts
+- `collections`: 3 sample collections (API, UI, Unit tests) with different ownership/sharing settings
+- `requests`: 14 sample requests with headers, body, and comprehensive test scripts
 
 ### Password Hashing
 User passwords are hashed using PBKDF2 with:
