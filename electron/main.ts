@@ -167,6 +167,28 @@ class AppManager {
       {
         label: 'View',
         submenu: [
+          {
+            label: 'Show Collections Panel',
+            accelerator: 'CmdOrCtrl+Shift+C',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-show-panel', 'collections');
+            }
+          },
+          {
+            label: 'Show Test Explorer Panel',
+            accelerator: 'CmdOrCtrl+Shift+T',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-show-panel', 'testExplorer');
+            }
+          },
+          {
+            label: 'Restore All Panels',
+            accelerator: 'CmdOrCtrl+Shift+R',
+            click: () => {
+              this.mainWindow?.webContents.send('menu-restore-all-panels');
+            }
+          },
+          { type: 'separator' },
           { role: 'reload' },
           { role: 'forceReload' },
           { role: 'toggleDevTools' },
