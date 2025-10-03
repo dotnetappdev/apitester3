@@ -268,7 +268,7 @@ export class SqliteDatabaseManager {
           ]
         );
         collectionIds.push(result.lastID!);
-        }
+      }
 
       // Seed requests with jsonplaceholder examples
       const seedRequests = [
