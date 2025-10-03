@@ -656,9 +656,9 @@ body.light-theme :root {
 
 /* ENHANCED SIDEBAR STYLES */
 .enhanced-sidebar {
-  width: 300px;
-  min-width: 250px;
-  max-width: 500px;
+  width: var(--sidebar-width, 360px);
+  min-width: 200px;
+  max-width: 800px;
   background: var(--sidebar-bg);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -2305,6 +2305,69 @@ body.light-theme :root {
   color: var(--text-secondary);
 }
 
+/* Small helpers for components adjusted by recent changes */
+.hidden { display: none !important; }
+.fill-width { width: 100%; box-sizing: border-box; }
+
+/* Allotment resizer styling moved from inline props */
+.allotment-vertical .allotment__divider,
+.allotment-horizontal .allotment__divider,
+.main-allotment .allotment__divider,
+.content-allotment .allotment__divider {
+  background-color: var(--border-color);
+}
+.allotment-vertical .allotment__divider { height: 6px; cursor: row-resize; }
+.allotment-horizontal .allotment__divider { width: 6px; cursor: col-resize; }
+.main-allotment .allotment__divider { width: 4px; transition: background-color 0.2s ease; }
+.content-allotment .allotment__divider { width: 4px; transition: background-color 0.2s ease; }
+
+/* Dockable panel styles (moved from DockablePanel.tsx inline <style>) */
+.dock-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dock-panel.floating {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  resize: both;
+  overflow: auto;
+  min-width: 300px;
+  min-height: 200px;
+}
+
+.dock-panel.docked-top,
+.dock-panel.docked-bottom { width: 100%; }
+.dock-panel.docked-left,
+.dock-panel.docked-right { height: 100%; }
+
+.dock-panel.stackable { transition: transform 0.2s ease; }
+
+.dock-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  cursor: move;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.dock-panel.floating .dock-panel-header { cursor: move; }
+.dock-panel:not(.floating) .dock-panel-header { cursor: default; }
+
+.dock-panel-title { font-weight: 600; font-size: 13px; color: var(--text-primary); }
+.dock-panel-actions { display: flex; gap: 4px; }
+.dock-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px 6px; border-radius: 3px; font-size: 12px; transition: all 0.15s ease; }
+.dock-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.dock-panel-body { flex: 1; overflow: auto; padding: 0; }
+.dock-panel-body.fill-width > * { width: 100%; box-sizing: border-box; }
+
 /* RESPONSIVE DESIGN */
 @media (max-width: 1200px) {
   .enhanced-sidebar {
@@ -3629,6 +3692,22 @@ textarea:focus-visible {
   border-bottom: 1px solid var(--border-color);
   overflow-x: auto;
   overflow-y: hidden;
+}
+
+/* Icons at top layout */
+.icons-top .sidebar-icon-nav {
+  flex-direction: row;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.icons-top .enhanced-sidebar {
+  height: auto;
+}
+
+.icons-top .icon-nav-label {
+  display: none;
 }
 
 .icon-nav-button {

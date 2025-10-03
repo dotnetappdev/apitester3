@@ -292,11 +292,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
             <Allotment 
               vertical={isPortrait}
               snap={true} // Enable snap points
-              resizerStyle={{ 
-                backgroundColor: 'var(--accent-color)',
-                width: isPortrait ? '100%' : '6px',
-                height: isPortrait ? '6px' : '100%'
-              }}
+              className={isPortrait ? 'allotment-vertical' : 'allotment-horizontal'}
             >
               <Allotment.Pane 
                 minSize={isPortrait ? 200 : 300}
@@ -416,10 +412,10 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                 <div className="help-menu-separator"></div>
                 <button 
                   className="help-menu-item"
-                  onClick={() => {
+                    onClick={() => {
                     setShowHelpMenu(false);
-                    if (typeof window !== 'undefined' && window.electron) {
-                      window.electron.openExternal('https://github.com/dotnetappdev/apitester3');
+                    if (typeof window !== 'undefined' && (window as any).electronAPI?.openExternal) {
+                      (window as any).electronAPI.openExternal('https://github.com/dotnetappdev/apitester3').catch((e: any) => console.warn('openExternal failed', e));
                     } else {
                       window.open('https://github.com/dotnetappdev/apitester3', '_blank', 'noopener,noreferrer');
                     }
@@ -429,10 +425,10 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                 </button>
                 <button 
                   className="help-menu-item"
-                  onClick={() => {
+                    onClick={() => {
                     setShowHelpMenu(false);
-                    if (typeof window !== 'undefined' && window.electron) {
-                      window.electron.openExternal('https://github.com/dotnetappdev/apitester3#readme');
+                    if (typeof window !== 'undefined' && (window as any).electronAPI?.openExternal) {
+                      (window as any).electronAPI.openExternal('https://github.com/dotnetappdev/apitester3#readme').catch((e: any) => console.warn('openExternal failed', e));
                     } else {
                       window.open('https://github.com/dotnetappdev/apitester3#readme', '_blank', 'noopener,noreferrer');
                     }
@@ -463,11 +459,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         snap={true}
         defaultSizes={[layoutConfig.splitterSizes.main, 1000 - layoutConfig.splitterSizes.main]}
         onChange={(sizes) => handleSplitterChange(sizes, 'main')}
-        resizerStyle={{
-          backgroundColor: 'var(--border-color)',
-          width: '4px',
-          transition: 'background-color 0.2s ease'
-        }}
+        className="main-allotment"
       >
         {/* Left Panel - Sidebar + Test Runner - Stackable */}
         <Allotment.Pane 
@@ -555,16 +547,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
               snap={true}
               defaultSizes={[layoutConfig.splitterSizes.content, 100 - layoutConfig.splitterSizes.content]}
               onChange={(sizes) => handleSplitterChange(sizes, 'content')}
-              resizerStyle={{
-                backgroundColor: 'var(--border-color)',
-                ...(isPortraitTablet ? {
-                  height: '4px',
-                  width: '100%'
-                } : {
-                  width: '4px',
-                  height: '100%'
-                })
-              }}
+              className="content-allotment"
             >
               <Allotment.Pane 
                 minSize={isTablet ? 250 : 300}

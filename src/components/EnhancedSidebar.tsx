@@ -288,7 +288,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
           <>
             <button
               className={`icon-nav-button ${activeView === 'ui-tests' ? 'active' : ''}`}
-              onClick={() => setActiveView('ui-tests')}
+              onClick={() => { setActiveView('ui-tests'); window.dispatchEvent(new CustomEvent('navigate', { detail: 'ui-tests' })); }}
               title="UI Tests"
             >
               <span className="icon-nav-icon">🖥️</span>
@@ -297,7 +297,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
             
             <button
               className={`icon-nav-button ${activeView === 'tests' ? 'active' : ''}`}
-              onClick={() => setActiveView('tests')}
+              onClick={() => { setActiveView('tests'); window.dispatchEvent(new CustomEvent('navigate', { detail: 'tests' })); }}
               title="Tests"
             >
               <span className="icon-nav-icon">🧪</span>
@@ -308,7 +308,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
       </div>
 
       {/* Tab Navigation - Old style, kept for backward compatibility */}
-      <div className="sidebar-tabs" style={{ display: 'none' }}>
+  <div className="sidebar-tabs hidden">
           <button
             className={`sidebar-tab ${activeTab === 'collections' ? 'active' : ''} sidebar-tab-flex`}
             onClick={() => setActiveTab('collections')}
@@ -556,7 +556,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
         )}
 
         {activeTab === 'tests' && enableTestExplorer && (
-          <div className="tests-panel" style={{ display: 'none' }}>
+          <div className="tests-panel hidden">
             <EnhancedTestExplorer
           requests={allRequests}
           testSuites={testSuites ?? new Map<number, TestSuite>()}

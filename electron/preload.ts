@@ -37,6 +37,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('menu-show-unit-testing', callback),
   onMenuCodeGeneration: (callback: () => void) => 
     ipcRenderer.on('menu-code-generation', callback),
+  // About / App info
+  getAppInfo: () => ipcRenderer.invoke('get-app-info'),
+  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
   
   // Code generation operations
   readTemplate: (templatePath: string) => ipcRenderer.invoke('read-template', templatePath),
@@ -94,7 +97,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // Platform info
   platform: process.platform,
-  version: process.versions.electron
+  version: process.versions.electron,
+  onMenuSidebarPosition: (callback: any) => ipcRenderer.on('menu-sidebar-position', (_e, pos) => callback(pos)),
+  onMenuSidebarWidth: (callback: any) => ipcRenderer.on('menu-sidebar-width', (_e, width) => callback(width)),
 });
 
 // Type definitions for the renderer process

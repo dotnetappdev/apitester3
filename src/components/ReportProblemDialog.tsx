@@ -84,8 +84,8 @@ ${expectedBehavior}
     const labels = issueType === 'bug' ? 'bug' : issueType === 'feature' ? 'enhancement' : 'question';
     const url = `${GITHUB_INFO.newIssueUrl}?title=${issueTitle}&body=${issueBodyEncoded}&labels=${labels}`;
     
-    if (typeof window !== 'undefined' && window.electron) {
-      window.electron.openExternal(url);
+    if (typeof window !== 'undefined' && (window as any).electronAPI?.openExternal) {
+      (window as any).electronAPI.openExternal(url).catch((e: any) => console.warn('openExternal failed', e));
     } else {
       window.open(url, '_blank', 'noopener,noreferrer');
     }

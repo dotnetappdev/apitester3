@@ -10,7 +10,7 @@ interface DockablePanelProps {
   children?: React.ReactNode;
   stackable?: boolean;
   stackIndex?: number;
-  onStackOrderChange?: (newIndex: number) => void;
+  // onStackOrderChange intentionally removed - not used
 }
 
 export const DockablePanel: React.FC<DockablePanelProps> = ({
@@ -23,11 +23,11 @@ export const DockablePanel: React.FC<DockablePanelProps> = ({
   children,
   stackable = false,
   stackIndex = 0,
-  onStackOrderChange
+  
 }) => {
   const [mode, setMode] = useState<'bottom' | 'right' | 'left' | 'top' | 'floating'>(floating ? 'floating' : defaultDock);
   const [pos, setPos] = useState({ x: 120, y: 120 });
-  const [size, setSize] = useState({ width: 400, height: 300 });
+  const [size] = useState({ width: 400, height: 300 });
   const [zIndex, setZIndex] = useState(100);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
@@ -66,19 +66,35 @@ export const DockablePanel: React.FC<DockablePanelProps> = ({
     onDockChange?.(newMode);
   };
 
-  const floatingStyle = mode === 'floating' ? {
-    left: `${pos.x}px`,
-    top: `${pos.y}px`,
-    width: `${size.width}px`,
-    height: `${size.height}px`,
-    zIndex
-  } : {};
+  // Imperatively apply floating position/size/zIndex to the root element to avoid inline JSX styles
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+
+    if (mode === 'floating') {
+      el.style.position = 'fixed';
+      el.style.left = `${pos.x}px`;
+      el.style.top = `${pos.y}px`;
+      el.style.width = `${size.width}px`;
+      el.style.height = `${size.height}px`;
+      el.style.zIndex = String(zIndex);
+    } else {
+      // Clear floating-specific inline styles when docked
+      el.style.position = '';
+      el.style.left = '';
+      el.style.top = '';
+      el.style.width = '';
+      el.style.height = '';
+      el.style.zIndex = '';
+    }
+  }, [mode, pos, size, zIndex]);
+
+  // floatingStyle removed; positioning applied via ref in useEffect
 
   return (
     <div
       ref={rootRef}
       className={`dock-panel ${mode === 'floating' ? 'floating' : 'docked-' + mode} ${stackable ? 'stackable' : ''}`}
-      style={floatingStyle}
       onMouseDown={bringToFront}
       id={id}
       data-stack-index={stackIndex}
@@ -94,95 +110,11 @@ export const DockablePanel: React.FC<DockablePanelProps> = ({
           {onClose && <button className="dock-btn" onClick={onClose} title="Close">✕</button>}
         </div>
       </div>
-      <div className="dock-panel-body">
+      <div className="dock-panel-body fill-width">
         {children}
       </div>
       
-      <style>{`
-        .dock-panel {
-          display: flex;
-          flex-direction: column;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          border-radius: 4px;
-          overflow: hidden;
-        }
-
-        .dock-panel.floating {
-          position: fixed;
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-          resize: both;
-          overflow: auto;
-          min-width: 300px;
-          min-height: 200px;
-        }
-
-        .dock-panel.docked-top,
-        .dock-panel.docked-bottom {
-          width: 100%;
-        }
-
-        .dock-panel.docked-left,
-        .dock-panel.docked-right {
-          height: 100%;
-        }
-
-        .dock-panel.stackable {
-          transition: transform 0.2s ease;
-        }
-
-        .dock-panel-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 8px 12px;
-          background: var(--bg-tertiary);
-          border-bottom: 1px solid var(--border-color);
-          cursor: move;
-          user-select: none;
-        }
-
-        .dock-panel.floating .dock-panel-header {
-          cursor: move;
-        }
-
-        .dock-panel:not(.floating) .dock-panel-header {
-          cursor: default;
-        }
-
-        .dock-panel-title {
-          font-weight: 600;
-          font-size: 13px;
-          color: var(--text-primary);
-        }
-
-        .dock-panel-actions {
-          display: flex;
-          gap: 4px;
-        }
-
-        .dock-btn {
-          background: none;
-          border: none;
-          color: var(--text-secondary);
-          cursor: pointer;
-          padding: 4px 6px;
-          border-radius: 3px;
-          font-size: 12px;
-          transition: all 0.15s ease;
-        }
-
-        .dock-btn:hover {
-          background: var(--bg-hover);
-          color: var(--text-primary);
-        }
-
-        .dock-panel-body {
-          flex: 1;
-          overflow: auto;
-          padding: 0;
-        }
-      `}</style>
+      {/* styles moved to src/styles/index.css */}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { APP_INFO, GITHUB_INFO, LINKS } from '../constants/appInfo';
 
 interface AboutDialogProps {
@@ -9,9 +9,27 @@ interface AboutDialogProps {
 export const AboutDialog: React.FC<AboutDialogProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
+  const [appInfo, setAppInfo] = useState<{ version?: string; buildNumber?: string; buildDate?: string; commit?: string }>(() => ({ version: APP_INFO.version }));
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        if (typeof window !== 'undefined' && (window as any).electronAPI?.getAppInfo) {
+          const info = await (window as any).electronAPI.getAppInfo();
+          if (mounted && info) setAppInfo(info);
+        }
+      } catch (err) {
+        // ignore - fall back to constants
+        console.warn('Failed to get app info from main process', err);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
   const handleLinkClick = (url: string) => {
-    if (typeof window !== 'undefined' && window.electron) {
-      window.electron.openExternal(url);
+    if (typeof window !== 'undefined' && (window as any).electronAPI?.openExternal) {
+      (window as any).electronAPI.openExternal(url).catch((e: any) => console.warn('openExternal failed', e));
     } else {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
@@ -29,7 +47,10 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ isOpen, onClose }) => 
           <div className="about-logo">
             <div className="app-icon">🚀</div>
             <h3>{APP_INFO.name}</h3>
-            <p className="version">Version {APP_INFO.version}</p>
+            <p className="version">Version {appInfo.version || APP_INFO.version}</p>
+            {(appInfo.buildNumber || appInfo.buildDate || appInfo.commit) && (
+              <p className="build-meta">{appInfo.buildNumber ? `Build ${appInfo.buildNumber}` : ''}{appInfo.buildDate ? ` • ${appInfo.buildDate}` : ''}{appInfo.commit ? ` • ${appInfo.commit}` : ''}</p>
+            )}
           </div>
 
           <div className="about-description">

@@ -179,6 +179,35 @@ class AppManager {
         ]
       },
       {
+        label: 'Layout',
+        submenu: [
+          {
+            label: 'Icons on Left',
+            type: 'radio',
+            checked: true,
+            click: () => this.mainWindow?.webContents.send('menu-sidebar-position', 'left')
+          },
+          {
+            label: 'Icons on Top',
+            type: 'radio',
+            click: () => this.mainWindow?.webContents.send('menu-sidebar-position', 'top')
+          },
+          { type: 'separator' },
+          {
+            label: 'Sidebar Width: 300px',
+            click: () => this.mainWindow?.webContents.send('menu-sidebar-width', 300)
+          },
+          {
+            label: 'Sidebar Width: 360px',
+            click: () => this.mainWindow?.webContents.send('menu-sidebar-width', 360)
+          },
+          {
+            label: 'Sidebar Width: 420px',
+            click: () => this.mainWindow?.webContents.send('menu-sidebar-width', 420)
+          }
+        ]
+      },
+      {
         label: 'Help',
         submenu: [
           {
@@ -206,6 +235,10 @@ class AppManager {
 
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
+  }
+
+  private sendMenuEvent(channel: string, payload?: any) {
+    this.mainWindow?.webContents.send(channel, payload);
   }
 
   private setupIpcHandlers(): void {
@@ -259,6 +292,30 @@ class AppManager {
     ipcMain.handle('save-collection', async (event, collectionData) => {
       // This will be implemented to save collections
       return { success: true };
+    });
+
+    // Expose app info to renderer
+    ipcMain.handle('get-app-info', async () => {
+      try {
+        const pkg = require(join(__dirname, '..', 'package.json'));
+        const buildNumber = process.env.BUILD_NUMBER || pkg.buildNumber || '';
+        const buildDate = process.env.BUILD_DATE || pkg.buildDate || '';
+        const commit = process.env.COMMIT_SHA || '';
+        return { version: app.getVersion(), buildNumber, buildDate, commit, platform: process.platform };
+      } catch (err) {
+        return { version: app.getVersion(), platform: process.platform };
+      }
+    });
+
+    // Safe external open via main process
+    ipcMain.handle('open-external', async (_, url: string) => {
+      try {
+        await shell.openExternal(url);
+        return { success: true };
+      } catch (err) {
+        console.error('open-external failed', err);
+        return { success: false, error: err instanceof Error ? err.message : String(err) };
+      }
     });
 
     ipcMain.handle('load-collection', async (event, filePath) => {
