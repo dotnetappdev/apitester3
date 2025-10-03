@@ -558,6 +558,21 @@ body.light-theme :root {
   margin-bottom: 8px;
 }
 
+.reset-password-icon, .delete-account-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.profile-card.reset-password, .profile-card.delete-account {
+  border: 2px dashed var(--border-color);
+  background: transparent;
+}
+
+.profile-card.reset-password:hover, .profile-card.delete-account:hover {
+  border-color: var(--accent-color);
+  background: var(--bg-tertiary);
+}
+
 .login-form {
   max-width: 400px;
   margin: 0 auto;

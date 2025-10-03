@@ -644,6 +644,15 @@ class AppManager {
       }
     });
 
+    ipcMain.handle('db-delete-user', async (event, userId) => {
+      try {
+        return await this.dbManager.deleteUser(userId);
+      } catch (error) {
+        console.error('Failed to delete user:', error);
+        throw error;
+      }
+    });
+
     // Collection operations
     ipcMain.handle('db-get-user-collections', async (event, userId) => {
       try {
