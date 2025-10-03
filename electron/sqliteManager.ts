@@ -179,91 +179,99 @@ export class SqliteDatabaseManager {
   private async initializeSeedData(): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
 
-    // Check if users already exist
-    const userCount = await this.db.get('SELECT COUNT(*) as count FROM users');
-    if (userCount.count > 0) {
-      return; // Seed data already exists
-    }
-
     const currentDate = new Date().toISOString();
     
-    // Insert seed users
-    const seedUsers = [
-      {
-        username: 'admin',
-        password: 'admin123',
-        role: 'admin'
-      },
-      {
-        username: 'testuser',
-        password: 'password123',
-        role: 'standard'
-      },
-      {
-        username: 'developer',
-        password: 'dev2024!',
-        role: 'standard'
-      },
-      {
-        username: 'qa_lead',
-        password: 'quality123',
-        role: 'admin'
-      },
-      {
-        username: 'api_tester',
-        password: 'testing456',
-        role: 'standard'
-      }
-    ];
+    // Check if users already exist
+    const userCount = await this.db.get('SELECT COUNT(*) as count FROM users');
+    const shouldSeedUsers = userCount.count === 0;
+    
+    // Seed users if needed
+    if (shouldSeedUsers) {
+      // Insert seed users
+      const seedUsers = [
+        {
+          username: 'admin',
+          password: 'admin123',
+          role: 'admin'
+        },
+        {
+          username: 'testuser',
+          password: 'password123',
+          role: 'standard'
+        },
+        {
+          username: 'developer',
+          password: 'dev2024!',
+          role: 'standard'
+        },
+        {
+          username: 'qa_lead',
+          password: 'quality123',
+          role: 'admin'
+        },
+        {
+          username: 'api_tester',
+          password: 'testing456',
+          role: 'standard'
+        }
+      ];
 
-    for (const user of seedUsers) {
-      const salt = this.generateSalt();
-      await this.db.run(
-        'INSERT INTO users (username, passwordHash, salt, role, createdAt) VALUES (?, ?, ?, ?, ?)',
-        [
-          user.username,
-          this.hashPassword(user.password, salt),
-          salt,
-          user.role,
-          currentDate
-        ]
-      );
+      for (const user of seedUsers) {
+        const salt = this.generateSalt();
+        await this.db.run(
+          'INSERT INTO users (username, passwordHash, salt, role, createdAt) VALUES (?, ?, ?, ?, ?)',
+          [
+            user.username,
+            this.hashPassword(user.password, salt),
+            salt,
+            user.role,
+            currentDate
+          ]
+        );
+      }
+      console.log(`✓ Seeded ${seedUsers.length} users`);
     }
 
-    // Seed collections for demo purposes
-    const seedCollections = [
-      {
-        name: 'JSONPlaceholder API Tests',
-        description: 'Sample API requests using jsonplaceholder.typicode.com',
-        ownerId: 1, // admin user
-        isShared: true
-      },
-      {
-        name: 'User Management APIs',
-        description: 'Test collection for user-related endpoints',
-        ownerId: 3, // developer user
-        isShared: false
-      }
-    ];
+    // Check if collections already exist
+    const collectionCount = await this.db.get('SELECT COUNT(*) as count FROM collections');
+    const shouldSeedCollections = collectionCount.count === 0;
 
-    const collectionIds: number[] = [];
-    for (const collection of seedCollections) {
-      const result = await this.db.run(
-        'INSERT INTO collections (name, description, ownerId, isShared, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)',
-        [
-          collection.name,
-          collection.description,
-          collection.ownerId,
-          collection.isShared ? 1 : 0,
-          currentDate,
-          currentDate
-        ]
-      );
-      collectionIds.push(result.lastID!);
-    }
+    // Seed collections and requests if needed
+    if (shouldSeedCollections) {
+      // Seed collections for demo purposes
+      const seedCollections = [
+        {
+          name: 'JSONPlaceholder API Tests',
+          description: 'Sample API requests using jsonplaceholder.typicode.com',
+          ownerId: 1, // admin user
+          isShared: true
+        },
+        {
+          name: 'User Management APIs',
+          description: 'Test collection for user-related endpoints',
+          ownerId: 3, // developer user
+          isShared: false
+        }
+      ];
 
-    // Seed requests with jsonplaceholder examples
-    const seedRequests = [
+      const collectionIds: number[] = [];
+      for (const collection of seedCollections) {
+        const result = await this.db.run(
+          'INSERT INTO collections (name, description, ownerId, isShared, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)',
+          [
+            collection.name,
+            collection.description,
+            collection.ownerId,
+            collection.isShared ? 1 : 0,
+            currentDate,
+            currentDate
+          ]
+        );
+        collectionIds.push(result.lastID!);
+        }
+
+      // Seed requests with jsonplaceholder examples
+      const seedRequests = [
       {
         collectionId: collectionIds[0],
         name: 'Get All Posts',
@@ -417,10 +425,11 @@ if (response.data.length > 0) {
       );
     }
 
-    console.log('Seed data initialized successfully');
-    console.log(`- Created ${seedUsers.length} users`);
-    console.log(`- Created ${seedCollections.length} collections`);
-    console.log(`- Created ${seedRequests.length} sample requests`);
+      console.log('✓ Seeded 2 collections');
+      console.log('✓ Seeded 8 sample requests');
+    }
+
+    console.log('Seed data initialization complete');
   }
 
   private generateSalt(): string {
