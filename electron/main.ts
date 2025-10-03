@@ -231,6 +231,15 @@ class AppManager {
   }
 
   private setupIpcHandlers(): void {
+    // Handle opening external URLs
+    ipcMain.handle('open-external', async (_event, url: string) => {
+      try {
+        await shell.openExternal(url);
+      } catch (error) {
+        console.error('Failed to open external URL:', error);
+      }
+    });
+
     // Handle API requests from renderer
     ipcMain.handle('make-api-request', async (event, requestData) => {
       // This will be implemented to handle API requests securely
