@@ -179,58 +179,446 @@ export class SqliteDatabaseManager {
   private async initializeSeedData(): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
 
-    // Check if users already exist
-    const userCount = await this.db.get('SELECT COUNT(*) as count FROM users');
-    if (userCount.count > 0) {
-      return; // Seed data already exists
-    }
-
     const currentDate = new Date().toISOString();
     
-    // Insert seed users
-    const seedUsers = [
+    // Check if users already exist
+    const userCount = await this.db.get('SELECT COUNT(*) as count FROM users');
+    const shouldSeedUsers = userCount.count === 0;
+    
+    // Seed users if needed
+    if (shouldSeedUsers) {
+      // Insert seed users
+      const seedUsers = [
+        {
+          username: 'admin',
+          password: 'admin123',
+          role: 'admin'
+        },
+        {
+          username: 'testuser',
+          password: 'password123',
+          role: 'standard'
+        },
+        {
+          username: 'developer',
+          password: 'dev2024!',
+          role: 'standard'
+        },
+        {
+          username: 'qa_lead',
+          password: 'quality123',
+          role: 'admin'
+        },
+        {
+          username: 'api_tester',
+          password: 'testing456',
+          role: 'standard'
+        }
+      ];
+
+      for (const user of seedUsers) {
+        const salt = this.generateSalt();
+        await this.db.run(
+          'INSERT INTO users (username, passwordHash, salt, role, createdAt) VALUES (?, ?, ?, ?, ?)',
+          [
+            user.username,
+            this.hashPassword(user.password, salt),
+            salt,
+            user.role,
+            currentDate
+          ]
+        );
+      }
+      console.log(`✓ Seeded ${seedUsers.length} users`);
+    }
+
+    // Check if collections already exist
+    const collectionCount = await this.db.get('SELECT COUNT(*) as count FROM collections');
+    const shouldSeedCollections = collectionCount.count === 0;
+
+    // Seed collections and requests if needed
+    if (shouldSeedCollections) {
+      // Seed collections for demo purposes
+      const seedCollections = [
+        {
+          name: 'JSONPlaceholder API Tests',
+          description: 'Sample API requests using jsonplaceholder.typicode.com',
+          ownerId: 1, // admin user
+          isShared: true
+        },
+        {
+          name: 'UI Test Examples',
+          description: 'Browser-based UI test examples using Playwright',
+          ownerId: 1, // admin user
+          isShared: true
+        },
+        {
+          name: 'Unit Test Examples',
+          description: 'Standalone unit test examples for functions and components',
+          ownerId: 3, // developer user
+          isShared: false
+        }
+      ];
+
+      const collectionIds: number[] = [];
+      for (const collection of seedCollections) {
+        const result = await this.db.run(
+          'INSERT INTO collections (name, description, ownerId, isShared, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)',
+          [
+            collection.name,
+            collection.description,
+            collection.ownerId,
+            collection.isShared ? 1 : 0,
+            currentDate,
+            currentDate
+          ]
+        );
+        collectionIds.push(result.lastID!);
+      }
+
+      // Seed requests with jsonplaceholder examples
+      const seedRequests = [
       {
-        username: 'admin',
-        password: 'admin123',
-        role: 'admin'
+        collectionId: collectionIds[0],
+        name: 'Get All Posts',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Example test assertions
+assert.assertStatusCode(200, response);
+assert.assertResponseTime(2000, response.time);
+assert.assertJsonPath('$[0].userId', 1, response.data);
+console.log('✓ Successfully retrieved posts');`
       },
       {
-        username: 'testuser',
-        password: 'password123',
-        role: 'standard'
+        collectionId: collectionIds[0],
+        name: 'Get Post by ID',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate post response
+assert.assertStatusCode(200, response);
+assert.assertJsonPath('$.id', 1, response.data);
+assert.assertJsonPath('$.userId', 1, response.data);
+assert.assertType('string', response.data.title);
+console.log('✓ Post retrieved successfully:', response.data.title);`
       },
       {
-        username: 'developer',
-        password: 'dev2024!',
-        role: 'standard'
+        collectionId: collectionIds[0],
+        name: 'Create New Post',
+        method: 'POST',
+        url: 'https://jsonplaceholder.typicode.com/posts',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          title: 'Test Post',
+          body: 'This is a test post created via VerifyApi',
+          userId: 1
+        }, null, 2),
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate post creation
+assert.assertStatusCode(201, response);
+assert.assertJsonPath('$.title', 'Test Post', response.data);
+assert.assertJsonPath('$.body', 'This is a test post created via VerifyApi', response.data);
+assert.assertJsonPath('$.userId', 1, response.data);
+assert.assertType('number', response.data.id);
+console.log('✓ Post created with ID:', response.data.id);`
       },
       {
-        username: 'qa_lead',
-        password: 'quality123',
-        role: 'admin'
+        collectionId: collectionIds[0],
+        name: 'Update Post',
+        method: 'PUT',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          id: 1,
+          title: 'Updated Post Title',
+          body: 'Updated post content',
+          userId: 1
+        }, null, 2),
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate post update
+assert.assertStatusCode(200, response);
+assert.assertJsonPath('$.id', 1, response.data);
+assert.assertJsonPath('$.title', 'Updated Post Title', response.data);
+console.log('✓ Post updated successfully');`
       },
       {
-        username: 'api_tester',
-        password: 'testing456',
-        role: 'standard'
+        collectionId: collectionIds[0],
+        name: 'Delete Post',
+        method: 'DELETE',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate deletion
+assert.assertStatusCode(200, response);
+console.log('✓ Post deleted successfully');`
+      },
+      {
+        collectionId: collectionIds[0],
+        name: 'Get All Users',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/users',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate users list
+assert.assertStatusCode(200, response);
+assert.assertArrayLength(10, response.data);
+assert.assertJsonPath('$[0].name', 'Leanne Graham', response.data);
+console.log('✓ Retrieved', response.data.length, 'users');`
+      },
+      {
+        collectionId: collectionIds[0],
+        name: 'Get User Albums',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/users/1/albums',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate user albums
+assert.assertStatusCode(200, response);
+assert.assertType('array', response.data);
+assert.assertJsonPath('$[0].userId', 1, response.data);
+console.log('✓ Retrieved', response.data.length, 'albums for user');`
+      },
+      // UI Test Examples
+      {
+        collectionId: collectionIds[1],
+        name: 'Login Page UI Test',
+        method: 'GET',
+        url: 'https://example.com/login',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// UI Test: Login Page Elements
+// Available: page, browser, context, assert, console
+
+await page.goto('https://example.com/login');
+
+// Check login form exists
+assert.assertElementExists('form#login-form', 'Login form should exist');
+assert.assertElementExists('input[name="username"]', 'Username field exists');
+assert.assertElementExists('input[name="password"]', 'Password field exists');
+assert.assertElementExists('button[type="submit"]', 'Submit button exists');
+
+console.log('✓ Login page elements validated');`
+      },
+      {
+        collectionId: collectionIds[1],
+        name: 'User Authentication Flow',
+        method: 'POST',
+        url: 'https://example.com/auth/login',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          username: 'testuser',
+          password: 'Test123!'
+        }, null, 2),
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// UI Test: Complete Login Flow
+await page.goto('https://example.com/login');
+
+// Fill in login form
+await page.fill('input[name="username"]', 'testuser');
+await page.fill('input[name="password"]', 'Test123!');
+await page.click('button[type="submit"]');
+
+// Wait for redirect to dashboard
+await page.waitForURL('**/dashboard', { timeout: 5000 });
+
+// Verify successful login
+assert.assertUrlContains('/dashboard', 'Should redirect to dashboard');
+assert.assertElementExists('.user-profile', 'User profile should display');
+assert.assertElementText('.welcome-message', 'Welcome, testuser');
+
+console.log('✓ User authentication flow completed');`
+      },
+      {
+        collectionId: collectionIds[1],
+        name: 'Navigation Menu Test',
+        method: 'GET',
+        url: 'https://example.com/dashboard',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// UI Test: Navigation Menu
+await page.goto('https://example.com/dashboard');
+
+// Check navigation menu elements
+assert.assertElementExists('nav.main-menu', 'Main menu exists');
+assert.assertElementVisible('#menu-home', 'Home link visible');
+assert.assertElementVisible('#menu-profile', 'Profile link visible');
+assert.assertElementVisible('#menu-settings', 'Settings link visible');
+
+// Test navigation
+await page.click('#menu-profile');
+await page.waitForURL('**/profile');
+assert.assertUrlContains('/profile', 'Navigated to profile page');
+
+console.log('✓ Navigation menu test passed');`
+      },
+      // Unit Test Examples
+      {
+        collectionId: collectionIds[2],
+        name: 'String Utility Functions',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Unit Test: String utility functions
+// Test string manipulation functions
+
+// Test 1: String trimming
+const testStr = '  hello world  ';
+const trimmed = testStr.trim();
+assert.assertEquals('hello world', trimmed, 'String should be trimmed');
+
+// Test 2: String capitalization
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+const result = capitalize('hello');
+assert.assertEquals('Hello', result, 'First letter should be capitalized');
+
+// Test 3: String splitting
+const sentence = 'The quick brown fox';
+const words = sentence.split(' ');
+assert.assertArrayLength(4, words, 'Should split into 4 words');
+assert.assertEquals('The', words[0], 'First word is "The"');
+
+console.log('✓ String utility tests passed');`
+      },
+      {
+        collectionId: collectionIds[2],
+        name: 'Array Operations Test',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/users',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Unit Test: Array operations
+// Test array manipulation functions
+
+// Test 1: Array filtering
+const numbers = [1, 2, 3, 4, 5, 6];
+const evens = numbers.filter(n => n % 2 === 0);
+assert.assertArrayLength(3, evens, 'Should have 3 even numbers');
+assert.assertEquals(2, evens[0], 'First even number is 2');
+
+// Test 2: Array mapping
+const doubled = numbers.map(n => n * 2);
+assert.assertEquals(2, doubled[0], 'First element doubled is 2');
+assert.assertEquals(12, doubled[5], 'Last element doubled is 12');
+
+// Test 3: Array reducing
+const sum = numbers.reduce((acc, n) => acc + n, 0);
+assert.assertEquals(21, sum, 'Sum of 1-6 should be 21');
+
+// Test 4: Array finding
+const found = numbers.find(n => n > 3);
+assert.assertEquals(4, found, 'First number > 3 is 4');
+
+console.log('✓ Array operation tests passed');`
+      },
+      {
+        collectionId: collectionIds[2],
+        name: 'Object Validation Test',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/users/1',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Unit Test: Object validation
+// Test object structure and validation
+
+// Test object creation and properties
+const user = {
+  id: 1,
+  name: 'John Doe',
+  email: 'john@example.com',
+  age: 30,
+  active: true
+};
+
+// Test property existence
+assert.assertObjectHasProperty(user, 'id', 'User should have id');
+assert.assertObjectHasProperty(user, 'email', 'User should have email');
+assert.assertObjectNotHasProperty(user, 'password', 'User should not have password');
+
+// Test property types
+assert.assertType('number', user.id, 'ID should be a number');
+assert.assertType('string', user.name, 'Name should be a string');
+assert.assertType('boolean', user.active, 'Active should be boolean');
+
+// Test property values
+assert.assertEquals(1, user.id, 'User ID is 1');
+assert.assertGreaterThan(user.age, 18, 'User should be adult');
+assert.assertTrue(user.active, 'User should be active');
+
+// Test email format
+assert.assertRegexMatch(/@example\.com$/, user.email, 'Email should be from example.com');
+
+console.log('✓ Object validation tests passed');`
+      },
+      {
+        collectionId: collectionIds[0],
+        name: 'Search Users by Name',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/users?username=Bret',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({ username: 'Bret' }),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate user search
+assert.assertStatusCode(200, response);
+assert.assertType('array', response.data);
+if (response.data.length > 0) {
+  assert.assertJsonPath('$[0].username', 'Bret', response.data);
+  console.log('✓ Found user:', response.data[0].name);
+}`
       }
     ];
 
-    for (const user of seedUsers) {
-      const salt = this.generateSalt();
+    for (const request of seedRequests) {
       await this.db.run(
-        'INSERT INTO users (username, passwordHash, salt, role, createdAt) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO requests (collectionId, name, method, url, headers, body, params, auth, tests, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
-          user.username,
-          this.hashPassword(user.password, salt),
-          salt,
-          user.role,
+          request.collectionId,
+          request.name,
+          request.method,
+          request.url,
+          request.headers,
+          request.body,
+          request.params,
+          request.auth,
+          request.tests,
+          currentDate,
           currentDate
         ]
       );
     }
 
-    console.log('Seed data initialized successfully');
+      console.log('✓ Seeded 3 collections');
+      console.log('✓ Seeded 14 sample requests (7 API + 3 UI + 4 Unit tests)');
+    }
+
+    console.log('Seed data initialization complete');
   }
 
   private generateSalt(): string {
