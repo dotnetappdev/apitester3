@@ -230,7 +230,197 @@ export class SqliteDatabaseManager {
       );
     }
 
+    // Seed collections for demo purposes
+    const seedCollections = [
+      {
+        name: 'JSONPlaceholder API Tests',
+        description: 'Sample API requests using jsonplaceholder.typicode.com',
+        ownerId: 1, // admin user
+        isShared: true
+      },
+      {
+        name: 'User Management APIs',
+        description: 'Test collection for user-related endpoints',
+        ownerId: 3, // developer user
+        isShared: false
+      }
+    ];
+
+    const collectionIds: number[] = [];
+    for (const collection of seedCollections) {
+      const result = await this.db.run(
+        'INSERT INTO collections (name, description, ownerId, isShared, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)',
+        [
+          collection.name,
+          collection.description,
+          collection.ownerId,
+          collection.isShared ? 1 : 0,
+          currentDate,
+          currentDate
+        ]
+      );
+      collectionIds.push(result.lastID!);
+    }
+
+    // Seed requests with jsonplaceholder examples
+    const seedRequests = [
+      {
+        collectionId: collectionIds[0],
+        name: 'Get All Posts',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Example test assertions
+assert.assertStatusCode(200, response);
+assert.assertResponseTime(2000, response.time);
+assert.assertJsonPath('$[0].userId', 1, response.data);
+console.log('✓ Successfully retrieved posts');`
+      },
+      {
+        collectionId: collectionIds[0],
+        name: 'Get Post by ID',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate post response
+assert.assertStatusCode(200, response);
+assert.assertJsonPath('$.id', 1, response.data);
+assert.assertJsonPath('$.userId', 1, response.data);
+assert.assertType('string', response.data.title);
+console.log('✓ Post retrieved successfully:', response.data.title);`
+      },
+      {
+        collectionId: collectionIds[0],
+        name: 'Create New Post',
+        method: 'POST',
+        url: 'https://jsonplaceholder.typicode.com/posts',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          title: 'Test Post',
+          body: 'This is a test post created via VerifyApi',
+          userId: 1
+        }, null, 2),
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate post creation
+assert.assertStatusCode(201, response);
+assert.assertJsonPath('$.title', 'Test Post', response.data);
+assert.assertJsonPath('$.body', 'This is a test post created via VerifyApi', response.data);
+assert.assertJsonPath('$.userId', 1, response.data);
+assert.assertType('number', response.data.id);
+console.log('✓ Post created with ID:', response.data.id);`
+      },
+      {
+        collectionId: collectionIds[0],
+        name: 'Update Post',
+        method: 'PUT',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          id: 1,
+          title: 'Updated Post Title',
+          body: 'Updated post content',
+          userId: 1
+        }, null, 2),
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate post update
+assert.assertStatusCode(200, response);
+assert.assertJsonPath('$.id', 1, response.data);
+assert.assertJsonPath('$.title', 'Updated Post Title', response.data);
+console.log('✓ Post updated successfully');`
+      },
+      {
+        collectionId: collectionIds[0],
+        name: 'Delete Post',
+        method: 'DELETE',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate deletion
+assert.assertStatusCode(200, response);
+console.log('✓ Post deleted successfully');`
+      },
+      {
+        collectionId: collectionIds[0],
+        name: 'Get All Users',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/users',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate users list
+assert.assertStatusCode(200, response);
+assert.assertArrayLength(10, response.data);
+assert.assertJsonPath('$[0].name', 'Leanne Graham', response.data);
+console.log('✓ Retrieved', response.data.length, 'users');`
+      },
+      {
+        collectionId: collectionIds[0],
+        name: 'Get User Albums',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/users/1/albums',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate user albums
+assert.assertStatusCode(200, response);
+assert.assertType('array', response.data);
+assert.assertJsonPath('$[0].userId', 1, response.data);
+console.log('✓ Retrieved', response.data.length, 'albums for user');`
+      },
+      {
+        collectionId: collectionIds[1],
+        name: 'Search Users by Name',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/users?username=Bret',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({ username: 'Bret' }),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate user search
+assert.assertStatusCode(200, response);
+assert.assertType('array', response.data);
+if (response.data.length > 0) {
+  assert.assertJsonPath('$[0].username', 'Bret', response.data);
+  console.log('✓ Found user:', response.data[0].name);
+}`
+      }
+    ];
+
+    for (const request of seedRequests) {
+      await this.db.run(
+        'INSERT INTO requests (collectionId, name, method, url, headers, body, params, auth, tests, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          request.collectionId,
+          request.name,
+          request.method,
+          request.url,
+          request.headers,
+          request.body,
+          request.params,
+          request.auth,
+          request.tests,
+          currentDate,
+          currentDate
+        ]
+      );
+    }
+
     console.log('Seed data initialized successfully');
+    console.log(`- Created ${seedUsers.length} users`);
+    console.log(`- Created ${seedCollections.length} collections`);
+    console.log(`- Created ${seedRequests.length} sample requests`);
   }
 
   private generateSalt(): string {
