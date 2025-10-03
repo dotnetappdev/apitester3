@@ -573,6 +573,13 @@ body.light-theme :root {
   background: var(--bg-tertiary);
 }
 
+.profile-card p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
 .login-form {
   max-width: 400px;
   margin: 0 auto;
@@ -635,6 +642,18 @@ body.light-theme :root {
   margin: 0 auto;
 }
 
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
 .profile-input, .profile-select {
   width: 100%;
   padding: 10px 12px;
@@ -643,7 +662,13 @@ body.light-theme :root {
   border-radius: 4px;
   color: var(--text-primary);
   font-size: 13px;
-  margin-bottom: 4px;
+  margin-bottom: 0;
+}
+
+.profile-input:focus, .profile-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
 }
 
 .create-profile-button {
