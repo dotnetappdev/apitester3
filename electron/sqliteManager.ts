@@ -713,6 +713,45 @@ if (response.data.length > 0) {
     return result.changes! > 0;
   }
 
+  async deleteUser(userId: number): Promise<boolean> {
+    if (!this.db) throw new Error('Database not initialized');
+    
+    try {
+      // Start a transaction to delete user and all related data
+      await this.db.run('BEGIN TRANSACTION');
+      
+      // Delete user's collections and related data
+      const collections = await this.db.all(
+        'SELECT id FROM collections WHERE ownerId = ?',
+        [userId]
+      );
+      
+      for (const collection of collections) {
+        // Delete requests in the collection
+        await this.db.run('DELETE FROM requests WHERE collectionId = ?', [collection.id]);
+      }
+      
+      // Delete collections
+      await this.db.run('DELETE FROM collections WHERE ownerId = ?', [userId]);
+      
+      // Delete team memberships
+      await this.db.run('DELETE FROM team_members WHERE userId = ?', [userId]);
+      
+      // Delete teams owned by the user
+      await this.db.run('DELETE FROM teams WHERE ownerId = ?', [userId]);
+      
+      // Delete the user
+      const result = await this.db.run('DELETE FROM users WHERE id = ?', [userId]);
+      
+      await this.db.run('COMMIT');
+      
+      return result.changes! > 0;
+    } catch (error) {
+      await this.db.run('ROLLBACK');
+      throw error;
+    }
+  }
+
   // Collection operations
   async getUserCollections(userId: number): Promise<Collection[]> {
     if (!this.db) throw new Error('Database not initialized');

@@ -15,12 +15,16 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
   const [error, setError] = useState('');
   const [showCreateProfile, setShowCreateProfile] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [showSwitchAccount, setShowSwitchAccount] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<'admin' | 'standard'>('standard');
   const [resetUsername, setResetUsername] = useState('');
   const [resetNewPassword, setResetNewPassword] = useState('');
   const [resetConfirmPassword, setResetConfirmPassword] = useState('');
+  const [deleteUsername, setDeleteUsername] = useState('');
+  const [deletePassword, setDeletePassword] = useState('');
 
   useEffect(() => {
     loadProfiles();
@@ -125,6 +129,35 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
       }
     } catch (error) {
       setError('Failed to reset password: ' + (error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!deleteUsername || !deletePassword) {
+      setError('Please enter username and password to confirm deletion');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const result = await authManager.deleteAccount(deleteUsername, deletePassword);
+      
+      if (result.success) {
+        setShowDeleteAccount(false);
+        setDeleteUsername('');
+        setDeletePassword('');
+        setError('');
+        await loadProfiles();
+        alert('Account deleted successfully!');
+      } else {
+        setError(result.error || 'Failed to delete account');
+      }
+    } catch (error) {
+      setError('Failed to delete account: ' + (error as Error).message);
     } finally {
       setIsLoading(false);
     }
@@ -266,6 +299,139 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
     );
   }
 
+  if (showDeleteAccount) {
+    return (
+      <div className="login-overlay">
+        <div className="login-container create-profile">
+          <div className="login-header">
+            <h1>Delete Account</h1>
+            <button 
+              className="back-button"
+              onClick={() => setShowDeleteAccount(false)}
+            >
+              ← Back
+            </button>
+          </div>
+
+          <div className="create-profile-form">
+            <div className="error-message" style={{ background: 'rgba(247, 37, 133, 0.2)' }}>
+              ⚠️ Warning: This action cannot be undone. All your data will be permanently deleted.
+            </div>
+
+            <div className="form-group">
+              <label>Username</label>
+              <input
+                type="text"
+                value={deleteUsername}
+                onChange={(e) => setDeleteUsername(e.target.value)}
+                placeholder="Enter your username"
+                className="profile-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                placeholder="Enter your password to confirm"
+                className="profile-input"
+              />
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <button
+              className="create-profile-button"
+              onClick={handleDeleteAccount}
+              disabled={isLoading}
+              style={{ background: '#dc3545' }}
+            >
+              {isLoading ? 'Deleting...' : 'Delete Account Permanently'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (showSwitchAccount) {
+    return (
+      <div className="login-overlay">
+        <div className="login-container">
+          <div className="login-header">
+            <h1>Switch Account</h1>
+            <button 
+              className="back-button"
+              onClick={() => setShowSwitchAccount(false)}
+            >
+              ← Back
+            </button>
+          </div>
+
+          <div className="profile-list">
+            {profiles.map((profile) => (
+              <div
+                key={profile.id}
+                className="profile-list-item"
+              >
+                <div className="profile-list-avatar">
+                  {profile.profilePicture ? (
+                    <img src={profile.profilePicture} alt={profile.username} />
+                  ) : (
+                    <div className="avatar-placeholder small">
+                      {profile.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="profile-list-info">
+                  <h3>{profile.username}</h3>
+                  <div 
+                    className="role-badge"
+                    style={{ backgroundColor: getRoleColor(profile.role) }}
+                  >
+                    {profile.role}
+                  </div>
+                </div>
+                <button 
+                  className="switch-button"
+                  onClick={() => {
+                    setSelectedProfile(profile);
+                    setShowSwitchAccount(false);
+                  }}
+                >
+                  Switch
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="account-actions">
+            <button 
+              className="action-button"
+              onClick={() => {
+                setShowSwitchAccount(false);
+                setShowResetPassword(true);
+              }}
+            >
+              🔑 Change Password
+            </button>
+            <button 
+              className="action-button danger"
+              onClick={() => {
+                setShowSwitchAccount(false);
+                setShowDeleteAccount(true);
+              }}
+            >
+              🗑️ Delete Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="login-overlay">
       <div className="login-container">
@@ -279,9 +445,8 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
             <div
               key={profile.id}
               className={`profile-card ${selectedProfile?.id === profile.id ? 'selected' : ''}`}
-              onClick={() => setSelectedProfile(profile)}
             >
-              <div className="profile-avatar">
+              <div className="profile-avatar" onClick={() => setSelectedProfile(profile)}>
                 {profile.profilePicture ? (
                   <img src={profile.profilePicture} alt={profile.username} />
                 ) : (
@@ -292,16 +457,13 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
               </div>
               <div className="profile-info">
                 <h3>{profile.username}</h3>
-                <div 
-                  className="role-badge"
-                  style={{ backgroundColor: getRoleColor(profile.role) }}
-                >
-                  {profile.role}
-                </div>
-                <p className="last-login">
-                  Last: {formatLastLogin(profile.lastLogin)}
-                </p>
               </div>
+              <button 
+                className="switch-account-button"
+                onClick={() => setShowSwitchAccount(true)}
+              >
+                Switch Account
+              </button>
             </div>
           ))}
 
@@ -319,6 +481,14 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
           >
             <div className="reset-password-icon">🔑</div>
             <p>Reset Password</p>
+          </div>
+
+          <div 
+            className="profile-card delete-account"
+            onClick={() => setShowDeleteAccount(true)}
+          >
+            <div className="delete-account-icon">🗑️</div>
+            <p>Delete Account</p>
           </div>
         </div>
 

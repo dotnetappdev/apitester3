@@ -132,6 +132,32 @@ export class AuthManager {
     }
   }
 
+  async deleteAccount(username: string, password: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      // First verify the password
+      const user = await this.dbManager.verifyPassword(username, password);
+      
+      if (!user) {
+        return { success: false, error: 'Invalid username or password' };
+      }
+
+      // Delete the user
+      const success = await this.dbManager.deleteUser(user.id);
+      
+      if (success) {
+        // If the deleted user was the current user, logout
+        if (this.currentSession?.user.id === user.id) {
+          this.logout();
+        }
+        return { success: true };
+      } else {
+        return { success: false, error: 'Failed to delete account' };
+      }
+    } catch (error) {
+      return { success: false, error: 'Failed to delete account: ' + (error as Error).message };
+    }
+  }
+
   onSessionChange(callback: (session: UserSession | null) => void): () => void {
     this.sessionListeners.push(callback);
     
