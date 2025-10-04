@@ -60,6 +60,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('db-reset-password', username, newPassword),
   dbDeleteUser: (userId: number) => 
     ipcRenderer.invoke('db-delete-user', userId),
+  dbClearSampleData: (userId: number) =>
+    ipcRenderer.invoke('db-clear-sample-data', userId),
 
   // Collection operations
   dbGetUserCollections: (userId: number) => ipcRenderer.invoke('db-get-user-collections', userId),
@@ -147,6 +149,7 @@ declare global {
       dbVerifyPassword: (username: string, password: string) => Promise<any>;
       dbResetPassword: (username: string, newPassword: string) => Promise<boolean>;
       dbDeleteUser: (userId: number) => Promise<boolean>;
+      dbClearSampleData: (userId: number) => Promise<{ collectionsDeleted: number; requestsDeleted: number; testResultsDeleted: number }>;
       dbGetUserCollections: (userId: number) => Promise<any[]>;
       dbCreateCollection: (name: string, description: string, ownerId: number) => Promise<number>;
       dbUpdateCollection: (id: number, updates: any) => Promise<void>;
