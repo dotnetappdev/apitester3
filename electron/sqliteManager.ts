@@ -67,15 +67,22 @@ export interface TestSuite {
 export class SqliteDatabaseManager {
   private static readonly ENCRYPTION_KEY = 'APITester3-SecureKey-256bit-ForPasswordEncryption-Change-In-Production';
   private db: Database | null = null;
-  private dbPath: string;
+  private dbPath: string = '';
 
   constructor() {
-    // Store database in user data directory
-    const userDataPath = app.getPath('userData');
-    this.dbPath = path.join(userDataPath, 'apitester3.db');
+    // Database path will be set in initialize() when app is ready
   }
 
   async initialize(): Promise<void> {
+    // Set database path here when app is ready, not in constructor
+    const userDataPath = app.getPath('userData');
+    this.dbPath = path.join(userDataPath, 'apitester3.db');
+    
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔧 Initializing SQLite database...');
+    console.log('📁 Database location:', this.dbPath);
+    console.log('═══════════════════════════════════════════════════════════');
+    
     // Open database connection
     this.db = await open({
       filename: this.dbPath,
@@ -186,56 +193,64 @@ export class SqliteDatabaseManager {
     
     console.log('\n🌱 Initializing seed data...');
     
-    // Check if users already exist
-    const userCount = await this.db.get('SELECT COUNT(*) as count FROM users');
-    const shouldSeedUsers = userCount.count === 0;
-    
-    // Seed users if needed
-    if (shouldSeedUsers) {
-      console.log('   Creating default user profiles...');
-      // Insert seed users
-      const seedUsers = [
-        {
-          username: 'admin',
-          password: 'admin123',
-          role: 'admin'
-        },
-        {
-          username: 'testuser',
-          password: 'password123',
-          role: 'standard'
-        },
-        {
-          username: 'developer',
-          password: 'dev2024!',
-          role: 'standard'
-        },
-        {
-          username: 'qa_lead',
-          password: 'quality123',
-          role: 'admin'
-        },
-        {
-          username: 'api_tester',
-          password: 'testing456',
-          role: 'standard'
-        }
-      ];
+    try {
+      // Check if users already exist
+      const userCount = await this.db.get('SELECT COUNT(*) as count FROM users');
+      console.log(`   📊 Current user count: ${userCount.count}`);
+      const shouldSeedUsers = userCount.count === 0;
+      
+      // Seed users if needed
+      if (shouldSeedUsers) {
+        console.log('   Creating default user profiles...');
+        // Insert seed users
+        const seedUsers = [
+          {
+            username: 'admin',
+            password: 'admin123',
+            role: 'admin'
+          },
+          {
+            username: 'testuser',
+            password: 'password123',
+            role: 'standard'
+          },
+          {
+            username: 'developer',
+            password: 'dev2024!',
+            role: 'standard'
+          },
+          {
+            username: 'qa_lead',
+            password: 'quality123',
+            role: 'admin'
+          },
+          {
+            username: 'api_tester',
+            password: 'testing456',
+            role: 'standard'
+          }
+        ];
 
-      for (const user of seedUsers) {
-        const salt = this.generateSalt();
-        await this.db.run(
-          'INSERT INTO users (username, passwordHash, salt, role, createdAt) VALUES (?, ?, ?, ?, ?)',
-          [
-            user.username,
-            this.hashPassword(user.password, salt),
-            salt,
-            user.role,
-            currentDate
-          ]
-        );
-      }
-      console.log('   ✅ Seeded 5 users (admin, testuser, developer, qa_lead, api_tester)');
+        for (const user of seedUsers) {
+          try {
+            const salt = this.generateSalt();
+            await this.db.run(
+              'INSERT INTO users (username, passwordHash, salt, role, createdAt) VALUES (?, ?, ?, ?, ?)',
+              [
+                user.username,
+                this.hashPassword(user.password, salt),
+                salt,
+                user.role,
+                currentDate
+              ]
+            );
+            console.log(`      ✓ Created user: ${user.username}`);
+          } catch (userError) {
+            console.error(`      ❌ Failed to create user ${user.username}:`, userError);
+            throw userError;
+          }
+        }
+        console.log('   ✅ Seeded 5 users (admin, testuser, developer, qa_lead, api_tester)');
     } else {
       console.log('   ℹ️  Users already exist (count: ' + userCount.count + '), skipping user seed');
     }
@@ -581,7 +596,7 @@ assert.assertGreaterThan(user.age, 18, 'User should be adult');
 assert.assertTrue(user.active, 'User should be active');
 
 // Test email format
-assert.assertRegexMatch(/@example\.com$/, user.email, 'Email should be from example.com');
+assert.assertRegexMatch(/@example\\.com$/, user.email, 'Email should be from example.com');
 
 console.log('✓ Object validation tests passed');`
       },
@@ -629,7 +644,26 @@ if (response.data.length > 0) {
       console.log('   ℹ️  Collections already exist (count: ' + collectionCount.count + '), skipping collection seed');
     }
 
+    // Final verification
+    const finalUserCount = await this.db.get('SELECT COUNT(*) as count FROM users');
+    const finalCollectionCount = await this.db.get('SELECT COUNT(*) as count FROM collections');
+    const finalRequestCount = await this.db.get('SELECT COUNT(*) as count FROM requests');
+    
+    console.log('\n📊 Seed Data Summary:');
+    console.log(`   Users: ${finalUserCount.count}`);
+    console.log(`   Collections: ${finalCollectionCount.count}`);
+    console.log(`   Requests: ${finalRequestCount.count}`);
+    
+    if (finalUserCount.count === 0) {
+      throw new Error('CRITICAL: No users were seeded! Database may be corrupted.');
+    }
+    
     console.log('✅ Seed data initialization complete\n');
+    } catch (error) {
+      console.error('\n❌ FATAL ERROR during seed data initialization:', error);
+      console.error('   Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+      throw error;
+    }
   }
 
   private generateSalt(): string {
@@ -995,6 +1029,28 @@ if (response.data.length > 0) {
   async deleteTestSuite(id: number): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
     await this.db.run('DELETE FROM test_suites WHERE id = ?', [id]);
+  }
+
+  async resetDatabase(): Promise<void> {
+    console.log('\n⚠️  Resetting database...');
+    
+    if (!this.db) throw new Error('Database not initialized');
+    
+    // Close current connection
+    await this.db.close();
+    this.db = null;
+    
+    // Delete the database file
+    const fs = require('fs');
+    if (fs.existsSync(this.dbPath)) {
+      fs.unlinkSync(this.dbPath);
+      console.log('   ✓ Deleted existing database file');
+    }
+    
+    // Reinitialize
+    await this.initialize();
+    
+    console.log('✅ Database reset complete\n');
   }
 
   async close(): Promise<void> {

@@ -27,12 +27,29 @@ class AppManager {
   private initializeApp(): void {
     // Handle app events
     app.whenReady().then(async () => {
-      // Initialize database first
-      await this.dbManager.initialize();
-      
-      this.createMainWindow();
-      this.setupMenu();
-      this.setupIpcHandlers();
+      try {
+        // Initialize database first
+        await this.dbManager.initialize();
+        
+        this.createMainWindow();
+        this.setupMenu();
+        this.setupIpcHandlers();
+      } catch (error) {
+        console.error('❌ FATAL ERROR: Failed to initialize application:', error);
+        console.error('   Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+        
+        // Show error dialog to user
+        dialog.showErrorBox(
+          'Database Initialization Failed',
+          `Failed to initialize the database. Please try the following:\n\n` +
+          `1. Close the application completely\n` +
+          `2. Delete the database file if it exists\n` +
+          `3. Restart the application\n\n` +
+          `Error: ${error instanceof Error ? error.message : String(error)}`
+        );
+        
+        app.quit();
+      }
     });
 
     app.on('window-all-closed', async () => {
@@ -780,6 +797,20 @@ class AppManager {
       } catch (error) {
         console.error('Failed to delete test suite:', error);
         throw error;
+      }
+    });
+
+    // Reset database (for development/debugging)
+    ipcMain.handle('db-reset', async () => {
+      try {
+        await this.dbManager.resetDatabase();
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to reset database:', error);
+        return { 
+          success: false, 
+          error: error instanceof Error ? error.message : String(error) 
+        };
       }
     });
 
