@@ -97,20 +97,28 @@ export const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, isLoadin
 
       {/* Response Tabs */}
       <div className="tabs">
-        {(['body', 'headers'] as const).map(tab => (
-          <button
-            key={tab}
-            className={`tab ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            {tab === 'headers' && (
-              <span style={{ marginLeft: '4px', fontSize: '11px', color: 'var(--accent-color)' }}>
-                ({Object.keys(response.headers).length})
-              </span>
-            )}
-          </button>
-        ))}
+        {(['body', 'headers'] as const).map(tab => {
+          const tabIcons: Record<string, string> = {
+            body: '📄',
+            headers: '📋'
+          };
+          
+          return (
+            <button
+              key={tab}
+              className={`tab ${activeTab === tab ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              <span className="tab-icon">{tabIcons[tab]}</span>
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab === 'headers' && (
+                <span style={{ marginLeft: '4px', fontSize: '11px', color: 'var(--accent-color)' }}>
+                  ({Object.keys(response.headers).length})
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Tab Content */}
