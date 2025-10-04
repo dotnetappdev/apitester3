@@ -13,6 +13,7 @@
     "package": "npm run build && electron-builder",
     "test": "jest",
     "test:seed": "node test-seed-data.js",
+    "test:login": "node test-login-profiles.js",
     "lint": "eslint . --ext .ts,.tsx --fix"
   },
   "keywords": [

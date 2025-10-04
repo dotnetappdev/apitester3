@@ -91,7 +91,10 @@ export class SqliteDatabaseManager {
     // Initialize seed data if database is empty
     await this.initializeSeedData();
     
-    console.log('SQLite database initialized at:', this.dbPath);
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('✅ SQLite database initialized successfully');
+    console.log('📁 Database location:', this.dbPath);
+    console.log('═══════════════════════════════════════════════════════════');
   }
 
   private async createTables(): Promise<void> {
@@ -181,12 +184,15 @@ export class SqliteDatabaseManager {
 
     const currentDate = new Date().toISOString();
     
+    console.log('\n🌱 Initializing seed data...');
+    
     // Check if users already exist
     const userCount = await this.db.get('SELECT COUNT(*) as count FROM users');
     const shouldSeedUsers = userCount.count === 0;
     
     // Seed users if needed
     if (shouldSeedUsers) {
+      console.log('   Creating default user profiles...');
       // Insert seed users
       const seedUsers = [
         {
@@ -229,7 +235,9 @@ export class SqliteDatabaseManager {
           ]
         );
       }
-      console.log(`✓ Seeded ${seedUsers.length} users`);
+      console.log('   ✅ Seeded 5 users (admin, testuser, developer, qa_lead, api_tester)');
+    } else {
+      console.log('   ℹ️  Users already exist (count: ' + userCount.count + '), skipping user seed');
     }
 
     // Check if collections already exist
@@ -238,6 +246,7 @@ export class SqliteDatabaseManager {
 
     // Seed collections and requests if needed
     if (shouldSeedCollections) {
+      console.log('   Creating sample collections and requests...');
       // Seed collections for demo purposes
       const seedCollections = [
         {
@@ -614,11 +623,13 @@ if (response.data.length > 0) {
       );
     }
 
-      console.log('✓ Seeded 3 collections');
-      console.log('✓ Seeded 14 sample requests (7 API + 3 UI + 4 Unit tests)');
+      console.log('   ✅ Seeded 3 collections (JSONPlaceholder API Tests, UI Test Examples, Unit Test Examples)');
+      console.log('   ✅ Seeded 14 sample requests (7 API + 3 UI + 4 Unit tests)');
+    } else {
+      console.log('   ℹ️  Collections already exist (count: ' + collectionCount.count + '), skipping collection seed');
     }
 
-    console.log('Seed data initialization complete');
+    console.log('✅ Seed data initialization complete\n');
   }
 
   private generateSalt(): string {

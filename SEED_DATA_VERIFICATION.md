@@ -46,6 +46,20 @@ This will check:
 - ✓ All 3 collections are created
 - ✓ All 14 sample requests exist
 
+### Method 3: Comprehensive Login Profile Test
+Run the comprehensive automated test for login profiles:
+
+```bash
+npm run test:login
+```
+
+This advanced test verifies:
+- ✓ All 5 user profiles exist with correct roles
+- ✓ Password encryption is properly implemented
+- ✓ All 3 sample collections are present
+- ✓ All 14+ sample requests exist
+- ✓ Database schema integrity
+
 Expected output:
 ```
 Database path: /path/to/apitester3.db
