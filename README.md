@@ -292,6 +292,8 @@ The application comes with pre-configured test accounts for demonstration and te
 | `qa_lead`   | `quality123` | Admin     | QA team lead with admin rights |
 | `api_tester`| `testing456` | Standard  | API testing specialist account |
 
+📋 **For visual guide showing how the login screen should look, see [LOGIN_SCREEN_VISUAL_GUIDE.md](LOGIN_SCREEN_VISUAL_GUIDE.md)**
+
 ### Security Implementation
 
 - **AES-256 Encryption**: All passwords are encrypted using industry-standard AES-256 encryption
@@ -339,6 +341,22 @@ CREATE TABLE collections (
 3. **Implement proper key rotation** mechanisms
 4. **Enable database encryption** at rest
 5. **Set up secure backup procedures**
+
+### Verifying Seed Data
+
+The application automatically creates seed data on first launch. To verify that all user profiles and sample collections are properly loaded:
+
+```bash
+# Run the automated seed data test
+npm run test:seed
+```
+
+This will verify:
+- ✅ All 5 user profiles are created
+- ✅ All 3 sample collections exist
+- ✅ All 14 sample requests are present
+
+If profiles are not showing up in the login screen, see **[SEED_DATA_VERIFICATION.md](SEED_DATA_VERIFICATION.md)** for troubleshooting steps.
 
 ## Security Features
 
