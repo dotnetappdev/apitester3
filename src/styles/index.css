@@ -413,9 +413,11 @@ body.light-theme :root {
 .login-container {
   background: var(--bg-secondary);
   border-radius: 12px;
-  padding: 40px;
+  padding: 32px;
   min-width: 600px;
-  max-width: 800px;
+  max-width: 750px;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   border: 1px solid var(--border-color);
 }
@@ -427,19 +429,19 @@ body.light-theme :root {
 
 .login-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 
 .login-header h1 {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 300;
   color: var(--text-primary);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .login-header p {
   color: var(--text-secondary);
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .back-button {
@@ -456,52 +458,64 @@ body.light-theme :root {
 
 .profiles-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .profile-card {
-  background: var(--bg-tertiary);
-  border: 2px solid transparent;
+  background: transparent;
+  border: 3px solid transparent;
   border-radius: 8px;
-  padding: 20px;
+  padding: 12px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 160px;
+  transition: all 0.3s ease;
+  min-height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .profile-card:hover {
-  background: var(--bg-quaternary);
+  transform: scale(1.05);
   border-color: var(--border-light);
 }
 
 .profile-card.selected {
   border-color: var(--accent-color);
-  background: var(--bg-quaternary);
+  transform: scale(1.08);
 }
 
 .profile-card.add-profile {
   border: 2px dashed var(--border-color);
   background: transparent;
+  min-height: 140px;
 }
 
 .profile-card.add-profile:hover {
   border-color: var(--accent-color);
   background: var(--bg-tertiary);
+  transform: scale(1.05);
 }
 
 .profile-avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  margin-bottom: 12px;
+  width: 100px;
+  height: 100px;
+  border-radius: 6px;
+  margin-bottom: 10px;
   overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-avatar:hover {
+  box-shadow: 0 4px 12px rgba(0, 122, 204, 0.4);
 }
 
 .profile-avatar img {
@@ -511,14 +525,14 @@ body.light-theme :root {
 }
 
 .avatar-placeholder {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  border-radius: 6px;
   background: var(--accent-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 36px;
   font-weight: bold;
   color: white;
 }
@@ -530,52 +544,63 @@ body.light-theme :root {
 }
 
 .profile-info h3 {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
 
-.role-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 10px;
-  font-weight: bold;
-  text-transform: uppercase;
+.switch-account-button {
+  width: 100%;
+  padding: 6px 12px;
+  background: var(--accent-color);
+  border: none;
+  border-radius: 4px;
   color: white;
-  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.last-login {
-  font-size: 12px;
-  color: var(--text-muted);
+.switch-account-button:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 122, 204, 0.4);
 }
 
 .add-profile-icon {
-  font-size: 48px;
+  font-size: 40px;
   color: var(--text-muted);
   margin-bottom: 8px;
 }
 
 .reset-password-icon, .delete-account-icon {
-  font-size: 36px;
+  font-size: 32px;
   margin-bottom: 8px;
 }
 
 .profile-card.reset-password, .profile-card.delete-account {
   border: 2px dashed var(--border-color);
   background: transparent;
+  min-height: 140px;
 }
 
 .profile-card.reset-password:hover, .profile-card.delete-account:hover {
   border-color: var(--accent-color);
   background: var(--bg-tertiary);
+  transform: scale(1.05);
 }
 
 .profile-card p {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-primary);
 }

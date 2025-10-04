@@ -368,9 +368,8 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
             <div
               key={profile.id}
               className={`profile-card ${selectedProfile?.id === profile.id ? 'selected' : ''}`}
-              onClick={() => setSelectedProfile(profile)}
             >
-              <div className="profile-avatar">
+              <div className="profile-avatar" onClick={() => setSelectedProfile(profile)}>
                 {profile.profilePicture ? (
                   <img src={profile.profilePicture} alt={profile.username} />
                 ) : (
@@ -381,16 +380,13 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
               </div>
               <div className="profile-info">
                 <h3>{profile.username}</h3>
-                <div 
-                  className="role-badge"
-                  style={{ backgroundColor: getRoleColor(profile.role) }}
-                >
-                  {profile.role}
-                </div>
-                <p className="last-login">
-                  Last: {formatLastLogin(profile.lastLogin)}
-                </p>
               </div>
+              <button 
+                className="switch-account-button"
+                onClick={() => setSelectedProfile(profile)}
+              >
+                Switch Account
+              </button>
             </div>
           ))}
 
