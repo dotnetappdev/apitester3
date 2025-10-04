@@ -292,8 +292,8 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
                 params: JSON.stringify(mergedParams)
               });
             }}
-            placeholder="https://api.example.com/endpoint"
-            title="Request URL"
+            placeholder="{{baseUrl}}/endpoint or https://api.example.com/endpoint"
+            title="Request URL - Use {{variableName}} for environment variables"
           />
           
           <button
@@ -366,13 +366,14 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
             <div className="panel-header">
               <h4>Query Parameters</h4>
               <p className="panel-description">
-                Parameters will be automatically URL-encoded and appended to the request URL
+                Parameters will be automatically URL-encoded and appended to the request URL. 
+                Use <code>{'{{variableName}}'}</code> syntax for environment variables.
               </p>
             </div>
             {renderKeyValueEditor(
               params,
               updateParams,
-              { key: 'Parameter name', value: 'Parameter value' }
+              { key: 'Parameter name', value: '{{value}} or static value' }
             )}
           </div>
         )}
@@ -382,7 +383,8 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
             <div className="panel-header">
               <h4>Headers</h4>
               <p className="panel-description">
-                HTTP headers to be sent with the request
+                HTTP headers to be sent with the request. 
+                Use <code>{'{{variableName}}'}</code> for environment variables like <code>{'{{apiKey}}'}</code>.
               </p>
               <div className="mode-toggle">
                 <label className="mode-label">
@@ -397,7 +399,7 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
               renderKeyValueEditor(
                 headers,
                 updateHeaders,
-                { key: 'Header name', value: 'Header value' }
+                { key: 'Header name', value: '{{value}} or static value' }
               )
             ) : (
               <textarea
@@ -423,7 +425,8 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
             <div className="panel-header">
               <h4>Request Body</h4>
               <p className="panel-description">
-                Raw request body content (JSON, XML, plain text, etc.)
+                Raw request body content (JSON, XML, plain text, etc.). 
+                Use <code>{'{{variableName}}'}</code> for environment variables in JSON/XML/text.
               </p>
               <div className="mode-toggle">
                 <label className="mode-label">

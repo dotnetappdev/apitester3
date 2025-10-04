@@ -326,16 +326,31 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
             disabled={isRunning || isDiscovering}
             title="Discover All Tests"
           >
-            {isDiscovering ? '🔄' : '🔍'}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M7 3.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM1.5 7a5.5 5.5 0 1 1 9.77 3.44l3.64 3.65a1 1 0 0 1-1.41 1.42l-3.65-3.65A5.5 5.5 0 0 1 1.5 7z"/>
+            </svg>
           </button>
           {isRunning ? (
-            <button
-              className="test-action-button stop"
-              onClick={() => setIsRunning(false)}
-              title="Stop Tests"
-            >
-              ⏹️
-            </button>
+            <>
+              <button
+                className="test-action-button pause"
+                onClick={() => {/* TODO: Implement pause */}}
+                title="Pause Tests"
+              >
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M5 3h2v10H5V3zm4 0h2v10H9V3z"/>
+                </svg>
+              </button>
+              <button
+                className="test-action-button stop"
+                onClick={() => setIsRunning(false)}
+                title="Stop Tests"
+              >
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                  <rect x="3" y="3" width="10" height="10" rx="1"/>
+                </svg>
+              </button>
+            </>
           ) : (
             <button
               className="test-action-button play"
@@ -343,7 +358,9 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
               disabled={requests.length === 0 && uiTestSuites.size === 0}
               title="Run All Tests (F5)"
             >
-              ▶️
+              <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M3 2l10 6-10 6V2z"/>
+              </svg>
             </button>
           )}
           <button
@@ -352,14 +369,19 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
             disabled={isRunning || (requests.length === 0 && uiTestSuites.size === 0)}
             title="Debug Tests (F6)"
           >
-            🐛
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 1a3.5 3.5 0 0 1 3.5 3.5v1.088A5.002 5.002 0 0 1 13 10v3H3v-3a5.002 5.002 0 0 1 1.5-4.412V4.5A3.5 3.5 0 0 1 8 1zm0 1a2.5 2.5 0 0 0-2.5 2.5v1.336a1 1 0 0 1-.26.67A4 4 0 0 0 4 10v2h8v-2a4 4 0 0 0-1.24-2.894 1 1 0 0 1-.26-.67V4.5A2.5 2.5 0 0 0 8 2z"/>
+            </svg>
           </button>
           <button
-            className="test-action-button"
+            className="test-action-button refresh"
             onClick={() => {/* TODO: Refresh tests */}}
             title="Refresh Tests"
           >
-            🔄
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+              <path fillRule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+            </svg>
           </button>
         </div>
       </div>
@@ -464,16 +486,54 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                               {hasTests ? `${testSuite.testCases.length} test(s)` : 'No tests'}
                             </div>
                           </div>
-                          <button
-                            className="run-test-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              runIndividualTest(request.id);
-                            }}
-                            disabled={isRunning}
-                          >
-                            ▶
-                          </button>
+                          <div className="test-item-actions">
+                            <button
+                              className="test-item-action-btn run-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                runIndividualTest(request.id);
+                              }}
+                              disabled={isRunning}
+                              title="Run test"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M3 2l10 6-10 6V2z"/>
+                              </svg>
+                            </button>
+                            {hasTests && (
+                              <>
+                                <button
+                                  className="test-item-action-btn edit-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEditTestSuite?.(testSuite);
+                                  }}
+                                  disabled={isRunning}
+                                  title="Edit test suite"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                  </svg>
+                                </button>
+                                <button
+                                  className="test-item-action-btn delete-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (confirm('Are you sure you want to delete this test suite?')) {
+                                      onDeleteTestSuite?.(testSuite);
+                                    }
+                                  }}
+                                  disabled={isRunning}
+                                  title="Delete test suite"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                    <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                  </svg>
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
 
                         {hasTests && isExpanded && (
@@ -540,7 +600,9 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                     onClick={handleCreateUITestSuite}
                     title="Create new UI test suite"
                   >
-                    +
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/>
+                    </svg>
                   </button>
                 </div>
                 <div className="section-description">
@@ -588,27 +650,48 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                                 {uiTestSuite.testCases.length} UI test(s)
                               </div>
                             </div>
-                            <div className="ui-test-actions">
+                            <div className="test-item-actions">
                               <button
-                                className="edit-test-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditUITestSuite(uiTestSuite);
-                                }}
-                                disabled={isRunning}
-                                title="Edit test suite"
-                              >
-                                ✏️
-                              </button>
-                              <button
-                                className="run-test-btn"
+                                className="test-item-action-btn run-btn"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   runUITestSuite(uiTestSuite);
                                 }}
                                 disabled={isRunning}
+                                title="Run UI test"
                               >
-                                ▶
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                                  <path d="M3 2l10 6-10 6V2z"/>
+                                </svg>
+                              </button>
+                              <button
+                                className="test-item-action-btn edit-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditUITestSuite(uiTestSuite);
+                                }}
+                                disabled={isRunning}
+                                title="Edit UI test suite"
+                              >
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                                  <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                </svg>
+                              </button>
+                              <button
+                                className="test-item-action-btn delete-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (confirm('Are you sure you want to delete this UI test suite?')) {
+                                    onDeleteUITestSuite?.(uiTestSuite);
+                                  }
+                                }}
+                                disabled={isRunning}
+                                title="Delete UI test suite"
+                              >
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                  <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                </svg>
                               </button>
                             </div>
                           </div>
