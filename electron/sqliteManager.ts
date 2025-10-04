@@ -596,7 +596,7 @@ assert.assertGreaterThan(user.age, 18, 'User should be adult');
 assert.assertTrue(user.active, 'User should be active');
 
 // Test email format
-assert.assertRegexMatch(/@example\.com$/, user.email, 'Email should be from example.com');
+assert.assertRegexMatch(/@example\\.com$/, user.email, 'Email should be from example.com');
 
 console.log('✓ Object validation tests passed');`
       },
