@@ -292,6 +292,8 @@ The application comes with pre-configured test accounts for demonstration and te
 | `qa_lead`   | `quality123` | Admin     | QA team lead with admin rights |
 | `api_tester`| `testing456` | Standard  | API testing specialist account |
 
+📋 **For visual guide showing how the login screen should look, see [LOGIN_SCREEN_VISUAL_GUIDE.md](LOGIN_SCREEN_VISUAL_GUIDE.md)**
+
 ### Security Implementation
 
 - **AES-256 Encryption**: All passwords are encrypted using industry-standard AES-256 encryption
