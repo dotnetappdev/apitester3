@@ -2306,6 +2306,17 @@ body.light-theme :root {
   line-height: 1.4;
 }
 
+.panel-description code {
+  background: var(--bg-tertiary);
+  color: var(--accent-color);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+}
+
 .key-value-editor {
   border: 1px solid var(--border-color);
   border-radius: 4px;
