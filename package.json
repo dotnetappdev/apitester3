@@ -12,6 +12,7 @@
     "build-electron": "tsc -p electron/tsconfig.json",
     "package": "npm run build && electron-builder",
     "test": "jest",
+    "test:seed": "node test-seed-data.js",
     "lint": "eslint . --ext .ts,.tsx --fix"
   },
   "keywords": [

@@ -340,6 +340,22 @@ CREATE TABLE collections (
 4. **Enable database encryption** at rest
 5. **Set up secure backup procedures**
 
+### Verifying Seed Data
+
+The application automatically creates seed data on first launch. To verify that all user profiles and sample collections are properly loaded:
+
+```bash
+# Run the automated seed data test
+npm run test:seed
+```
+
+This will verify:
+- ✅ All 5 user profiles are created
+- ✅ All 3 sample collections exist
+- ✅ All 14 sample requests are present
+
+If profiles are not showing up in the login screen, see **[SEED_DATA_VERIFICATION.md](SEED_DATA_VERIFICATION.md)** for troubleshooting steps.
+
 ## Security Features
 
 - **Context Isolation**: Renderer process is isolated from Node.js
