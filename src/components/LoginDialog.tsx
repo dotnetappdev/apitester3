@@ -16,6 +16,7 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
   const [showCreateProfile, setShowCreateProfile] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [showSwitchAccount, setShowSwitchAccount] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<'admin' | 'standard'>('standard');
@@ -355,6 +356,82 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
     );
   }
 
+  if (showSwitchAccount) {
+    return (
+      <div className="login-overlay">
+        <div className="login-container">
+          <div className="login-header">
+            <h1>Switch Account</h1>
+            <button 
+              className="back-button"
+              onClick={() => setShowSwitchAccount(false)}
+            >
+              ← Back
+            </button>
+          </div>
+
+          <div className="profile-list">
+            {profiles.map((profile) => (
+              <div
+                key={profile.id}
+                className="profile-list-item"
+              >
+                <div className="profile-list-avatar">
+                  {profile.profilePicture ? (
+                    <img src={profile.profilePicture} alt={profile.username} />
+                  ) : (
+                    <div className="avatar-placeholder small">
+                      {profile.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="profile-list-info">
+                  <h3>{profile.username}</h3>
+                  <div 
+                    className="role-badge"
+                    style={{ backgroundColor: getRoleColor(profile.role) }}
+                  >
+                    {profile.role}
+                  </div>
+                </div>
+                <button 
+                  className="switch-button"
+                  onClick={() => {
+                    setSelectedProfile(profile);
+                    setShowSwitchAccount(false);
+                  }}
+                >
+                  Switch
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="account-actions">
+            <button 
+              className="action-button"
+              onClick={() => {
+                setShowSwitchAccount(false);
+                setShowResetPassword(true);
+              }}
+            >
+              🔑 Change Password
+            </button>
+            <button 
+              className="action-button danger"
+              onClick={() => {
+                setShowSwitchAccount(false);
+                setShowDeleteAccount(true);
+              }}
+            >
+              🗑️ Delete Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="login-overlay">
       <div className="login-container">
@@ -383,7 +460,7 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
               </div>
               <button 
                 className="switch-account-button"
-                onClick={() => setSelectedProfile(profile)}
+                onClick={() => setShowSwitchAccount(true)}
               >
                 Switch Account
               </button>
