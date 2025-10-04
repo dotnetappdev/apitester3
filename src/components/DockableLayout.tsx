@@ -98,6 +98,8 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
   // Panel docking states
   const [collectionsPanelMode, setCollectionsPanelMode] = useState<'left' | 'right' | 'top' | 'bottom' | 'floating'>('left');
   const [testExplorerPanelMode, setTestExplorerPanelMode] = useState<'left' | 'right' | 'top' | 'bottom' | 'floating'>('left');
+  const [contentLayoutMode, setContentLayoutMode] = useState<'stacked' | 'tabbed'>('stacked');
+  const [activeContentTab, setActiveContentTab] = useState<'request' | 'response'>('request');
   const [collectionsPanelVisible, setCollectionsPanelVisible] = useState(true);
   const [testExplorerPanelVisible, setTestExplorerPanelVisible] = useState(true);
 
@@ -420,6 +422,14 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
           >
             🧪 {!isTablet && 'Tests'}
           </button>
+          <button 
+            className={`layout-mode-toggle ${contentLayoutMode === 'tabbed' ? 'active' : ''}`}
+            onClick={() => setContentLayoutMode(contentLayoutMode === 'stacked' ? 'tabbed' : 'stacked')}
+            title={`Switch to ${contentLayoutMode === 'stacked' ? 'Tabbed' : 'Stacked'} Layout`}
+            aria-label="Toggle Layout Mode"
+          >
+            {contentLayoutMode === 'stacked' ? '📑' : '📚'} {!isTablet && (contentLayoutMode === 'stacked' ? 'Tabs' : 'Stack')}
+          </button>
           <div className="toolbar-spacer"></div>
           <div className="help-menu-container">
             <button 
@@ -584,58 +594,118 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         {/* Main Content Area */}
         <Allotment.Pane minSize={isTablet ? 350 : 400} snap>
           {activeRequest ? (
-            <Allotment 
-              vertical={true}
-              snap={true}
-              defaultSizes={[60, 40]}
-              onChange={(sizes) => handleSplitterChange(sizes, 'content')}
-              className="content-allotment"
-            >
-              <Allotment.Pane 
-                minSize={isTablet ? 250 : 300}
-                preferredSize="60%"
-                snap
+            contentLayoutMode === 'stacked' ? (
+              // Stacked Layout (default)
+              <Allotment 
+                vertical={true}
+                snap={true}
+                defaultSizes={[60, 40]}
+                onChange={(sizes) => handleSplitterChange(sizes, 'content')}
+                className="content-allotment"
               >
-                <div className="panel-container request-panel">
-                  <div className="panel-header">
-                    <span className="panel-title">📝 Request</span>
-                    {isLoading && <span className="loading-indicator">⏳</span>}
+                <Allotment.Pane 
+                  minSize={isTablet ? 250 : 300}
+                  preferredSize="60%"
+                  snap
+                >
+                  <div className="panel-container request-panel">
+                    <div className="panel-header">
+                      <span className="panel-title">📝 Request</span>
+                      {isLoading && <span className="loading-indicator">⏳</span>}
+                    </div>
+                    <div className="panel-content">
+                      <EnhancedRequestPanel
+                        request={activeRequest}
+                        onRequestChange={onRequestChange}
+                        onSendRequest={onSendRequest}
+                        isLoading={isLoading}
+                        enableSyntaxHighlighting={enableSyntaxHighlighting}
+                        theme={theme}
+                      />
+                    </div>
                   </div>
-                  <div className="panel-content">
-                    <EnhancedRequestPanel
-                      request={activeRequest}
-                      onRequestChange={onRequestChange}
-                      onSendRequest={onSendRequest}
-                      isLoading={isLoading}
-                      enableSyntaxHighlighting={enableSyntaxHighlighting}
-                      theme={theme}
-                    />
+                </Allotment.Pane>
+                
+                <Allotment.Pane 
+                  minSize={isTablet ? 200 : 250}
+                  snap
+                >
+                  <div className="panel-container response-panel">
+                    <div className="panel-header">
+                      <span className="panel-title">📄 Response</span>
+                      {response && (
+                        <span className="response-status">
+                          {response.status} • {response.responseTime}ms
+                        </span>
+                      )}
+                    </div>
+                    <div className="panel-content">
+                      <ResponsePanel
+                        response={response}
+                        isLoading={isLoading}
+                      />
+                    </div>
                   </div>
-                </div>
-              </Allotment.Pane>
-              
-              <Allotment.Pane 
-                minSize={isTablet ? 200 : 250}
-                snap
-              >
-                <div className="panel-container response-panel">
-                  <div className="panel-header">
-                    <span className="panel-title">📄 Response</span>
+                </Allotment.Pane>
+              </Allotment>
+            ) : (
+              // Tabbed Layout
+              <div className="tabbed-content-container">
+                <div className="content-tabs">
+                  <button
+                    className={`content-tab ${activeContentTab === 'request' ? 'active' : ''}`}
+                    onClick={() => setActiveContentTab('request')}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+                      <path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8zm0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                    <span>Request Editor</span>
+                    {isLoading && <span className="tab-loading-indicator">⏳</span>}
+                  </button>
+                  <button
+                    className={`content-tab ${activeContentTab === 'response' ? 'active' : ''}`}
+                    onClick={() => setActiveContentTab('response')}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+                      <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                    </svg>
+                    <span>Response</span>
                     {response && (
-                      <span className="response-status">
+                      <span className="tab-status-badge">
                         {response.status} • {response.responseTime}ms
                       </span>
                     )}
-                  </div>
-                  <div className="panel-content">
-                    <ResponsePanel
-                      response={response}
-                      isLoading={isLoading}
-                    />
-                  </div>
+                  </button>
                 </div>
-              </Allotment.Pane>
-            </Allotment>
+                <div className="content-tab-panel">
+                  {activeContentTab === 'request' ? (
+                    <div className="panel-container request-panel full-height">
+                      <div className="panel-content">
+                        <EnhancedRequestPanel
+                          request={activeRequest}
+                          onRequestChange={onRequestChange}
+                          onSendRequest={onSendRequest}
+                          isLoading={isLoading}
+                          enableSyntaxHighlighting={enableSyntaxHighlighting}
+                          theme={theme}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="panel-container response-panel full-height">
+                      <div className="panel-content">
+                        <ResponsePanel
+                          response={response}
+                          isLoading={isLoading}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
           ) : (
             <div className="welcome-screen">
               <div className="welcome-content">
