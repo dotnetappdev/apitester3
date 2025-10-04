@@ -14,6 +14,7 @@
     "test": "jest",
     "test:seed": "node test-seed-data.js",
     "test:login": "node test-login-profiles.js",
+    "diagnose": "node diagnose-database.js",
     "lint": "eslint . --ext .ts,.tsx --fix"
   },
   "keywords": [
