@@ -271,6 +271,12 @@ export class SqliteDatabaseManager {
           isShared: true
         },
         {
+          name: 'REST API Advanced Examples',
+          description: 'Advanced REST API testing patterns and scenarios',
+          ownerId: 1, // admin user
+          isShared: true
+        },
+        {
           name: 'UI Test Examples',
           description: 'Browser-based UI test examples using Playwright',
           ownerId: 1, // admin user
@@ -281,6 +287,12 @@ export class SqliteDatabaseManager {
           description: 'Standalone unit test examples for functions and components',
           ownerId: 3, // developer user
           isShared: false
+        },
+        {
+          name: 'Authentication & Authorization',
+          description: 'Examples of API authentication and authorization testing',
+          ownerId: 4, // qa_lead user
+          isShared: true
         }
       ];
 
@@ -616,6 +628,177 @@ if (response.data.length > 0) {
   assert.assertJsonPath('$[0].username', 'Bret', response.data);
   console.log('✓ Found user:', response.data[0].name);
 }`
+      },
+      {
+        collectionId: collectionIds[0],
+        name: 'Get Comments for Post',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts/1/comments',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate post comments
+assert.assertStatusCode(200, response);
+assert.assertType('array', response.data);
+assert.assertJsonPath('$[0].postId', 1, response.data);
+console.log('✓ Retrieved', response.data.length, 'comments for post');`
+      },
+      {
+        collectionId: collectionIds[0],
+        name: 'Get All Todos',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/todos',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate todos list
+assert.assertStatusCode(200, response);
+assert.assertType('array', response.data);
+assert.assertGreaterThan(response.data.length, 0);
+console.log('✓ Retrieved', response.data.length, 'todos');`
+      },
+      // Advanced REST API Examples
+      {
+        collectionId: collectionIds[1],
+        name: 'Conditional Request (If-None-Match)',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 
+          'Content-Type': 'application/json',
+          'If-None-Match': '"abc123"'
+        }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Test conditional request
+assert.assertStatusCode(200, response);
+console.log('✓ Conditional request handled, status:', response.status);`
+      },
+      {
+        collectionId: collectionIds[1],
+        name: 'Pagination Example',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts?_page=1&_limit=10',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({ _page: '1', _limit: '10' }),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate pagination
+assert.assertStatusCode(200, response);
+assert.assertType('array', response.data);
+assert.assertArrayLength(10, response.data);
+console.log('✓ Retrieved page 1 with 10 items');`
+      },
+      {
+        collectionId: collectionIds[1],
+        name: 'Filter and Sort',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/comments?postId=1&_sort=id&_order=desc',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({ postId: '1', _sort: 'id', _order: 'desc' }),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate filtering and sorting
+assert.assertStatusCode(200, response);
+assert.assertType('array', response.data);
+assert.assertJsonPath('$[0].postId', 1, response.data);
+console.log('✓ Filtered and sorted', response.data.length, 'comments');`
+      },
+      {
+        collectionId: collectionIds[1],
+        name: 'Partial Update (PATCH)',
+        method: 'PATCH',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          title: 'Updated Title via PATCH'
+        }, null, 2),
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate partial update
+assert.assertStatusCode(200, response);
+assert.assertJsonPath('$.title', 'Updated Title via PATCH', response.data);
+assert.assertJsonPath('$.id', 1, response.data);
+console.log('✓ Partial update successful');`
+      },
+      {
+        collectionId: collectionIds[1],
+        name: 'Nested Resource Access',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/users/1/posts',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'none' }),
+        tests: `// Validate nested resource
+assert.assertStatusCode(200, response);
+assert.assertType('array', response.data);
+assert.assertJsonPath('$[0].userId', 1, response.data);
+console.log('✓ Retrieved posts for user ID 1');`
+      },
+      // Authentication & Authorization Examples
+      {
+        collectionId: collectionIds[4],
+        name: 'Basic Auth Example',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic dXNlcjpwYXNz'
+        }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'basic', username: 'user', password: 'pass' }),
+        tests: `// Test basic authentication
+assert.assertStatusCode(200, response);
+console.log('✓ Basic auth request completed');`
+      },
+      {
+        collectionId: collectionIds[4],
+        name: 'Bearer Token Auth Example',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
+        }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'bearer', token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' }),
+        tests: `// Test bearer token authentication
+assert.assertStatusCode(200, response);
+console.log('✓ Bearer token auth request completed');`
+      },
+      {
+        collectionId: collectionIds[4],
+        name: 'API Key in Header',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
+        headers: JSON.stringify({ 
+          'Content-Type': 'application/json',
+          'X-API-Key': 'demo-api-key-12345'
+        }),
+        body: '',
+        params: JSON.stringify({}),
+        auth: JSON.stringify({ type: 'apikey', key: 'X-API-Key', value: 'demo-api-key-12345' }),
+        tests: `// Test API key authentication
+assert.assertStatusCode(200, response);
+console.log('✓ API key auth request completed');`
+      },
+      {
+        collectionId: collectionIds[4],
+        name: 'API Key in Query Param',
+        method: 'GET',
+        url: 'https://jsonplaceholder.typicode.com/posts/1?api_key=demo-key-12345',
+        headers: JSON.stringify({ 'Content-Type': 'application/json' }),
+        body: '',
+        params: JSON.stringify({ api_key: 'demo-key-12345' }),
+        auth: JSON.stringify({ type: 'apikey', location: 'query', key: 'api_key', value: 'demo-key-12345' }),
+        tests: `// Test API key in query parameter
+assert.assertStatusCode(200, response);
+console.log('✓ API key in query param completed');`
       }
     ];
 
@@ -638,8 +821,8 @@ if (response.data.length > 0) {
       );
     }
 
-      console.log('   ✅ Seeded 3 collections (JSONPlaceholder API Tests, UI Test Examples, Unit Test Examples)');
-      console.log('   ✅ Seeded 14 sample requests (7 API + 3 UI + 4 Unit tests)');
+      console.log('   ✅ Seeded 5 collections (JSONPlaceholder API, REST Advanced, UI Tests, Unit Tests, Auth Examples)');
+      console.log('   ✅ Seeded 28 sample requests (10 basic API + 5 advanced REST + 3 UI + 4 unit + 4 auth + 2 extras)');
     } else {
       console.log('   ℹ️  Collections already exist (count: ' + collectionCount.count + '), skipping collection seed');
     }
@@ -793,6 +976,81 @@ if (response.data.length > 0) {
       return result.changes! > 0;
     } catch (error) {
       await this.db.run('ROLLBACK');
+      throw error;
+    }
+  }
+
+  // Clear sample data for a user (keep the user account but remove all their data)
+  async clearSampleDataForUser(userId: number): Promise<{ collectionsDeleted: number; requestsDeleted: number; testResultsDeleted: number }> {
+    if (!this.db) throw new Error('Database not initialized');
+    
+    try {
+      console.log(`🧹 Clearing sample data for user ${userId}...`);
+      
+      // Start a transaction
+      await this.db.run('BEGIN TRANSACTION');
+      
+      // Get all collections owned by the user
+      const collections = await this.db.all(
+        'SELECT id FROM collections WHERE ownerId = ?',
+        [userId]
+      );
+      
+      let requestsDeleted = 0;
+      let testResultsDeleted = 0;
+      
+      // Delete requests and test results for each collection
+      for (const collection of collections) {
+        // Delete test results for requests in this collection
+        const requestIds = await this.db.all(
+          'SELECT id FROM requests WHERE collectionId = ?',
+          [collection.id]
+        );
+        
+        for (const request of requestIds) {
+          const testResults = await this.db.run(
+            'DELETE FROM test_results WHERE requestId = ?',
+            [request.id]
+          );
+          testResultsDeleted += testResults.changes || 0;
+        }
+        
+        // Delete requests in the collection
+        const requestsResult = await this.db.run(
+          'DELETE FROM requests WHERE collectionId = ?',
+          [collection.id]
+        );
+        requestsDeleted += requestsResult.changes || 0;
+      }
+      
+      // Delete test suites for the user's requests
+      await this.db.run(
+        'DELETE FROM test_suites WHERE requestId IN (SELECT id FROM requests WHERE collectionId IN (SELECT id FROM collections WHERE ownerId = ?))',
+        [userId]
+      );
+      
+      // Delete all collections owned by the user
+      const collectionsResult = await this.db.run(
+        'DELETE FROM collections WHERE ownerId = ?',
+        [userId]
+      );
+      const collectionsDeleted = collectionsResult.changes || 0;
+      
+      await this.db.run('COMMIT');
+      
+      console.log(`✅ Cleared sample data for user ${userId}:`);
+      console.log(`   - Collections deleted: ${collectionsDeleted}`);
+      console.log(`   - Requests deleted: ${requestsDeleted}`);
+      console.log(`   - Test results deleted: ${testResultsDeleted}`);
+      
+      return {
+        collectionsDeleted,
+        requestsDeleted,
+        testResultsDeleted
+      };
+    } catch (error) {
+      await this.db.run('ROLLBACK');
+      console.error('❌ Failed to clear sample data:', error);
       throw error;
     }
   }

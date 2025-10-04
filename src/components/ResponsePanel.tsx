@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ApiResponse } from '../types';
 import { formatResponseTime, formatFileSize, getStatusColor } from '../utils/api';
+import { MonacoEditor } from './MonacoEditor';
 
 interface ResponsePanelProps {
   response: ApiResponse | null;
@@ -9,6 +10,7 @@ interface ResponsePanelProps {
 
 export const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, isLoading }) => {
   const [activeTab, setActiveTab] = useState<'body' | 'headers'>('body');
+  const [useMonacoEditor, setUseMonacoEditor] = useState(true);
 
   const formatJson = (data: any): string => {
     try {
@@ -97,49 +99,99 @@ export const ResponsePanel: React.FC<ResponsePanelProps> = ({ response, isLoadin
 
       {/* Response Tabs */}
       <div className="tabs">
-        {(['body', 'headers'] as const).map(tab => (
-          <button
-            key={tab}
-            className={`tab ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            {tab === 'headers' && (
-              <span style={{ marginLeft: '4px', fontSize: '11px', color: 'var(--accent-color)' }}>
-                ({Object.keys(response.headers).length})
-              </span>
-            )}
-          </button>
-        ))}
+        {(['body', 'headers'] as const).map(tab => {
+          const tabIcons: Record<string, string> = {
+            body: '📄',
+            headers: '📋'
+          };
+          
+          return (
+            <button
+              key={tab}
+              className={`tab ${activeTab === tab ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              <span className="tab-icon">{tabIcons[tab]}</span>
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab === 'headers' && (
+                <span style={{ marginLeft: '4px', fontSize: '11px', color: 'var(--accent-color)' }}>
+                  ({Object.keys(response.headers).length})
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Tab Content */}
       <div className="tab-content" style={{ flex: 1, overflow: 'auto' }}>
         {activeTab === 'body' && (
-          <div style={{ height: '100%' }}>
+          <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             {response.data ? (
-              <pre
-                style={{
-                  margin: 0,
-                  padding: '16px',
-                  fontSize: '12px',
-                  lineHeight: '1.4',
-                  fontFamily: 'Consolas, Monaco, "Courier New", monospace',
-                  color: 'var(--text-primary)',
-                  backgroundColor: 'var(--bg-primary)',
-                  overflow: 'auto',
-                  height: '100%',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word'
-                }}
-              >
-                {isJsonResponse(response.headers) 
-                  ? formatJson(response.data)
-                  : typeof response.data === 'string'
-                    ? response.data
-                    : formatJson(response.data)
-                }
-              </pre>
+              <>
+                {/* Editor toggle button */}
+                <div style={{ 
+                  padding: '8px 16px', 
+                  borderBottom: '1px solid var(--border-color)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backgroundColor: 'var(--bg-secondary)'
+                }}>
+                  <label style={{ 
+                    fontSize: '11px', 
+                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer'
+                  }}>
+                    <input 
+                      type="checkbox" 
+                      checked={useMonacoEditor}
+                      onChange={(e) => setUseMonacoEditor(e.target.checked)}
+                      style={{ accentColor: 'var(--accent-color)' }}
+                    />
+                    <span>Use Monaco Editor (Syntax Highlighting)</span>
+                  </label>
+                </div>
+                
+                {/* Response body content */}
+                {useMonacoEditor && isJsonResponse(response.headers) ? (
+                  <div style={{ flex: 1, minHeight: 0 }}>
+                    <MonacoEditor
+                      value={formatJson(response.data)}
+                      language="json"
+                      readOnly={true}
+                      height="100%"
+                      theme="vs-dark"
+                    />
+                  </div>
+                ) : (
+                  <pre
+                    style={{
+                      margin: 0,
+                      padding: '16px',
+                      fontSize: '12px',
+                      lineHeight: '1.4',
+                      fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+                      color: 'var(--text-primary)',
+                      backgroundColor: 'var(--bg-primary)',
+                      overflow: 'auto',
+                      flex: 1,
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word'
+                    }}
+                  >
+                    {isJsonResponse(response.headers) 
+                      ? formatJson(response.data)
+                      : typeof response.data === 'string'
+                        ? response.data
+                        : formatJson(response.data)
+                    }
+                  </pre>
+                )}
+              </>
             ) : (
               <div style={{ padding: '16px', textAlign: 'center' }}>
                 <p className="text-muted">No response body</p>

@@ -325,12 +325,23 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
             baseTabs.splice(2, 0, 'grpc'); // Insert gRPC tab before body
           }
           
+          const tabIcons: Record<string, string> = {
+            params: '🔍',
+            headers: '📋',
+            body: '📝',
+            auth: '🔐',
+            tests: '🧪',
+            soap: '🧼',
+            grpc: '⚡'
+          };
+          
           return baseTabs.map(tab => (
             <button
               key={tab}
               className={`request-tab ${activeTab === tab ? 'active' : ''}`}
               onClick={() => setActiveTab(tab)}
             >
+              <span className="tab-icon">{tabIcons[tab]}</span>
               <span className="tab-label">
                 {tab === 'soap' ? 'SOAP' : tab === 'grpc' ? 'gRPC' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </span>

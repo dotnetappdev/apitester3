@@ -585,15 +585,15 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         <Allotment.Pane minSize={isTablet ? 350 : 400} snap>
           {activeRequest ? (
             <Allotment 
-              vertical={isPortraitTablet}
+              vertical={true}
               snap={true}
-              defaultSizes={[layoutConfig.splitterSizes.content, 100 - layoutConfig.splitterSizes.content]}
+              defaultSizes={[60, 40]}
               onChange={(sizes) => handleSplitterChange(sizes, 'content')}
               className="content-allotment"
             >
               <Allotment.Pane 
                 minSize={isTablet ? 250 : 300}
-                preferredSize="50%"
+                preferredSize="60%"
                 snap
               >
                 <div className="panel-container request-panel">
@@ -615,7 +615,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
               </Allotment.Pane>
               
               <Allotment.Pane 
-                minSize={isTablet ? 200 : 300}
+                minSize={isTablet ? 200 : 250}
                 snap
               >
                 <div className="panel-container response-panel">
