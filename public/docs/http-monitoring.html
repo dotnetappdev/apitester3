@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Monitoring - VerifyApi Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d30 100%);
+            color: #cccccc;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #252526;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #FF6C37 0%, #FF8352 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #FF6C37;
+            font-size: 28px;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3c3c3c;
+        }
+
+        h3 {
+            color: #61AFFE;
+            font-size: 20px;
+            margin: 20px 0 15px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #cccccc;
+        }
+
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            color: #cccccc;
+        }
+
+        .feature-box {
+            background: #2d2d30;
+            border-left: 4px solid #FF6C37;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+
+        .feature-box h3 {
+            margin-top: 0;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+
+        .method-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            margin-right: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-get { background: #61AFFE; }
+        .badge-post { background: #49CC90; }
+        .badge-put { background: #FCA130; }
+        .badge-delete { background: #F93E3E; }
+
+        .warning-box {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #FFC107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+
+        .info-box {
+            background: rgba(97, 175, 254, 0.1);
+            border-left: 4px solid #61AFFE;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background: #FF6C37;
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #3c3c3c;
+        }
+
+        th {
+            background: #2d2d30;
+            color: #FF6C37;
+            font-weight: 600;
+        }
+
+        .screenshot-placeholder {
+            background: #1e1e1e;
+            border: 2px dashed #3c3c3c;
+            border-radius: 6px;
+            padding: 60px;
+            text-align: center;
+            margin: 20px 0;
+            color: #808080;
+        }
+
+        footer {
+            background: #1e1e1e;
+            text-align: center;
+            padding: 30px;
+            color: #808080;
+            border-top: 1px solid #3c3c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📡 HTTP Monitoring</h1>
+            <p>Intercept, inspect, and modify HTTP traffic in real-time</p>
+        </header>
+
+        <div class="content">
+            <h2>🎯 Overview</h2>
+            <p>
+                The HTTP Monitoring feature in VerifyApi allows you to intercept and inspect HTTP traffic 
+                from your applications in real-time. Similar to HTTP Toolkit, this powerful tool enables 
+                you to view request/response headers, modify responses, and debug API communication issues.
+            </p>
+
+            <div class="feature-box">
+                <h3>✨ Key Features</h3>
+                <ul>
+                    <li><strong>Traffic Interception:</strong> Capture all HTTP requests passing through the proxy</li>
+                    <li><strong>Real-time Inspection:</strong> View headers, body, and metadata as requests happen</li>
+                    <li><strong>Response Modification:</strong> Modify responses before they reach your application</li>
+                    <li><strong>Method Color Coding:</strong> Quickly identify request types with color-coded badges</li>
+                    <li><strong>Configurable Endpoints:</strong> Target specific API endpoints for monitoring</li>
+                    <li><strong>Auto-forward Mode:</strong> Choose between manual and automatic request forwarding</li>
+                </ul>
+            </div>
+
+            <h2>🚀 Getting Started</h2>
+            
+            <h3><span class="step-number">1</span>Open the Monitoring Panel</h3>
+            <p>
+                Click the <strong>Monitor</strong> button in the toolbar or select the <strong>Monitoring</strong> 
+                tab in the sidebar to open the HTTP monitoring panel.
+            </p>
+
+            <h3><span class="step-number">2</span>Configure the Proxy</h3>
+            <p>Before starting the proxy, configure the following settings:</p>
+            <ul>
+                <li><strong>Proxy Port:</strong> Default is 8888. Choose any available port.</li>
+                <li><strong>Target Endpoints:</strong> Add the URLs where requests should be forwarded (e.g., http://localhost:3000)</li>
+                <li><strong>Enable Traffic Interception:</strong> Check to capture and inspect traffic</li>
+                <li><strong>Auto-forward Requests:</strong> Check to automatically forward requests without manual intervention</li>
+            </ul>
+
+            <div class="code-block">
+Example Configuration:
+Port: 8888
+Target Endpoint: http://localhost:3000
+Interception: Enabled
+Auto-forward: Disabled (for manual response modification)
+            </div>
+
+            <h3><span class="step-number">3</span>Start the Proxy Server</h3>
+            <p>
+                Click the <strong>▶ Start Proxy</strong> button. Once started, you'll see a status indicator 
+                showing the proxy is active and the port it's listening on.
+            </p>
+
+            <div class="info-box">
+                <strong>💡 Tip:</strong> Configure your application to use the proxy by setting the HTTP proxy 
+                to <code>http://localhost:8888</code> (or your chosen port).
+            </div>
+
+            <h3><span class="step-number">4</span>Capture and Inspect Traffic</h3>
+            <p>
+                Once your application makes requests through the proxy, they'll appear in the traffic list. 
+                Click on any request to view detailed information:
+            </p>
+
+            <h2>📊 Understanding the Interface</h2>
+
+            <h3>Traffic List (Left Panel)</h3>
+            <p>Shows all captured requests with:</p>
+            <ul>
+                <li>
+                    <span class="method-badge badge-get">GET</span>
+                    <span class="method-badge badge-post">POST</span>
+                    <span class="method-badge badge-put">PUT</span>
+                    <span class="method-badge badge-delete">DELETE</span>
+                    Method badges color-coded for easy identification
+                </li>
+                <li><strong>Status Code:</strong> HTTP response status (200, 404, 500, etc.)</li>
+                <li><strong>Timestamp:</strong> When the request was made</li>
+                <li><strong>URL:</strong> Full request URL with query parameters</li>
+                <li><strong>Metrics:</strong> Response time and size</li>
+            </ul>
+
+            <h3>Request Details (Right Panel)</h3>
+            <p>Detailed view of the selected request:</p>
+            <ul>
+                <li><strong>Request Information:</strong> Method, URL, timestamp, client address</li>
+                <li><strong>Request Headers:</strong> All HTTP headers sent by the client</li>
+                <li><strong>Request Body:</strong> Formatted JSON or raw body content</li>
+                <li><strong>Response Information:</strong> Status code, response time, size</li>
+                <li><strong>Response Headers:</strong> All HTTP headers returned by the server</li>
+                <li><strong>Response Body:</strong> Formatted JSON or raw response content</li>
+            </ul>
+
+            <h2>✏️ Modifying Responses</h2>
+            
+            <div class="feature-box">
+                <h3>Manual Response Modification</h3>
+                <p>
+                    When auto-forward is disabled, you can modify responses before they reach the client:
+                </p>
+                <ol>
+                    <li>Select an intercepted request (without a response)</li>
+                    <li>Click the <strong>✏️ Modify Response</strong> button</li>
+                    <li>Edit the status code, status text, and body</li>
+                    <li>Click <strong>Send Response</strong> to forward the modified response</li>
+                </ol>
+            </div>
+
+            <h2>🎨 Method Color Codes</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Color</th>
+                        <th>Typical Use</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="method-badge badge-get">GET</span></td>
+                        <td>Blue (#61AFFE)</td>
+                        <td>Retrieve data</td>
+                    </tr>
+                    <tr>
+                        <td><span class="method-badge badge-post">POST</span></td>
+                        <td>Green (#49CC90)</td>
+                        <td>Create new resources</td>
+                    </tr>
+                    <tr>
+                        <td><span class="method-badge badge-put">PUT</span></td>
+                        <td>Orange (#FCA130)</td>
+                        <td>Update resources</td>
+                    </tr>
+                    <tr>
+                        <td><span class="method-badge badge-delete">DELETE</span></td>
+                        <td>Red (#F93E3E)</td>
+                        <td>Delete resources</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>🔧 Configuration Options</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Description</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Proxy Port</strong></td>
+                        <td>Port number the proxy server listens on</td>
+                        <td>8888</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Target Endpoints</strong></td>
+                        <td>List of URLs to forward requests to</td>
+                        <td>http://localhost:3000</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Enable Interception</strong></td>
+                        <td>Capture and display traffic in the UI</td>
+                        <td>Enabled</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Auto-forward</strong></td>
+                        <td>Automatically forward requests without manual intervention</td>
+                        <td>Disabled</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>💡 Use Cases</h2>
+
+            <h3>🐛 Debugging API Issues</h3>
+            <p>
+                Inspect requests and responses to identify issues with headers, authentication, 
+                or payload formatting.
+            </p>
+
+            <h3>🧪 Testing Error Scenarios</h3>
+            <p>
+                Modify responses to simulate error conditions (500 errors, timeouts, malformed data) 
+                and test your application's error handling.
+            </p>
+
+            <h3>📝 API Documentation</h3>
+            <p>
+                Capture actual request/response examples from your application to create accurate 
+                API documentation.
+            </p>
+
+            <h3>🔒 Security Testing</h3>
+            <p>
+                Examine authentication headers, tokens, and sensitive data being transmitted 
+                between client and server.
+            </p>
+
+            <div class="warning-box">
+                <strong>⚠️ Security Warning:</strong> The HTTP monitoring proxy operates without SSL/TLS 
+                verification. Only use it with trusted local services and never with production systems 
+                containing sensitive data. Always use HTTPS in production environments.
+            </div>
+
+            <h2>🎯 Best Practices</h2>
+            <ul>
+                <li>Start with auto-forward enabled to understand normal traffic patterns</li>
+                <li>Use the <strong>🗑️ Clear</strong> button regularly to remove old traffic from the list</li>
+                <li>Configure specific target endpoints rather than catch-all proxying</li>
+                <li>Use descriptive names for target endpoints (e.g., "API Server", "Auth Service")</li>
+                <li>Stop the proxy when not in use to free up the port</li>
+                <li>Review captured traffic regularly to identify performance bottlenecks</li>
+            </ul>
+
+            <h2>🔍 Troubleshooting</h2>
+
+            <h3>Proxy won't start</h3>
+            <ul>
+                <li>Check if another application is using the selected port</li>
+                <li>Try a different port number (e.g., 8889, 9000)</li>
+                <li>Restart the application</li>
+            </ul>
+
+            <h3>No traffic appearing</h3>
+            <ul>
+                <li>Verify your application is configured to use the proxy</li>
+                <li>Ensure "Enable Traffic Interception" is checked</li>
+                <li>Check that the target endpoint is correctly configured</li>
+                <li>Verify the proxy server is running (green status indicator)</li>
+            </ul>
+
+            <h3>Requests timing out</h3>
+            <ul>
+                <li>Enable "Auto-forward Requests" if you're not manually responding</li>
+                <li>Check that the target endpoint is reachable</li>
+                <li>Verify no firewall is blocking the proxy port</li>
+            </ul>
+
+            <h2>🔗 Related Features</h2>
+            <ul>
+                <li><strong>Request Panel:</strong> Send manual API requests</li>
+                <li><strong>Collections:</strong> Organize and save requests</li>
+                <li><strong>Environments:</strong> Manage different endpoint configurations</li>
+                <li><strong>Tests:</strong> Automate API testing</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>📚 Learn More:</strong> For more information about HTTP proxy concepts and 
+                best practices, visit the 
+                <a href="https://httptoolkit.com/docs/" target="_blank" style="color: #61AFFE;">HTTP Toolkit documentation</a>.
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>VerifyApi</strong> - Professional API Testing Tool</p>
+            <p style="margin-top: 10px;">Version 1.0.0 | Built with ❤️ for developers</p>
+        </footer>
+    </div>
+</body>
+</html>
