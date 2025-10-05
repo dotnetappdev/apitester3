@@ -101,6 +101,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
   const [showDebugMenu, setShowDebugMenu] = useState(false);
   const [showUnitTestEditor, setShowUnitTestEditor] = useState(false);
   const [showUITestEditor, setShowUITestEditor] = useState(false);
+  const [testEditorView, setTestEditorView] = useState<'none' | 'unit' | 'ui'>('none');
 
   useEffect(() => {
     const onDocClick = () => {
@@ -207,10 +208,10 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
                         <button className="ribbon-dropdown-item" onClick={() => { debugSelected(); setShowDebugMenu(false); }}>
                           Debug Selected
                         </button>
-                        <button className="ribbon-dropdown-item" onClick={() => { setShowUnitTestEditor(true); setShowDebugMenu(false); }}>
+                        <button className="ribbon-dropdown-item" onClick={() => { setTestEditorView('unit'); setShowDebugMenu(false); }}>
                           Debug Unit Tests
                         </button>
-                        <button className="ribbon-dropdown-item" onClick={() => { setShowUITestEditor(true); setShowDebugMenu(false); }}>
+                        <button className="ribbon-dropdown-item" onClick={() => { setTestEditorView('ui'); setShowDebugMenu(false); }}>
                           Debug UI Tests
                         </button>
                       </div>
@@ -220,11 +221,11 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
                     <span className="ribbon-button-icon">📺</span>
                     <span className="ribbon-button-label">Output</span>
                   </button>
-                  <button className="ribbon-button" onClick={() => setShowUnitTestEditor(true)} title="Unit Tests">
+                  <button className="ribbon-button" onClick={() => setTestEditorView('unit')} title="Unit Tests">
                     <span className="ribbon-button-icon">🧪</span>
                     <span className="ribbon-button-label">Unit Tests</span>
                   </button>
-                  <button className="ribbon-button" onClick={() => setShowUITestEditor(true)} title="UI Tests">
+                  <button className="ribbon-button" onClick={() => setTestEditorView('ui')} title="UI Tests">
                     <span className="ribbon-button-icon">🖥️</span>
                     <span className="ribbon-button-label">UI Tests</span>
                   </button>
@@ -368,6 +369,36 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
         <div className="content-column">
           {showMonitoring ? (
             <MonitoringPanel theme={theme} />
+          ) : testEditorView !== 'none' && activeRequest ? (
+            <div className="test-editor-panel">
+              <div className="test-editor-header">
+                <h3>
+                  {testEditorView === 'unit' ? '🧪 Unit Test Editor' : '🖥️ UI Test Editor'} - {activeRequest.name}
+                </h3>
+                <button className="panel-close-btn" onClick={() => setTestEditorView('none')}>✕</button>
+              </div>
+              <div className="test-editor-content">
+                {testEditorView === 'unit' ? (
+                  <TestScriptEditor
+                    requestId={activeRequest.id}
+                    requestName={activeRequest.name}
+                    onTestSuiteChange={onEditTestSuite}
+                    onRunTests={onRunTestSuite}
+                    testResults={testExecutionResults.get(activeRequest.id)}
+                  />
+                ) : (
+                  <UITestDialog
+                    isOpen={true}
+                    onClose={() => setTestEditorView('none')}
+                    onSave={(suite) => {
+                      onEditUITestSuite(suite);
+                      setTestEditorView('none');
+                    }}
+                    title="UI Test Editor"
+                  />
+                )}
+              </div>
+            </div>
           ) : activeRequest ? (
             <div className="content-area">
               <EnhancedRequestPanel
@@ -389,40 +420,6 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
           )}
         </div>
       </div>
-
-      {/* Unit Test Editor Dialog */}
-      {showUnitTestEditor && activeRequest && (
-        <div className="modal-overlay" onClick={() => setShowUnitTestEditor(false)}>
-          <div className="modal-dialog modal-dialog-large" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Unit Test Editor - {activeRequest.name}</h3>
-              <button className="modal-close" onClick={() => setShowUnitTestEditor(false)}>✕</button>
-            </div>
-            <div className="modal-body">
-              <TestScriptEditor
-                requestId={activeRequest.id}
-                requestName={activeRequest.name}
-                onTestSuiteChange={onEditTestSuite}
-                onRunTests={onRunTestSuite}
-                testResults={testExecutionResults.get(activeRequest.id)}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* UI Test Editor Dialog */}
-      {showUITestEditor && (
-        <UITestDialog
-          isOpen={showUITestEditor}
-          onClose={() => setShowUITestEditor(false)}
-          onSave={(suite) => {
-            onEditUITestSuite(suite);
-            setShowUITestEditor(false);
-          }}
-          title="UI Test Editor"
-        />
-      )}
 
       <style>{`
         /* Office 365 Ribbon Bar Styles */
@@ -859,7 +856,58 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
           to { transform: rotate(360deg); } 
         }
 
-        /* Modal Overlay and Dialog Styles */
+        /* Test Editor Panel Styles */
+        .test-editor-panel {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          width: 100%;
+          background: var(--bg-primary);
+        }
+
+        .test-editor-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 20px;
+          background: var(--bg-secondary);
+          border-bottom: 1px solid var(--border-color);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-editor-header h3 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--text-primary);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .panel-close-btn {
+          background: transparent;
+          border: none;
+          color: var(--text-secondary);
+          font-size: 20px;
+          cursor: pointer;
+          padding: 4px 8px;
+          border-radius: 4px;
+          transition: all 0.15s;
+        }
+
+        .panel-close-btn:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: var(--text-primary);
+        }
+
+        .test-editor-content {
+          flex: 1;
+          overflow: auto;
+          padding: 0;
+        }
+
+        /* Modal Overlay and Dialog Styles (kept for UITestDialog) */
         .modal-overlay {
           position: fixed;
           top: 0;
