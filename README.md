@@ -91,13 +91,31 @@ The Electron main process can read this env variable and use it when renderer pa
 
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Build for production
-- `npm run package` - Package the application for distribution
+- `npm run package` - Package the application for current platform
+- `npm run package:win` - Build Windows installers (NSIS, Portable, ZIP)
+- `npm run package:mac` - Build macOS installers (DMG, ZIP)
+- `npm run package:linux` - Build Linux installers (AppImage, DEB, RPM, TAR.GZ)
+- `npm run package:all` - Build for all platforms
 - `npm run lint` - Run ESLint
 - `npm test` - Run tests
 
 ### Build for Production
 
-#### Cross-Platform Build Instructions
+#### Automated Builds with GitHub Actions
+
+VerifyApi includes a comprehensive CI/CD workflow that automatically builds installers for Windows, macOS, and Linux:
+
+- **Workflow file**: `.github/workflows/build.yml`
+- **Triggers**: Push to main/develop, pull requests, releases, or manual dispatch
+- **Artifacts**: Available from the Actions tab after each workflow run
+- **Auto-release**: Installers automatically attached to GitHub releases
+
+**Download Pre-built Binaries:**
+1. Go to the [Actions](../../actions) tab
+2. Click on the latest successful workflow run
+3. Download artifacts for your platform
+
+#### Manual Build Instructions
 
 **All Platforms:**
 ```bash
@@ -106,19 +124,26 @@ npm run build
 
 # Package for current platform
 npm run package
+
+# Or package for specific platforms
+npm run package:win      # Windows (NSIS, Portable, ZIP)
+npm run package:mac      # macOS (DMG, ZIP - Universal binary)
+npm run package:linux    # Linux (AppImage, DEB, RPM, TAR.GZ)
+npm run package:all      # All platforms (requires proper setup)
 ```
+
+#### Cross-Platform Build Instructions
 
 **Windows:**
 ```bash
-# Install Windows-specific dependencies (if needed)
-npm install --platform=win32
-
 # Build and package for Windows
-npm run build
-npm run package
+npm run package:win
 
-# The built application will be in release/ directory
-# Look for API-Tester-3-Setup.exe or similar
+# Output in release/windows/:
+# - VerifyApi Setup 1.0.0.exe (NSIS installer x64)
+# - VerifyApi Setup 1.0.0-ia32.exe (NSIS installer 32-bit)
+# - VerifyApi 1.0.0.exe (Portable)
+# - VerifyApi-1.0.0-win.zip (ZIP archive)
 ```
 
 **macOS:**
@@ -127,11 +152,11 @@ npm run package
 xcode-select --install
 
 # Build and package for macOS
-npm run build
-npm run package
+npm run package:mac
 
-# The built application will be in release/ directory
-# Look for VerifyApi.dmg or VerifyApi.app
+# Output in release/mac/:
+# - VerifyApi-1.0.0-universal.dmg (Universal binary: Intel + Apple Silicon)
+# - VerifyApi-1.0.0-mac.zip (ZIP archive)
 ```
 
 **Linux:**
@@ -145,50 +170,29 @@ sudo yum groupinstall "Development Tools"
 sudo yum install nss atk at-spi2-atk libXScrnSaver
 
 # Build and package for Linux
-npm run build
-npm run package
+npm run package:linux
 
-# The built application will be in release/ directory
-# Look for VerifyApi.AppImage or .deb/.rpm files
-```
-
-**Build for Specific Platforms (Cross-compilation):**
-```bash
-# Build for Windows (from any platform)
-npm run build
-npx electron-builder --win
-
-# Build for macOS (requires macOS or special setup)
-npm run build
-npx electron-builder --mac
-
-# Build for Linux (from any platform)
-npm run build
-npx electron-builder --linux
+# Output in release/linux/:
+# - VerifyApi-1.0.0.AppImage (Universal Linux binary)
+# - verifyapi_1.0.0_amd64.deb (Debian/Ubuntu package)
+# - verifyapi-1.0.0.x86_64.rpm (Red Hat/Fedora package)
+# - verifyapi-1.0.0.tar.gz (Generic archive)
 ```
 
 **Platform-Specific Notes:**
-- **Windows**: No additional setup required. Builds work on Windows 10/11.
-- **macOS**: Requires macOS 10.15+ (Catalina) or later. Apple Silicon (M1/M2) supported.
+- **Windows**: No additional setup required. Builds work on Windows 10/11. Supports both 64-bit and 32-bit architectures.
+- **macOS**: Requires macOS 10.15+ (Catalina) or later. Universal binaries support both Intel and Apple Silicon (M1/M2).
 - **Linux**: Tested on Ubuntu 18.04+, CentOS 7+, Debian 10+, Fedora 32+.
 
 **Package Formats by Platform:**
-- **Windows**: `.appx` package for Windows Store (MSIX format, x64 and x86/32-bit support)
-- **macOS**: `.dmg` disk image, `.zip` application bundle (Universal: Intel + Apple Silicon)
-- **Linux**: `.AppImage` universal, `.deb` (Debian/Ubuntu), `.rpm` (Red Hat/CentOS), `.tar.gz` archive
+- **Windows**: NSIS installer (x64 and ia32), portable executable, ZIP archive
+- **macOS**: DMG disk image, ZIP application bundle (Universal: Intel + Apple Silicon)
+- **Linux**: AppImage (universal), DEB (Debian/Ubuntu), RPM (Red Hat/CentOS), TAR.GZ (generic)
 
 **Verified Working Packages:**
-- ✅ Linux: AppImage, DEB, RPM, TAR.GZ (tested on Ubuntu)
-- 🔧 Windows: APPX/MSIX for Windows Store (x64 + x86 architectures ready)  
-- 🔧 macOS: DMG, ZIP (configuration ready)
-
-**Quick Build Commands:**
-```bash
-npm run package:linux    # Linux packages
-npm run package:win      # Windows packages  
-npm run package:mac      # macOS packages
-npm run package:all      # All platforms
-```
+- ✅ **Linux**: AppImage, DEB, RPM, TAR.GZ
+- ✅ **Windows**: NSIS Installer (x64, ia32), Portable, ZIP
+- ✅ **macOS**: DMG (Universal), ZIP (Universal)
 
 📋 **For detailed build instructions and installer configuration, see [docs/INSTALLERS.md](docs/INSTALLERS.md) and [docs/BUILD.md](docs/BUILD.md)**
 

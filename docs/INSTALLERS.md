@@ -34,27 +34,47 @@ npm run installer:all     # All platforms (requires proper setup)
 
 ### Windows Installers
 
-#### APPX/MSIX Package (Primary - Windows Store)
-- **Built by**: electron-builder with APPX target (generates MSIX packages)
-- **Output**: `VerifyApi-{version}.appx` (MSIX format)
-- **Architecture**: Both x64 and x86 (32-bit) support
+#### NSIS Installer (Primary)
+- **Built by**: electron-builder with NSIS target
+- **Output**: `VerifyApi Setup {version}.exe` (x64) and `VerifyApi Setup {version}-ia32.exe` (32-bit)
+- **Architecture**: Both x64 and ia32 (32-bit) support
 - **Features**: 
-  - Windows Store distribution ready
-  - Modern MSIX packaging format
-  - Automatic updates through Microsoft Store
-  - Sandboxed execution for security
-  - Digital signature validation
-  - Universal Windows Platform (UWP) integration
+  - Standard Windows installation experience
+  - Custom installation directory selection
+  - Desktop and Start Menu shortcuts
+  - Uninstaller included
+  - Support for both 64-bit and 32-bit Windows
+
+#### Portable Executable
+- **Output**: `VerifyApi {version}.exe`
+- **Architecture**: x64
+- **Features**: 
+  - No installation required
+  - Run from USB or any directory
+  - Portable configuration
+
+#### ZIP Archive
+- **Output**: `VerifyApi-{version}-win.zip`
+- **Architecture**: x64
+- **Features**: 
+  - Compressed application bundle
+  - Manual extraction and execution
 
 ### macOS Installers
 
 #### DMG Disk Image (Primary)
-- **Output**: `VerifyApi-{version}.dmg`
+- **Output**: `VerifyApi-{version}-universal.dmg`
 - **Features**:
   - Custom background image
   - Drag-to-Applications layout
   - Universal binary (Intel + Apple Silicon)
   - Code signing ready
+
+#### ZIP Archive
+- **Output**: `VerifyApi-{version}-mac.zip`
+- **Features**:
+  - Universal binary (Intel + Apple Silicon)
+  - Compressed .app bundle
 
 #### Requirements
 - **Development**: macOS 10.15+ with Xcode Command Line Tools
@@ -71,19 +91,19 @@ npm run installer:all     # All platforms (requires proper setup)
   - Desktop integration
 
 #### DEB Package (Debian/Ubuntu)
-- **Output**: `api-tester-3_{version}_amd64.deb`
-- **Installation**: `sudo dpkg -i api-tester-3_{version}_amd64.deb`
+- **Output**: `verifyapi_{version}_amd64.deb`
+- **Installation**: `sudo dpkg -i verifyapi_{version}_amd64.deb`
 - **Features**: APT repository integration ready
 
 #### RPM Package (Red Hat/CentOS/Fedora)
-- **Output**: `api-tester-3-{version}.x86_64.rpm`
-- **Installation**: `sudo rpm -i api-tester-3-{version}.x86_64.rpm`
+- **Output**: `verifyapi-{version}.x86_64.rpm`
+- **Installation**: `sudo rpm -i verifyapi-{version}.x86_64.rpm`
 - **Features**: YUM/DNF repository integration ready
 
-#### Snap Package
-- **Output**: `api-tester-3_{version}_amd64.snap`
-- **Installation**: `sudo snap install api-tester-3_{version}_amd64.snap --dangerous`
-- **Features**: Sandboxed execution, auto-updates
+#### TAR.GZ Archive
+- **Output**: `verifyapi-{version}.tar.gz`
+- **Installation**: Extract and run the binary
+- **Features**: Generic Linux archive for manual installation
 
 ## Configuration Files
 
@@ -152,7 +172,41 @@ For production, replace placeholders with proper icons using:
 
 ## Continuous Integration
 
-### GitHub Actions Example
+### GitHub Actions Workflow
+
+The project includes a comprehensive CI/CD workflow (`.github/workflows/build.yml`) that:
+
+- **Builds for all platforms**: Windows, macOS, and Linux in parallel
+- **Creates installers**: Automatically generates installers for each platform
+- **Organizes artifacts**: Separates build outputs into platform-specific folders
+- **Uploads artifacts**: Makes binaries available for download from workflow runs
+- **Auto-releases**: Attaches installers to GitHub releases automatically
+
+#### Workflow Triggers
+- Push to `main` or `develop` branches
+- Pull requests to `main` or `develop`
+- GitHub releases
+- Manual workflow dispatch
+
+#### Artifact Structure
+```
+artifacts/
+├── windows-artifacts/
+│   ├── VerifyApi Setup 1.0.0.exe
+│   ├── VerifyApi Setup 1.0.0-ia32.exe
+│   ├── VerifyApi 1.0.0.exe (portable)
+│   └── VerifyApi-1.0.0-win.zip
+├── mac-artifacts/
+│   ├── VerifyApi-1.0.0-universal.dmg
+│   └── VerifyApi-1.0.0-mac.zip
+└── linux-artifacts/
+    ├── VerifyApi-1.0.0.AppImage
+    ├── verifyapi_1.0.0_amd64.deb
+    ├── verifyapi-1.0.0.x86_64.rpm
+    └── verifyapi-1.0.0.tar.gz
+```
+
+### Manual GitHub Actions Example (Legacy Reference)
 ```yaml
 name: Build Installers
 on:
@@ -186,10 +240,13 @@ jobs:
 ## Distribution
 
 ### GitHub Releases
-Upload installer files to GitHub Releases:
-- Windows: `.exe`, `.zip`, portable `.exe`
-- macOS: `.dmg`, `.zip`
-- Linux: `.AppImage`, `.deb`, `.rpm`, `.snap`, `.tar.gz`
+The GitHub Actions workflow automatically uploads installer files to GitHub Releases when a release is published:
+- **Windows**: NSIS installers (x64, ia32), portable `.exe`, `.zip`
+- **macOS**: Universal `.dmg`, `.zip`
+- **Linux**: `.AppImage`, `.deb`, `.rpm`, `.tar.gz`
+
+#### Manual Upload (if needed)
+If uploading manually, include all platform variants for maximum compatibility.
 
 ### Package Repositories
 

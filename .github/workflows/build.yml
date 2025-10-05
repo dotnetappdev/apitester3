@@ -1,0 +1,170 @@
+name: Build VerifyApi
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            platform: windows
+            artifact_name: windows-artifacts
+          - os: macos-latest
+            platform: mac
+            artifact_name: mac-artifacts
+          - os: ubuntu-latest
+            platform: linux
+            artifact_name: linux-artifacts
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+      
+      - name: Package for Windows
+        if: matrix.platform == 'windows'
+        run: npm run package:win
+      
+      - name: Package for macOS
+        if: matrix.platform == 'mac'
+        run: npm run package:mac
+      
+      - name: Package for Linux
+        if: matrix.platform == 'linux'
+        run: npm run package:linux
+      
+      - name: Organize Windows release artifacts
+        if: matrix.platform == 'windows'
+        shell: bash
+        run: |
+          mkdir -p release/windows
+          find release -maxdepth 1 -type f \( -name "*.exe" -o -name "*.zip" -o -name "*.msi" \) -exec mv {} release/windows/ \;
+          ls -la release/windows/
+      
+      - name: Organize macOS release artifacts
+        if: matrix.platform == 'mac'
+        shell: bash
+        run: |
+          mkdir -p release/mac
+          find release -maxdepth 1 -type f \( -name "*.dmg" -o -name "*.zip" \) -exec mv {} release/mac/ \;
+          ls -la release/mac/
+      
+      - name: Organize Linux release artifacts
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          mkdir -p release/linux
+          find release -maxdepth 1 -type f \( -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.tar.gz" \) -exec mv {} release/linux/ \;
+          ls -la release/linux/
+      
+      - name: Upload Windows artifacts
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: release/windows/
+          retention-days: 30
+      
+      - name: Upload macOS artifacts
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: release/mac/
+          retention-days: 30
+      
+      - name: Upload Linux artifacts
+        if: matrix.platform == 'linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: release/linux/
+          retention-days: 30
+      
+      - name: Upload to GitHub Release (Windows)
+        if: github.event_name == 'release' && matrix.platform == 'windows'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/windows/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload to GitHub Release (macOS)
+        if: github.event_name == 'release' && matrix.platform == 'mac'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/mac/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload to GitHub Release (Linux)
+        if: github.event_name == 'release' && matrix.platform == 'linux'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/linux/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: build
+    if: always()
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: Display structure of downloaded files
+        run: |
+          echo "## Build Artifacts Structure" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Windows Artifacts" >> $GITHUB_STEP_SUMMARY
+          if [ -d "artifacts/windows-artifacts" ]; then
+            ls -lh artifacts/windows-artifacts/ | tail -n +2 >> $GITHUB_STEP_SUMMARY || echo "No Windows artifacts found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No Windows artifacts found" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### macOS Artifacts" >> $GITHUB_STEP_SUMMARY
+          if [ -d "artifacts/mac-artifacts" ]; then
+            ls -lh artifacts/mac-artifacts/ | tail -n +2 >> $GITHUB_STEP_SUMMARY || echo "No macOS artifacts found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No macOS artifacts found" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Linux Artifacts" >> $GITHUB_STEP_SUMMARY
+          if [ -d "artifacts/linux-artifacts" ]; then
+            ls -lh artifacts/linux-artifacts/ | tail -n +2 >> $GITHUB_STEP_SUMMARY || echo "No Linux artifacts found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No Linux artifacts found" >> $GITHUB_STEP_SUMMARY
+          fi
