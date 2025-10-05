@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debugging Session Animation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1e1e1e;
+            font-family: 'Consolas', monospace;
+            color: #d4d4d4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #252526;
+            border: 2px solid #0078d4;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .header {
+            background: #2d2d2d;
+            padding: 12px 15px;
+            border-bottom: 1px solid #3e3e42;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #cccccc;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        .editor {
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        .line {
+            position: relative;
+            padding: 2px 0;
+        }
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; }
+        .variable {
+            color: #9cdcfe;
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: #2d2d2d;
+            border: 2px solid #0078d4;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+            z-index: 100;
+            margin-bottom: 5px;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        .tooltip-title {
+            color: #4ec9b0;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .tooltip-value {
+            color: #ce9178;
+        }
+        .step-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #0078d4;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .instruction {
+            background: rgba(0, 122, 204, 0.1);
+            border: 1px solid #0078d4;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="step-indicator" id="step">Step 1: Hover over variables</div>
+    
+    <div class="instruction">
+        <strong>Interactive Demo:</strong> Hover your mouse over the blue variable names to see their values!
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="title">🧪 Unit Test Editor - User API Test</div>
+            <button class="close-btn">✕</button>
+        </div>
+        <div class="editor">
+            <div class="line">
+                <span class="comment">// Debugging Unit Test - Hover over variables to see values</span>
+            </div>
+            <div class="line">
+                <span class="keyword">describe</span>(<span class="string">'User API Tests'</span>, () => {
+            </div>
+            <div class="line">
+                &nbsp;&nbsp;<span class="keyword">it</span>(<span class="string">'should fetch user data'</span>, <span class="keyword">async</span> () => {
+            </div>
+            <div class="line">
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">const</span> <span class="variable" id="var1">userId</span> = <span class="string">123</span>;
+            </div>
+            <div class="line">
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">const</span> <span class="variable" id="var2">endpoint</span> = <span class="string">'/api/users/'</span> + <span class="variable">userId</span>;
+            </div>
+            <div class="line">&nbsp;</div>
+            <div class="line">
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">const</span> <span class="variable" id="var3">response</span> = <span class="keyword">await</span> fetch(<span class="variable">endpoint</span>);
+            </div>
+            <div class="line">
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">const</span> <span class="variable" id="var4">data</span> = <span class="keyword">await</span> <span class="variable">response</span>.json();
+            </div>
+            <div class="line">&nbsp;</div>
+            <div class="line">
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// Assertions - hover to see values</span>
+            </div>
+            <div class="line">
+                &nbsp;&nbsp;&nbsp;&nbsp;assert.assertStatusCode(<span class="string">200</span>, <span class="variable" id="var5">response</span>.status);
+            </div>
+            <div class="line">
+                &nbsp;&nbsp;&nbsp;&nbsp;assert.assertJSONPath(<span class="string">'$.id'</span>, <span class="variable">userId</span>, <span class="variable">data</span>);
+            </div>
+            <div class="line">
+                &nbsp;&nbsp;&nbsp;&nbsp;assert.assertBodyContains(<span class="string">'John'</span>, <span class="variable">data</span>.name);
+            </div>
+            <div class="line">
+                &nbsp;&nbsp;});
+            </div>
+            <div class="line">
+                });
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const variables = document.querySelectorAll('.variable');
+        const tooltipData = {
+            'var1': { name: 'userId', value: '123' },
+            'var2': { name: 'endpoint', value: "'/api/users/123'" },
+            'var3': { name: 'response', value: '{ status: 200, data: { id: 123, name: "John" } }' },
+            'var4': { name: 'data', value: '{ id: 123, name: "John", email: "john@example.com" }' },
+            'var5': { name: 'response', value: '{ status: 200, data: {...} }' }
+        };
+
+        let currentStep = 1;
+        const stepIndicator = document.getElementById('step');
+
+        variables.forEach(variable => {
+            variable.addEventListener('mouseenter', function() {
+                const data = tooltipData[this.id];
+                if (data) {
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip';
+                    tooltip.innerHTML = `
+                        <div class="tooltip-title">${data.name}</div>
+                        <div class="tooltip-value">${data.value}</div>
+                    `;
+                    this.appendChild(tooltip);
+                    
+                    currentStep++;
+                    stepIndicator.textContent = `Step ${currentStep}: Value inspected! ✓`;
+                }
+            });
+
+            variable.addEventListener('mouseleave', function() {
+                const tooltip = this.querySelector('.tooltip');
+                if (tooltip) {
+                    tooltip.remove();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -4643,6 +4643,9 @@ textarea:focus-visible {
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .proxy-controls {
@@ -4732,7 +4735,8 @@ textarea:focus-visible {
   padding: 12px;
   background: var(--bg-tertiary);
   border: 1px solid var(--success-color);
-  border-radius: 4px;
+  border-radius: 6px;
+  box-shadow: 0 0 12px rgba(73, 204, 144, 0.1);
 }
 
 .status-indicator {
@@ -4780,20 +4784,25 @@ textarea:focus-visible {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  gap: 0;
 }
 
 .traffic-list {
-  width: 350px;
+  flex: 1;
+  min-width: 400px;
+  max-width: none;
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   background: var(--bg-secondary);
+  overflow: hidden;
 }
 
 .traffic-header {
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border-color);
   background: var(--header-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .traffic-header h4 {
@@ -4801,6 +4810,9 @@ textarea:focus-visible {
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .traffic-items {
@@ -4816,18 +4828,20 @@ textarea:focus-visible {
   border: 1px solid var(--border-color);
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .traffic-item:hover {
   background: var(--bg-quaternary);
   border-color: var(--accent-color);
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .traffic-item.selected {
   background: var(--bg-quaternary);
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 1px var(--accent-color);
+  box-shadow: 0 0 0 1px var(--accent-color), 0 2px 12px rgba(0, 122, 204, 0.2);
 }
 
 .traffic-item-header {
@@ -4871,12 +4885,13 @@ textarea:focus-visible {
 }
 
 .details-header {
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border-color);
   background: var(--header-bg);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .details-header h4 {
@@ -4884,6 +4899,9 @@ textarea:focus-visible {
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .details-content {
@@ -4894,6 +4912,18 @@ textarea:focus-visible {
 
 .detail-section {
   margin-bottom: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .detail-section h5 {
@@ -5049,4 +5079,28 @@ textarea:focus-visible {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Custom Scrollbar Styles for Monitoring Panel */
+.traffic-items::-webkit-scrollbar,
+.details-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.traffic-items::-webkit-scrollbar-track,
+.details-content::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+.traffic-items::-webkit-scrollbar-thumb,
+.details-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.traffic-items::-webkit-scrollbar-thumb:hover,
+.details-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }

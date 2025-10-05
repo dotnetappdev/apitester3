@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel-Based Test Editors - Visual Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d30 100%);
+            color: #cccccc;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+
+        section {
+            background: #252526;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            color: #0078d4;
+            font-size: 28px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3c3c3c;
+        }
+
+        h3 {
+            color: #61AFFE;
+            font-size: 20px;
+            margin: 20px 0 15px 0;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .before, .after {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            border: 2px solid #3c3c3c;
+        }
+
+        .before {
+            border-color: #f93e3e;
+        }
+
+        .after {
+            border-color: #49cc90;
+        }
+
+        .label {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding: 8px 15px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .before .label {
+            background: #f93e3e;
+            color: white;
+        }
+
+        .after .label {
+            background: #49cc90;
+            color: white;
+        }
+
+        .mockup {
+            background: #2d2d2d;
+            border: 1px solid #3e3e42;
+            border-radius: 6px;
+            padding: 0;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .mockup-app {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+        }
+
+        .mockup-toolbar {
+            background: #1f1f1f;
+            border-bottom: 1px solid #3e3e42;
+            padding: 10px 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .mockup-button {
+            background: #2d2d2d;
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: #cccccc;
+            cursor: pointer;
+        }
+
+        .mockup-button:hover {
+            background: #3e3e42;
+        }
+
+        .mockup-main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .mockup-sidebar {
+            width: 200px;
+            background: #252526;
+            border-right: 1px solid #3e3e42;
+            padding: 10px;
+            font-size: 11px;
+        }
+
+        .mockup-sidebar-item {
+            padding: 6px;
+            margin-bottom: 4px;
+            border-radius: 3px;
+            background: #2d2d2d;
+        }
+
+        .mockup-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mockup-panel {
+            flex: 1;
+            background: #1e1e1e;
+            border: 1px solid #0078d4;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mockup-panel-header {
+            background: #2d2d2d;
+            padding: 12px 15px;
+            border-bottom: 1px solid #3e3e42;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mockup-panel-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .mockup-close-btn {
+            background: transparent;
+            border: none;
+            color: #cccccc;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .mockup-close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .mockup-panel-body {
+            flex: 1;
+            padding: 15px;
+            overflow: auto;
+            font-size: 10px;
+            color: #888;
+        }
+
+        .mockup-editor {
+            background: #1e1e1e;
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 10px;
+            line-height: 1.4;
+            color: #d4d4d4;
+        }
+
+        .mockup-code {
+            color: #ce9178;
+        }
+
+        .mockup-comment {
+            color: #6a9955;
+        }
+
+        .mockup-keyword {
+            color: #569cd6;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 20px 0;
+        }
+
+        .feature-list li {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: #1e1e1e;
+            border-left: 4px solid #49cc90;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .feature-list li::before {
+            content: "✓ ";
+            color: #49cc90;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .overlay-example {
+            position: relative;
+            height: 400px;
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .overlay-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-example {
+            background: #2d2d2d;
+            border: 1px solid #3e3e42;
+            border-radius: 8px;
+            width: 500px;
+            padding: 20px;
+        }
+
+        code {
+            background: #1e1e1e;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #49cc90;
+            font-size: 13px;
+        }
+
+        .highlight-box {
+            background: rgba(0, 122, 204, 0.1);
+            border: 1px solid #0078d4;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .highlight-box h4 {
+            color: #0078d4;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Panel-Based Test Editors</h1>
+            <p>Enhanced Debugging with Integrated Panels</p>
+        </header>
+
+        <section>
+            <h2>📱 Modal vs Panel Approach</h2>
+            <p>The test editors have been redesigned from modal dialogs to integrated panels for a better workflow experience.</p>
+
+            <div class="comparison">
+                <div class="before">
+                    <span class="label">❌ BEFORE: Modal Dialog</span>
+                    <div class="overlay-example">
+                        <div class="mockup-sidebar" style="position: absolute; left: 0; top: 0; height: 100%; width: 150px; z-index: 1;">
+                            <div class="mockup-sidebar-item">📁 Collections</div>
+                            <div class="mockup-sidebar-item">📁 Requests</div>
+                        </div>
+                        <div class="overlay-bg">
+                            <div class="modal-example">
+                                <h4 style="color: #fff; margin-bottom: 10px;">Unit Test Editor</h4>
+                                <p style="color: #888; font-size: 12px;">Modal blocks everything behind it</p>
+                                <button style="margin-top: 10px; padding: 6px 12px; background: #0078d4; border: none; color: white; border-radius: 4px; cursor: pointer;">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin-top: 15px; font-size: 13px;">
+                        <li style="color: #f93e3e; margin-bottom: 5px;">❌ Blocks entire UI</li>
+                        <li style="color: #f93e3e; margin-bottom: 5px;">❌ Cannot access other features</li>
+                        <li style="color: #f93e3e;">❌ Overlay covers everything</li>
+                    </ul>
+                </div>
+
+                <div class="after">
+                    <span class="label">✅ AFTER: Integrated Panel</span>
+                    <div class="mockup">
+                        <div class="mockup-app">
+                            <div class="mockup-toolbar">
+                                <div class="mockup-button">🧪 Unit Tests</div>
+                                <div class="mockup-button">🖥️ UI Tests</div>
+                            </div>
+                            <div class="mockup-main">
+                                <div class="mockup-sidebar">
+                                    <div class="mockup-sidebar-item">📁 Collections</div>
+                                    <div class="mockup-sidebar-item">📁 Requests</div>
+                                    <div class="mockup-sidebar-item">📁 Tests</div>
+                                </div>
+                                <div class="mockup-content">
+                                    <div class="mockup-panel">
+                                        <div class="mockup-panel-header">
+                                            <span class="mockup-panel-title">🧪 Unit Test Editor - Get Users</span>
+                                            <span class="mockup-close-btn">✕</span>
+                                        </div>
+                                        <div class="mockup-panel-body">
+                                            <div class="mockup-editor">
+                                                <div class="mockup-comment">// Test Suite: Get Users</div>
+                                                <div><span class="mockup-keyword">describe</span>(<span class="mockup-code">'API Test'</span>, () => {</div>
+                                                <div>&nbsp;&nbsp;<span class="mockup-keyword">it</span>(<span class="mockup-code">'should return 200'</span>, <span class="mockup-keyword">async</span> () => {</div>
+                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;assert.assertStatusCode(<span class="mockup-code">200</span>, response.status);</div>
+                                                <div>&nbsp;&nbsp;});</div>
+                                                <div>});</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin-top: 15px; font-size: 13px;">
+                        <li style="color: #49cc90; margin-bottom: 5px;">✅ Integrated into layout</li>
+                        <li style="color: #49cc90; margin-bottom: 5px;">✅ Sidebar remains accessible</li>
+                        <li style="color: #49cc90;">✅ No overlay blocking UI</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>🎯 Key Improvements</h2>
+            
+            <h3>1. Panel-Based Architecture</h3>
+            <ul class="feature-list">
+                <li>Test editors open as panels within the main layout</li>
+                <li>No modal overlay blocking other UI elements</li>
+                <li>Close button (✕) in top-right corner of panel header</li>
+                <li>Can switch between different views without closing panel</li>
+            </ul>
+
+            <h3>2. Monaco Editor Hover Inspection</h3>
+            <ul class="feature-list">
+                <li>Hover mouse over variables to see their values</li>
+                <li>Tooltip shows variable assignments and current values</li>
+                <li>Works for JavaScript and TypeScript code</li>
+                <li>Enhanced debugging without console.log</li>
+            </ul>
+
+            <h3>3. Seamless Workflow</h3>
+            <ul class="feature-list">
+                <li>Panel remains open while accessing sidebar</li>
+                <li>Can navigate collections while editor is visible</li>
+                <li>Consistent behavior across Unit Tests and UI Tests</li>
+                <li>Debug dropdown opens panels (not modals)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>🔧 How to Use</h2>
+
+            <div class="highlight-box">
+                <h4>Opening Test Editors</h4>
+                <p><strong>Method 1:</strong> Click <code>🧪 Unit Tests</code> or <code>🖥️ UI Tests</code> button in the ribbon</p>
+                <p><strong>Method 2:</strong> Use Debug dropdown → Select "Debug Unit Tests" or "Debug UI Tests"</p>
+                <p><strong>Result:</strong> Panel opens on the right side, integrated into the layout</p>
+            </div>
+
+            <div class="highlight-box">
+                <h4>Closing Test Editors</h4>
+                <p><strong>Method 1:</strong> Click the <code>✕</code> button in the panel header</p>
+                <p><strong>Method 2:</strong> Click another view button (e.g., switch to Monitoring)</p>
+                <p><strong>Result:</strong> Panel closes and main content area is restored</p>
+            </div>
+
+            <div class="highlight-box">
+                <h4>Using Monaco Hover Inspection</h4>
+                <p><strong>Step 1:</strong> Open Unit Test Editor or UI Test Editor</p>
+                <p><strong>Step 2:</strong> Write or view test code with variables</p>
+                <p><strong>Step 3:</strong> Hover your mouse over any variable name</p>
+                <p><strong>Result:</strong> Tooltip appears showing the variable's value and type</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>📊 Technical Benefits</h2>
+
+            <h3>Better Screen Real Estate</h3>
+            <p>Panels use the main content area efficiently, while modals take up space with overlay and margins.</p>
+
+            <h3>Improved Accessibility</h3>
+            <p>Sidebar remains accessible - you can navigate collections, switch requests, and manage tests while the editor is open.</p>
+
+            <h3>Consistent User Experience</h3>
+            <p>All test editing functions (Unit Tests, UI Tests, Debug options) now use the same panel-based approach.</p>
+
+            <h3>Enhanced Debugging</h3>
+            <p>Monaco editor's hover inspection provides immediate value feedback without needing to run or debug the code.</p>
+        </section>
+
+        <section>
+            <h2>📚 Documentation</h2>
+            <p>Complete debugging guide available in <code>DEBUGGING_GUIDE.md</code> covering:</p>
+            <ul class="feature-list">
+                <li>Step-by-step debugging instructions</li>
+                <li>Unit test examples with all available assertions</li>
+                <li>UI test examples with Playwright syntax</li>
+                <li>Monaco editor features and keyboard shortcuts</li>
+                <li>Playwright automation for pass/fail results</li>
+                <li>Troubleshooting common issues</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>✨ Summary</h2>
+            <div class="comparison">
+                <div class="before" style="border-color: #0078d4;">
+                    <span class="label" style="background: #0078d4;">MODAL APPROACH</span>
+                    <ul style="list-style: none; padding: 0; margin-top: 15px; font-size: 13px;">
+                        <li style="margin-bottom: 8px;">📦 Overlay blocks UI</li>
+                        <li style="margin-bottom: 8px;">🚫 Cannot access sidebar</li>
+                        <li style="margin-bottom: 8px;">⚠️ Limited workspace</li>
+                        <li style="margin-bottom: 8px;">🔒 Locked workflow</li>
+                    </ul>
+                </div>
+
+                <div class="after">
+                    <span class="label">PANEL APPROACH</span>
+                    <ul style="list-style: none; padding: 0; margin-top: 15px; font-size: 13px;">
+                        <li style="margin-bottom: 8px;">✅ Integrated into layout</li>
+                        <li style="margin-bottom: 8px;">✅ Sidebar accessible</li>
+                        <li style="margin-bottom: 8px;">✅ Full workspace available</li>
+                        <li style="margin-bottom: 8px;">✅ Flexible workflow</li>
+                        <li style="margin-bottom: 8px;">✅ Monaco hover inspection</li>
+                        <li style="margin-bottom: 8px;">✅ Enhanced debugging</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <footer style="text-align: center; margin-top: 40px; padding: 20px; color: #888; font-size: 14px;">
+            <p>Panel-Based Test Editors - Implementation Complete ✅</p>
+            <p style="margin-top: 10px;">Files Modified: <code>DockableLayout.tsx</code>, <code>MonacoEditor.tsx</code></p>
+            <p style="margin-top: 5px;">Documentation: <code>DEBUGGING_GUIDE.md</code></p>
+        </footer>
+    </div>
+</body>
+</html>

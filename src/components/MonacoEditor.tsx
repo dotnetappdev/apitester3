@@ -44,8 +44,54 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
         horizontal: 'auto',
         verticalScrollbarSize: 12,
         horizontalScrollbarSize: 12
+      },
+      // Enable hover for debugging
+      hover: {
+        enabled: true,
+        delay: 300,
+        sticky: true
       }
     });
+
+    // Register hover provider for variable inspection
+    if (language === 'javascript' || language === 'typescript') {
+      monaco.languages.registerHoverProvider(language, {
+        provideHover: (model, position) => {
+          const word = model.getWordAtPosition(position);
+          if (!word) return null;
+
+          // Extract variable name
+          const variableName = word.word;
+          
+          // Try to find variable value from context
+          // This is a simple implementation - in a real debugger, 
+          // this would connect to a debug adapter
+          const content = model.getValue();
+          const lines = content.split('\n');
+          let variableValue = 'undefined';
+          
+          // Look for variable assignments
+          const assignmentRegex = new RegExp(`(?:let|const|var)\\s+${variableName}\\s*=\\s*([^;\\n]+)`, 'g');
+          const match = assignmentRegex.exec(content);
+          if (match && match[1]) {
+            variableValue = match[1].trim();
+          }
+
+          return {
+            range: new monaco.Range(
+              position.lineNumber,
+              word.startColumn,
+              position.lineNumber,
+              word.endColumn
+            ),
+            contents: [
+              { value: `**${variableName}**` },
+              { value: `\`\`\`${language}\n${variableValue}\n\`\`\`` }
+            ]
+          };
+        }
+      });
+    }
 
     // Add custom themes
     monaco.editor.defineTheme('api-tester-dark', {
