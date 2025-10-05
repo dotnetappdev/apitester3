@@ -4,6 +4,8 @@ import { ModernButton, CollectionIcon, TestIcon } from './ModernButton';
 import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
 import { MonitoringPanel } from './MonitoringPanel';
+import { TestScriptEditor } from './TestScriptEditor';
+import { UITestDialog } from './UITestDialog';
 // Note: TestScriptEditor and TestExplorer removed from this simplified layout
 import { Collection, Request, TestResult, User } from '../database/DatabaseManager';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
@@ -96,6 +98,9 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
   const [showMonitoring, setShowMonitoring] = useState(false);
   const [sidebarView, setSidebarView] = useState<'collections' | 'environments' | 'history' | 'monitoring' | 'ui-tests' | 'tests'>('collections');
   const [showViewMenu, setShowViewMenu] = useState(false);
+  const [showDebugMenu, setShowDebugMenu] = useState(false);
+  const [showUnitTestEditor, setShowUnitTestEditor] = useState(false);
+  const [showUITestEditor, setShowUITestEditor] = useState(false);
 
   useEffect(() => {
     const onDocClick = () => {
@@ -103,6 +108,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
       setShowProfileDropdown(false);
       setRunGroupOpen(false);
       setShowViewMenu(false);
+      setShowDebugMenu(false);
     };
     window.addEventListener('click', onDocClick);
     return () => window.removeEventListener('click', onDocClick);
@@ -190,13 +196,37 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
                     <span className="ribbon-button-icon">▶️</span>
                     <span className="ribbon-button-label">Run</span>
                   </button>
-                  <button className="ribbon-button" onClick={() => debugSelected()} title="Debug">
-                    <span className="ribbon-button-icon">🐞</span>
-                    <span className="ribbon-button-label">Debug</span>
-                  </button>
+                  <div className="ribbon-dropdown-wrapper" onClick={e => e.stopPropagation()}>
+                    <button className="ribbon-button" onClick={(e) => { e.stopPropagation(); setShowDebugMenu(v => !v); }} title="Debug">
+                      <span className="ribbon-button-icon">🐞</span>
+                      <span className="ribbon-button-label">Debug</span>
+                      <span className="ribbon-button-arrow">▼</span>
+                    </button>
+                    {showDebugMenu && (
+                      <div className="ribbon-dropdown">
+                        <button className="ribbon-dropdown-item" onClick={() => { debugSelected(); setShowDebugMenu(false); }}>
+                          Debug Selected
+                        </button>
+                        <button className="ribbon-dropdown-item" onClick={() => { setShowUnitTestEditor(true); setShowDebugMenu(false); }}>
+                          Debug Unit Tests
+                        </button>
+                        <button className="ribbon-dropdown-item" onClick={() => { setShowUITestEditor(true); setShowDebugMenu(false); }}>
+                          Debug UI Tests
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <button className="ribbon-button" onClick={() => { window.dispatchEvent(new CustomEvent('toggle-output')); }} title="Output">
                     <span className="ribbon-button-icon">📺</span>
                     <span className="ribbon-button-label">Output</span>
+                  </button>
+                  <button className="ribbon-button" onClick={() => setShowUnitTestEditor(true)} title="Unit Tests">
+                    <span className="ribbon-button-icon">🧪</span>
+                    <span className="ribbon-button-label">Unit Tests</span>
+                  </button>
+                  <button className="ribbon-button" onClick={() => setShowUITestEditor(true)} title="UI Tests">
+                    <span className="ribbon-button-icon">🖥️</span>
+                    <span className="ribbon-button-label">UI Tests</span>
                   </button>
                 </div>
                 <div className="ribbon-group-label">Test</div>
@@ -359,6 +389,40 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
           )}
         </div>
       </div>
+
+      {/* Unit Test Editor Dialog */}
+      {showUnitTestEditor && activeRequest && (
+        <div className="modal-overlay" onClick={() => setShowUnitTestEditor(false)}>
+          <div className="modal-dialog modal-dialog-large" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Unit Test Editor - {activeRequest.name}</h3>
+              <button className="modal-close" onClick={() => setShowUnitTestEditor(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <TestScriptEditor
+                requestId={activeRequest.id}
+                requestName={activeRequest.name}
+                onTestSuiteChange={onEditTestSuite}
+                onRunTests={onRunTestSuite}
+                testResults={testExecutionResults.get(activeRequest.id)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* UI Test Editor Dialog */}
+      {showUITestEditor && (
+        <UITestDialog
+          isOpen={showUITestEditor}
+          onClose={() => setShowUITestEditor(false)}
+          onSave={(suite) => {
+            onEditUITestSuite(suite);
+            setShowUITestEditor(false);
+          }}
+          title="UI Test Editor"
+        />
+      )}
 
       <style>{`
         /* Office 365 Ribbon Bar Styles */
@@ -793,6 +857,98 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
         @keyframes spin { 
           from { transform: rotate(0deg); } 
           to { transform: rotate(360deg); } 
+        }
+
+        /* Modal Overlay and Dialog Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 2000;
+        }
+
+        .modal-dialog {
+          background: #2d2d2d;
+          border: 1px solid #3e3e42;
+          border-radius: 8px;
+          max-width: 90vw;
+          max-height: 90vh;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-dialog-large {
+          width: 1200px;
+          height: 800px;
+        }
+
+        .modal-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 20px;
+          border-bottom: 1px solid #3e3e42;
+        }
+
+        .modal-header h3 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #ffffff;
+        }
+
+        .modal-close {
+          background: transparent;
+          border: none;
+          color: #cccccc;
+          font-size: 20px;
+          cursor: pointer;
+          padding: 4px 8px;
+          border-radius: 4px;
+          transition: all 0.15s;
+        }
+
+        .modal-close:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: #ffffff;
+        }
+
+        .modal-body {
+          flex: 1;
+          overflow: auto;
+          padding: 0;
+        }
+
+        /* Ribbon Dropdown Wrapper for Debug Button */
+        .ribbon-dropdown-wrapper {
+          position: relative;
+          display: inline-block;
+        }
+
+        .ribbon-button-arrow {
+          margin-left: 4px;
+          font-size: 8px;
+        }
+
+        .ribbon-dropdown {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          margin-top: 4px;
+          background: #2d2d2d;
+          border: 1px solid #3e3e42;
+          border-radius: 4px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+          z-index: 1100;
+          min-width: 200px;
+          padding: 4px 0;
         }
       `}</style>
     </div>

@@ -4780,14 +4780,18 @@ textarea:focus-visible {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  gap: 0;
 }
 
 .traffic-list {
-  width: 350px;
+  flex: 1;
+  min-width: 400px;
+  max-width: none;
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   background: var(--bg-secondary);
+  overflow: hidden;
 }
 
 .traffic-header {
