@@ -3,6 +3,7 @@ import { EnhancedSidebar } from './EnhancedSidebar';
 import { ModernButton, CollectionIcon, TestIcon } from './ModernButton';
 import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
+import { MonitoringPanel } from './MonitoringPanel';
 // Note: TestScriptEditor and TestExplorer removed from this simplified layout
 import { Collection, Request, TestResult, User } from '../database/DatabaseManager';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
@@ -93,6 +94,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
   const [collectionsVisible, setCollectionsVisible] = useState(true);
   const [testsVisible, setTestsVisible] = useState(true);
   const [runGroupOpen, setRunGroupOpen] = useState(false);
+  const [showMonitoring, setShowMonitoring] = useState(false);
 
   useEffect(() => {
     const onDocClick = () => {
@@ -123,6 +125,17 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
           <ModernButton className={`toolbar-button ${collectionsVisible ? 'active' : ''}`} variant="secondary" size="small" onClick={() => setCollectionsVisible(v => !v)} title="Toggle Collections" icon={<CollectionIcon />} />
 
           <ModernButton className={`toolbar-button ${testsVisible ? 'active' : ''}`} variant="secondary" size="small" onClick={() => setTestsVisible(v => !v)} title="Toggle Test Explorer" icon={<TestIcon />} />
+          
+          <ModernButton 
+            className={`toolbar-button ${showMonitoring ? 'active' : ''}`} 
+            variant={showMonitoring ? 'primary' : 'secondary'} 
+            size="small" 
+            onClick={() => setShowMonitoring(v => !v)} 
+            title="HTTP Monitor" 
+            icon={<span>📡</span>}
+          >
+            {showMonitoring ? 'Exit Monitor' : 'Monitor'}
+          </ModernButton>
 
           <div className="toolbar-sep" />
 
@@ -211,7 +224,9 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
         </div>
 
         <div className="content-column">
-          {activeRequest ? (
+          {showMonitoring ? (
+            <MonitoringPanel theme={theme} />
+          ) : activeRequest ? (
             <div className="content-area">
               <EnhancedRequestPanel
                 request={activeRequest}

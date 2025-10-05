@@ -95,6 +95,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   exportReportExcel: (data: { results: any[]; defaultName?: string }) => ipcRenderer.invoke('export-report-excel', data),
   exportReportPdf: (data: { htmlContent: string; defaultName?: string }) => ipcRenderer.invoke('export-report-pdf', data),
   
+  // HTTP Proxy operations
+  proxyStart: (config: any) => ipcRenderer.invoke('proxy-start', config),
+  proxyStop: () => ipcRenderer.invoke('proxy-stop'),
+  proxyUpdateConfig: (config: any) => ipcRenderer.invoke('proxy-update-config', config),
+  proxyRespond: (data: { requestId: string; response: any }) => ipcRenderer.invoke('proxy-respond', data),
+  
   // Remove listeners
   removeAllListeners: (channel: string) => 
     ipcRenderer.removeAllListeners(channel),
@@ -104,6 +110,22 @@ contextBridge.exposeInMainWorld('electronAPI', {
   version: process.versions.electron,
   onMenuSidebarPosition: (callback: any) => ipcRenderer.on('menu-sidebar-position', (_e, pos) => callback(pos)),
   onMenuSidebarWidth: (callback: any) => ipcRenderer.on('menu-sidebar-width', (_e, width) => callback(width)),
+});
+
+// Declare window for preload context
+declare const window: {
+  postMessage: (message: any, targetOrigin: string) => void;
+};
+
+// Proxy event listeners - we'll set these up through the API
+ipcRenderer.on('proxy-request-intercepted', (event, request) => {
+  // Forward to renderer via custom event
+  window.postMessage({ type: 'proxy-request-intercepted', data: request }, '*');
+});
+
+ipcRenderer.on('proxy-response-intercepted', (event, data) => {
+  // Forward to renderer via custom event
+  window.postMessage({ type: 'proxy-response-intercepted', data: data }, '*');
 });
 
 // Expose electron utilities
@@ -165,6 +187,12 @@ declare global {
       dbUpdateTestSuite: (id: number, updates: any) => Promise<void>;
       dbDeleteTestSuite: (id: number) => Promise<void>;
   sendEmail: (data: { apiKey?: string; from: string; to: string | string[]; subject: string; text?: string; html?: string }) => Promise<any>;
+      
+      // HTTP Proxy operations
+      proxyStart: (config: any) => Promise<{ success: boolean; port?: number; error?: string }>;
+      proxyStop: () => Promise<{ success: boolean; error?: string }>;
+      proxyUpdateConfig: (config: any) => Promise<{ success: boolean; error?: string }>;
+      proxyRespond: (data: { requestId: string; response: any }) => Promise<{ success: boolean; error?: string }>;
       
       removeAllListeners: (channel: string) => void;
       platform: string;
