@@ -1,10 +1,10 @@
 /**
- * Application constants for VerifyApi
+ * Application constants for Palis
  * Contains version info, GitHub links, and other application metadata
  */
 
 export const APP_INFO = {
-  name: 'VerifyApi',
+  name: 'Palis',
   version: '1.0.0',
   description: 'Professional API testing tool with Visual Studio-style dockable layout',
   author: 'dotnetappdev',

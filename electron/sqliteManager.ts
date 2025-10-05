@@ -361,7 +361,7 @@ console.log('✓ Post retrieved successfully:', response.data.title);`
         headers: JSON.stringify({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           title: 'Test Post',
-          body: 'This is a test post created via VerifyApi',
+          body: 'This is a test post created via Palis',
           userId: 1
         }, null, 2),
         params: JSON.stringify({}),
@@ -369,7 +369,7 @@ console.log('✓ Post retrieved successfully:', response.data.title);`
         tests: `// Validate post creation
 assert.assertStatusCode(201, response);
 assert.assertJsonPath('$.title', 'Test Post', response.data);
-assert.assertJsonPath('$.body', 'This is a test post created via VerifyApi', response.data);
+assert.assertJsonPath('$.body', 'This is a test post created via Palis', response.data);
 assert.assertJsonPath('$.userId', 1, response.data);
 assert.assertType('number', response.data.id);
 console.log('✓ Post created with ID:', response.data.id);`
