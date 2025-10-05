@@ -423,6 +423,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
           >
             🧪 {!isTablet && 'Tests'}
           </button>
+          <div className="toolbar-separator"></div>
           <button 
             className={`layout-mode-toggle ${contentLayoutMode === 'tabbed' ? 'active' : ''}`}
             onClick={() => setContentLayoutMode(contentLayoutMode === 'stacked' ? 'tabbed' : 'stacked')}
@@ -857,76 +858,74 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         }
 
         .layout-toolbar {
-          height: 32px;
-          background: var(--bg-secondary);
+          height: 40px;
+          background: var(--bg-primary);
           border-bottom: 1px solid var(--border-color);
           display: flex;
           align-items: center;
-          padding: 0 8px;
+          padding: 0 12px;
           flex-shrink: 0;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
         }
 
         .panel-controls {
           display: flex;
-          gap: 4px;
+          gap: 6px;
+          align-items: center;
         }
 
         .panel-toggle {
-          background: var(--bg-tertiary);
-          border: 1px solid var(--border-color);
+          background: transparent;
+          border: 1px solid transparent;
           color: var(--text-primary);
-          padding: 6px 12px;
+          padding: 6px 14px;
           border-radius: 4px;
           cursor: pointer;
           font-size: 13px;
           font-weight: 500;
-          transition: all 0.2s ease;
+          transition: all 0.15s ease;
           display: flex;
           align-items: center;
           gap: 6px;
+          height: 32px;
         }
 
         .panel-toggle:hover {
           background: var(--bg-hover);
-          border-color: var(--accent-color);
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border-color: transparent;
         }
 
         .panel-toggle.active {
-          background: var(--accent-color);
-          color: white;
-          border-color: var(--accent-color);
-          box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+          background: var(--bg-tertiary);
+          color: var(--accent-color);
+          border-color: transparent;
         }
 
         .layout-mode-toggle {
-          background: var(--bg-tertiary);
-          border: 1px solid var(--border-color);
+          background: transparent;
+          border: 1px solid transparent;
           color: var(--text-primary);
-          padding: 6px 12px;
+          padding: 6px 14px;
           border-radius: 4px;
           cursor: pointer;
           font-size: 13px;
           font-weight: 500;
-          transition: all 0.2s ease;
+          transition: all 0.15s ease;
           display: flex;
           align-items: center;
           gap: 6px;
+          height: 32px;
         }
 
         .layout-mode-toggle:hover {
           background: var(--bg-hover);
-          border-color: var(--accent-color);
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border-color: transparent;
         }
 
         .layout-mode-toggle.active {
-          background: var(--accent-color);
-          color: white;
-          border-color: var(--accent-color);
-          box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+          background: var(--bg-tertiary);
+          color: var(--accent-color);
+          border-color: transparent;
         }
 
         .reset-layout {
@@ -953,32 +952,30 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         }
 
         .help-menu-toggle {
-          background: var(--bg-tertiary);
-          border: 1px solid var(--border-color);
+          background: transparent;
+          border: 1px solid transparent;
           color: var(--text-primary);
-          padding: 6px 12px;
+          padding: 6px 14px;
           border-radius: 4px;
           cursor: pointer;
           font-size: 13px;
           font-weight: 500;
-          transition: all 0.2s ease;
+          transition: all 0.15s ease;
           display: flex;
           align-items: center;
           gap: 6px;
+          height: 32px;
         }
 
         .help-menu-toggle:hover {
           background: var(--bg-hover);
-          border-color: var(--accent-color);
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border-color: transparent;
         }
         
         .help-menu-toggle.active {
-          background: var(--accent-color);
-          color: white;
-          border-color: var(--accent-color);
-          box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+          background: var(--bg-tertiary);
+          color: var(--accent-color);
+          border-color: transparent;
         }
 
         .help-dropdown {
@@ -1241,6 +1238,13 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
 
         .toolbar-spacer {
           flex: 1;
+        }
+
+        .toolbar-separator {
+          width: 1px;
+          height: 24px;
+          background: var(--border-color);
+          margin: 0 8px;
         }
 
         /* Enhanced panel headers with status indicators */
