@@ -1,8 +1,8 @@
 import React from 'react';
 
 interface ModernButtonProps {
-  children: React.ReactNode;
-  onClick?: () => void;
+  children?: React.ReactNode;
+  onClick?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   variant?: 'primary' | 'secondary' | 'success' | 'danger';
   size?: 'small' | 'medium' | 'large';
   icon?: React.ReactNode;
@@ -11,6 +11,7 @@ interface ModernButtonProps {
   fullWidth?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  title?: string;
 }
 
 export const ModernButton: React.FC<ModernButtonProps> = ({
@@ -23,138 +24,28 @@ export const ModernButton: React.FC<ModernButtonProps> = ({
   loading = false,
   fullWidth = false,
   className = '',
-  style = {}
+  title
 }) => {
-  const baseStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: icon ? '8px' : '0',
-    border: 'none',
-    borderRadius: '6px',
-    fontWeight: '500',
-    cursor: disabled || loading ? 'not-allowed' : 'pointer',
-    transition: 'all 0.2s ease',
-    textDecoration: 'none',
-    position: 'relative',
-    overflow: 'hidden',
-    opacity: disabled ? 0.6 : 1,
-    width: fullWidth ? '100%' : 'auto',
-    ...style
-  };
+  const classNames = ['modern-button', size, variant, className].filter(Boolean).join(' ');
 
-  const sizeStyles = {
-    small: {
-      padding: '6px 12px',
-      fontSize: '12px',
-      minHeight: '28px'
-    },
-    medium: {
-      padding: '10px 16px',
-      fontSize: '14px',
-      minHeight: '36px'
-    },
-    large: {
-      padding: '12px 20px',
-      fontSize: '16px',
-      minHeight: '44px'
-    }
-  };
-
-  const variantStyles = {
-    primary: {
-      background: 'linear-gradient(45deg, #007acc, #0066aa)',
-      color: '#ffffff',
-      boxShadow: '0 2px 8px rgba(0, 122, 204, 0.3)'
-    },
-    secondary: {
-      background: 'linear-gradient(45deg, #3c3c3c, #2d2d30)',
-      color: '#cccccc',
-      border: '1px solid #6c6c6c',
-      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
-    },
-    success: {
-      background: 'linear-gradient(45deg, #28a745, #218838)',
-      color: '#ffffff',
-      boxShadow: '0 2px 8px rgba(40, 167, 69, 0.3)'
-    },
-    danger: {
-      background: 'linear-gradient(45deg, #f44747, #d73a49)',
-      color: '#ffffff',
-      boxShadow: '0 2px 8px rgba(244, 71, 71, 0.3)'
-    }
-  };
-
-  const hoverStyles = {
-    primary: {
-      background: 'linear-gradient(45deg, #106ebe, #007acc)',
-      boxShadow: '0 4px 12px rgba(0, 122, 204, 0.4)',
-      transform: 'translateY(-1px)'
-    },
-    secondary: {
-      background: 'linear-gradient(45deg, #4a4a4a, #3c3c3c)',
-      borderColor: '#7c7c7c',
-      transform: 'translateY(-1px)'
-    },
-    success: {
-      background: 'linear-gradient(45deg, #34ce57, #28a745)',
-      boxShadow: '0 4px 12px rgba(40, 167, 69, 0.4)',
-      transform: 'translateY(-1px)'
-    },
-    danger: {
-      background: 'linear-gradient(45deg, #ff6b6b, #f44747)',
-      boxShadow: '0 4px 12px rgba(244, 71, 71, 0.4)',
-      transform: 'translateY(-1px)'
-    }
-  };
-
-  const buttonStyle = {
-    ...baseStyle,
-    ...sizeStyles[size],
-    ...variantStyles[variant]
-  };
-
-  const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (disabled || loading) return;
-    const button = e.target as HTMLButtonElement;
-    const hoverStyle = hoverStyles[variant];
-    Object.assign(button.style, hoverStyle);
-  };
-
-  const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (disabled || loading) return;
-    const button = e.target as HTMLButtonElement;
-    Object.assign(button.style, variantStyles[variant]);
-    button.style.transform = 'translateY(0)';
-  };
+  // Styling is driven by CSS classes (see src/styles/index.css)
 
   const LoadingSpinner = () => (
-    <div
-      style={{
-        width: '16px',
-        height: '16px',
-        border: '2px solid rgba(255,255,255,0.3)',
-        borderTop: '2px solid #ffffff',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite'
-      }}
-    />
+    <div className="modern-button-spinner" />
   );
-
   return (
     <button
-      style={buttonStyle}
-      onClick={disabled || loading ? undefined : onClick}
+      onClick={disabled || loading ? undefined : ((e?: React.MouseEvent<HTMLButtonElement>) => onClick ? onClick(e) : undefined)}
       disabled={disabled || loading}
-      className={className}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className={classNames}
+      title={title}
+      aria-label={title}
     >
       {loading ? (
         <LoadingSpinner />
       ) : (
         <>
-          {icon && <span style={{ display: 'flex', alignItems: 'center' }}>{icon}</span>}
+          {icon && <span className="modern-button-icon">{icon}</span>}
           {children}
         </>
       )}
@@ -178,6 +69,24 @@ export const TestIcon = () => (
 export const AddIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
     <path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2z"/>
+  </svg>
+);
+
+export const SettingsIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M19.14 12.94a7.07 7.07 0 000-1.88l2.03-1.58a.5.5 0 00.12-.63l-1.92-3.32a.5.5 0 00-.6-.22l-2.39.96a6.9 6.9 0 00-1.61-.94l-.36-2.54a.5.5 0 00-.49-.42h-3.84a.5.5 0 00-.49.42l-.36 2.54c-.56.22-1.09.5-1.61.94l-2.39-.96a.5.5 0 00-.6.22L2.71 8.85a.5.5 0 00.12.63l2.03 1.58c-.06.29-.1.59-.1.88s.04.59.1.88L2.83 14.4a.5.5 0 00-.12.63l1.92 3.32c.14.24.42.34.66.26l2.39-.96c.52.44 1.05.82 1.61.94l.36 2.54c.05.28.28.49.56.49h3.84c.28 0 .51-.21.56-.49l.36-2.54c.56-.12 1.09-.5 1.61-.94l2.39.96c.24.08.52-.02.66-.26l1.92-3.32a.5.5 0 00-.12-.63l-2.03-1.58zM12 15.5A3.5 3.5 0 1112 8.5a3.5 3.5 0 010 7z"/>
+  </svg>
+);
+
+export const TeamIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05C16.9 13.5 18.66 14 20 14v2.5h-6.03c.15-.48.03-1.08-.28-1.5-.48-.67-1.37-1.05-2.69-1.05z"/>
+  </svg>
+);
+
+export const MonitorIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M21 3H3c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h6v2H7v2h10v-2h-2v-2h6c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM21 16H3V5h18v11z"/>
   </svg>
 );
 

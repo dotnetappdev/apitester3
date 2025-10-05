@@ -216,6 +216,43 @@ body.light-theme :root {
   box-sizing: border-box;
 }
 
+/* ModernButton (Windows-11 style) */
+.modern-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  opacity: 1;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  font-size: 13px;
+  background: transparent;
+}
+
+.modern-button.small { padding:6px 10px; font-size:13px; }
+.modern-button.medium { padding:8px 12px; font-size:14px; }
+.modern-button.large { padding:10px 16px; font-size:16px; }
+
+.modern-button.primary { background: linear-gradient(180deg, rgba(0,120,215,0.14), rgba(0,120,215,0.08)); color:#fff; }
+.modern-button.secondary { background: transparent; color:var(--text-primary); }
+.modern-button.success { background: linear-gradient(180deg, rgba(40,167,69,0.12), rgba(40,167,69,0.06)); color:#fff; }
+.modern-button.danger { background: linear-gradient(180deg, rgba(244,71,71,0.12), rgba(244,71,71,0.06)); color:#fff; }
+
+.modern-button:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.08); transform: translateY(-2px); background: rgba(255,255,255,0.02); }
+.modern-button:disabled { opacity: 0.6; cursor: not-allowed; transform:none; box-shadow:none; }
+
+.modern-button-icon { display:inline-flex; align-items:center; justify-content:center; }
+
+.modern-button-spinner { width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,0.12); border-top-color:rgba(255,255,255,0.9); animation: spin 1s linear infinite; }
+
 .btn-primary {
   background-color: var(--button-bg);
   color: white;
@@ -915,54 +952,245 @@ body.light-theme :root {
 
 .header-actions {
   display: flex;
-  gap: 4px;
+  gap: 8px;
+  align-items: center;
 }
 
 .header-action-button {
-  background: none;
-  border: none;
+  background: transparent;
+  border: 1px solid transparent;
   color: var(--text-secondary);
-  font-size: 14px;
-  padding: 6px;
-  border-radius: 4px;
+  font-size: 13px;
+  padding: 6px 8px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.15s ease, box-shadow 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  min-width: 36px;
 }
 
 .header-action-button:hover {
   background: var(--bg-quaternary);
   color: var(--text-primary);
+  border-color: var(--border-light);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
 }
 
 /* Enhanced Teams Button Styling */
 .header-action-button.teams-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6c63ff 0%, #8b5cf6 100%);
   color: white;
   padding: 6px 12px;
   font-weight: 600;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 18px rgba(108,99,255,0.12);
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  border-radius: 8px;
 }
 
 .header-action-button.teams-button:hover {
-  background: linear-gradient(135deg, #7c8ff0 0%, #8b5ab8 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #7c8ff0 0%, #9b6df0 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(108,99,255,0.16);
   color: white;
 }
 
 .header-action-button.teams-button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.3);
+.header-action-button.teams-button {
+  /* Teams button removed — keep empty to avoid layout regressions if referenced */
+  background: transparent;
+  color: var(--text-primary);
+  padding: 6px 8px;
+  border-radius: 6px;
+  box-shadow: none;
+  border: 1px solid transparent;
+}
+.header-action-button.teams-button:hover {
+  background: var(--bg-hover);
+}
+.teams-button-text {
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.teams-button-text {
-  font-size: 12px;
-  letter-spacing: 0.3px;
+/* Toolbar avatar */
+.toolbar-avatar-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
+
+.toolbar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+}
+
+.toolbar-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.toolbar-avatar .avatar-initial {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.profile-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+  min-width: 160px;
+  z-index: 1200;
+  padding: 6px 0;
+  display: none; /* toggled by JS if needed */
+}
+
+.profile-dropdown-item {
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.profile-dropdown-item:hover {
+  background: var(--bg-hover);
+}
+
+.profile-dropdown-separator {
+  height: 1px;
+  background: var(--border-color);
+  margin: 6px 0;
+}
+  align-items: center;
+  justify-content: center;
+}
+
+.modern-button-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Top toolbar — use app's standard subtle header style */
+.layout-toolbar {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: none;
+  backdrop-filter: none;
+  z-index: 80;
+}
+.layout-toolbar .toolbar-left,
+.layout-toolbar .toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Primary buttons should follow the existing ModernButton look — subtle, flat, pill where needed */
+.modern-button.primary {
+  background: linear-gradient(180deg, rgba(0,120,215,0.12), rgba(0,120,215,0.06));
+  color: white;
+  padding: 6px 12px;
+  border-radius: 10px;
+  box-shadow: none;
+}
+.modern-button.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
+
+/* secondary toolbar buttons remain subtle */
+.modern-button.secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.02);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+/* pill-style header action (match app's + New but not heavy) */
+.header-action-button.pill {
+  background: linear-gradient(180deg, rgba(0,120,215,0.14), rgba(0,120,215,0.06));
+  color: white;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.06);
+  font-weight: 600;
+}
+.header-action-button.pill:hover { background: linear-gradient(180deg, rgba(0,120,215,0.16), rgba(0,120,215,0.08)); transform: translateY(-1px); }
+
+/* make header action buttons visible but not overly prominent */
+.header-action-button {
+  background: rgba(255,255,255,0.01);
+  border: 1px solid rgba(255,255,255,0.02);
+  color: var(--text-primary);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.header-action-button:hover { box-shadow: 0 6px 12px rgba(0,0,0,0.18); }
+
+/* Toolbar-specific button fine-tuning: clearer Run/Demo buttons and active toggle styles */
+.layout-toolbar .modern-button.primary {
+  /* make Run stand out more like the + New button */
+  background: linear-gradient(180deg, var(--accent-color), var(--accent-hover));
+  color: white;
+  padding: 6px 14px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,122,204,0.12), inset 0 -1px 0 rgba(255,255,255,0.04);
+}
+.layout-toolbar .modern-button.primary:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(0,122,204,0.14); }
+
+.layout-toolbar .modern-button.secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.03);
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+
+/* active state for toolbar toggle buttons (left-most icons) */
+.toolbar-button.active, .layout-toolbar .modern-button.active {
+  border: 1px solid rgba(0,120,215,0.9);
+  background: linear-gradient(180deg, rgba(0,120,215,0.12), rgba(0,120,215,0.06));
+  color: white;
+  box-shadow: 0 8px 24px rgba(0,122,204,0.10);
+}
+
+/* smaller icon-only toolbar buttons */
+.layout-toolbar .modern-button.small { padding:6px 8px; min-width:40px; border-radius:10px; }
+
+/* ensure dropdown caret button is understated */
+.layout-toolbar .toolbar-group .modern-button.secondary { padding:6px 8px; min-width:36px; }
+
 
 /* Search Bar */
 .sidebar-search {

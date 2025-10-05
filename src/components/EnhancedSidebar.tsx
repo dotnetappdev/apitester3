@@ -3,7 +3,7 @@ import { Collection, Request, TestResult, User } from '../database/DatabaseManag
 import { EnhancedTestExplorer } from './EnhancedTestExplorer';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
 import { UITestSuite, UITestExecutionResult } from '../testing/UITestRunner';
-import { ModernButton, CollectionIcon, TestIcon, AddIcon } from './ModernButton';
+import { ModernButton, CollectionIcon, TestIcon, AddIcon, SettingsIcon, MonitorIcon, FolderIcon } from './ModernButton';
 import { ApiResponse } from '../types';
 
 interface EnhancedSidebarProps {
@@ -34,7 +34,7 @@ interface EnhancedSidebarProps {
   onDeleteUITestSuite?: (testSuite: UITestSuite) => void;
   onUserProfile?: () => void;
   onSettings?: () => void;
-  onTeamManager?: () => void;
+  // onTeamManager removed — team management moved to profile dropdown in the toolbar
   onToggleOutput?: () => void;
   enableTestExplorer?: boolean;
 }
@@ -67,7 +67,6 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
   onDeleteUITestSuite,
   onUserProfile,
   onSettings,
-  onTeamManager,
   onToggleOutput,
   enableTestExplorer
 }) => {
@@ -213,16 +212,11 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
         </div>
         
         <div className="header-actions">
-          <button className="header-action-button" onClick={onSettings} title="Settings">⚙️</button>
-          {onTeamManager && (
-            <button className="header-action-button teams-button" onClick={onTeamManager} title="Team Management">
-              <span>👥</span>
-              <span className="teams-button-text">Teams</span>
-            </button>
-          )}
-          <button className="header-action-button" onClick={onNewCollection} title="New Collection">📁+</button>
-          <ModernButton onClick={onNewRequest} variant="primary" size="small" icon={<AddIcon />}>New</ModernButton>
-          <button className="header-action-button" onClick={() => onToggleOutput?.()} title="Toggle Output">🖥️</button>
+          <ModernButton className="header-action-icon" title="Settings" onClick={onSettings} variant="secondary" size="small" icon={<SettingsIcon />}>{/* icon-only */}{null}</ModernButton>
+          {/* Teams button removed — replaced by profile/avatar in the top toolbar */}
+          <ModernButton className="header-action-icon pill" title="New Collection" onClick={onNewCollection} variant="primary" size="small" icon={<FolderIcon />}>{/* icon-only */}{null}</ModernButton>
+          <ModernButton onClick={onNewRequest} variant="primary" size="small" icon={<AddIcon />} title="New Request">New</ModernButton>
+          <ModernButton className="header-action-icon" title="Toggle Output" onClick={() => onToggleOutput?.()} variant="secondary" size="small" icon={<MonitorIcon />}>{/* icon-only */}{null}</ModernButton>
         </div>
       </div>
 

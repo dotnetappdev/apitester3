@@ -1,20 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Allotment } from 'allotment';
-import 'allotment/dist/style.css';
-import { LayoutManager, LayoutConfig } from '../utils/layoutManager';
+import React, { useState, useEffect } from 'react';
 import { EnhancedSidebar } from './EnhancedSidebar';
-import { TestExplorer } from './TestExplorer';
+import { ModernButton, CollectionIcon, TestIcon } from './ModernButton';
 import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
-import { TestScriptEditor } from './TestScriptEditor';
-import { DockablePanel } from './DockablePanel';
+// Note: TestScriptEditor and TestExplorer removed from this simplified layout
 import { Collection, Request, TestResult, User } from '../database/DatabaseManager';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
 import { UITestSuite, UITestExecutionResult } from '../testing/UITestRunner';
 import { ApiResponse } from '../types';
 
 interface DockableLayoutProps {
-  user: User;
+  user: User | null;
   collections: Collection[];
   activeRequest: Request | null;
   response: ApiResponse | null;
@@ -33,753 +29,157 @@ interface DockableLayoutProps {
   onNewCollection: () => void;
   onEditRequest: (request: Request) => void;
   onDeleteRequest: (request: Request) => void;
-  onNewTestSuite: (requestId: number) => void;
-  onEditTestSuite: (testSuite: TestSuite) => void;
-  onDeleteTestSuite: (testSuite: TestSuite) => void;
-  onNewUITestSuite: () => void;
-  onEditUITestSuite: (testSuite: UITestSuite) => void;
-  onDeleteUITestSuite: (testSuite: UITestSuite) => void;
   onDeleteCollection: (collection: Collection) => void;
   onRunTest: (requestId: number) => Promise<TestResult>;
   onRunAllTests: () => Promise<TestResult[]>;
   onRunTestSuite: (requestId: number, testSuite: TestSuite, response: ApiResponse, request: any) => Promise<TestExecutionResult[]>;
   onRunUITestSuite: (testSuite: UITestSuite) => Promise<UITestExecutionResult[]>;
   onRunAllUITests: () => Promise<UITestExecutionResult[]>;
-  onUserProfile: () => void;
-  onSettings: () => void;
-  onTeamManager: () => void;
+  onNewTestSuite: (requestId: number) => void;
+  onEditTestSuite: (suite: TestSuite) => void;
+  onDeleteTestSuite: (testSuite: TestSuite) => void;
+  onNewUITestSuite: () => void;
+  onEditUITestSuite: (suite: UITestSuite) => void;
+  onDeleteUITestSuite: (testSuite: UITestSuite) => void;
+  onUserProfile?: () => void;
+  onSettings?: () => void;
+  onTeamManager?: () => void;
   onShowAbout?: () => void;
   onReportProblem?: () => void;
 }
 
+export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
+  const {
+    user,
+    collections,
+    activeRequest,
+    response,
+    isLoading,
+    testResults,
+    testSuites,
+    testExecutionResults,
+    uiTestSuites,
+    uiTestExecutionResults,
+    theme,
+    enableSyntaxHighlighting,
+    onRequestSelect,
+    onRequestChange,
+    onSendRequest,
+    onNewRequest,
+    onNewCollection,
+    onEditRequest,
+    onDeleteRequest,
+    onDeleteCollection,
+    onRunTest,
+    onRunAllTests,
+    onRunTestSuite,
+    onRunUITestSuite,
+    onRunAllUITests,
+    onNewTestSuite,
+    onEditTestSuite,
+    onDeleteTestSuite,
+    onNewUITestSuite,
+    onEditUITestSuite,
+    onDeleteUITestSuite,
+    onUserProfile,
+    onSettings,
+    onTeamManager,
+    onShowAbout,
+    onReportProblem,
+  } = props;
 
-export const DockableLayout: React.FC<DockableLayoutProps> = ({
-  user,
-  collections,
-  activeRequest,
-  response,
-  isLoading,
-  testResults,
-  testSuites,
-  testExecutionResults,
-  uiTestSuites,
-  uiTestExecutionResults,
-  theme,
-  enableSyntaxHighlighting,
-  onRequestSelect,
-  onRequestChange,
-  onSendRequest,
-  onNewRequest,
-  onNewCollection,
-  onEditRequest,
-  onDeleteRequest,
-  onNewTestSuite,
-  onEditTestSuite,
-  onDeleteTestSuite,
-  onNewUITestSuite,
-  onEditUITestSuite,
-  onDeleteUITestSuite,
-  onDeleteCollection,
-  onRunTest,
-  onRunAllTests,
-  onRunTestSuite,
-  onRunUITestSuite,
-  onRunAllUITests,
-  onUserProfile,
-  onSettings,
-  onTeamManager,
-  onShowAbout,
-  onReportProblem
-}) => {
-  const [layoutManager] = useState(() => LayoutManager.getInstance());
   const [showHelpMenu, setShowHelpMenu] = useState(false);
-  const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(() => layoutManager.loadLayout());
-  const [isResponsive, setIsResponsive] = useState(() => layoutManager.getResponsiveConfig());
-  
-  // Panel docking states
-  const [collectionsPanelMode, setCollectionsPanelMode] = useState<'left' | 'right' | 'top' | 'bottom' | 'floating'>('left');
-  const [testExplorerPanelMode, setTestExplorerPanelMode] = useState<'left' | 'right' | 'top' | 'bottom' | 'floating'>('left');
-  const [contentLayoutMode, setContentLayoutMode] = useState<'stacked' | 'tabbed'>('stacked');
-  const [activeContentTab, setActiveContentTab] = useState<'request' | 'response' | 'testcode'>('request');
-  const [collectionsPanelVisible, setCollectionsPanelVisible] = useState(true);
-  const [testExplorerPanelVisible, setTestExplorerPanelVisible] = useState(true);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [collectionsVisible, setCollectionsVisible] = useState(true);
+  const [testsVisible, setTestsVisible] = useState(true);
+  const [runGroupOpen, setRunGroupOpen] = useState(false);
 
-  // Close help menu when clicking outside
   useEffect(() => {
-    if (showHelpMenu) {
-      const handleClickOutside = () => setShowHelpMenu(false);
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
-    }
-  }, [showHelpMenu]);
-
-  // Handle window resize for responsive design with debouncing
-  useEffect(() => {
-    let resizeTimer: NodeJS.Timeout;
-    
-    const handleResize = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        const newResponsive = layoutManager.getResponsiveConfig();
-        setIsResponsive(newResponsive);
-        
-        // Update layout config if responsive state changed
-        if (newResponsive.mobile !== isResponsive.mobile || 
-            newResponsive.tablet !== isResponsive.tablet || 
-            newResponsive.desktop !== isResponsive.desktop) {
-          const updatedConfig = layoutManager.updateResponsiveState();
-          setLayoutConfig(updatedConfig);
-        }
-      }, 150); // Debounce resize events
+    const onDocClick = () => {
+      setShowHelpMenu(false);
+      setShowProfileDropdown(false);
+      setRunGroupOpen(false);
     };
+    window.addEventListener('click', onDocClick);
+    return () => window.removeEventListener('click', onDocClick);
+  }, []);
 
-    window.addEventListener('resize', handleResize);
-    
-    // Handle orientation change on mobile devices
-    const handleOrientationChange = () => {
-      setTimeout(() => {
-        handleResize();
-      }, 100); // Small delay to ensure dimensions are updated
-    };
-    
-    window.addEventListener('orientationchange', handleOrientationChange);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleOrientationChange);
-      clearTimeout(resizeTimer);
-    };
-  }, [layoutManager, isResponsive]);
-
-  const handleSplitterChange = useCallback((sizes: number[], splitterKey: keyof LayoutConfig['splitterSizes']) => {
-    const size = sizes[0];
-    const updatedConfig = layoutManager.updateSplitterSize(splitterKey, size);
-    setLayoutConfig(updatedConfig);
-  }, [layoutManager]);
-
-  const togglePanel = useCallback((panelId: string) => {
-    if (panelId === 'sidebar') {
-      setCollectionsPanelVisible(!collectionsPanelVisible);
-    } else if (panelId === 'testRunner') {
-      setTestExplorerPanelVisible(!testExplorerPanelVisible);
-    }
-    // Keep the old layout config toggle for backwards compatibility
-    const panel = layoutConfig.panels[panelId as keyof typeof layoutConfig.panels];
-    const updatedConfig = layoutManager.updatePanelVisibility(panelId, !panel.visible);
-    setLayoutConfig(updatedConfig);
-  }, [collectionsPanelVisible, testExplorerPanelVisible, layoutConfig, layoutManager]);
-
-  const resetLayout = useCallback(() => {
-    const defaultConfig = layoutManager.resetLayout();
-    setLayoutConfig(defaultConfig);
-  }, [layoutManager]);
-
-  const showPanel = useCallback((panelId: string) => {
-    if (panelId === 'collections' || panelId === 'sidebar') {
-      setCollectionsPanelVisible(true);
-      const updatedConfig = layoutManager.updatePanelVisibility('sidebar', true);
-      setLayoutConfig(updatedConfig);
-    } else if (panelId === 'testExplorer' || panelId === 'testRunner') {
-      setTestExplorerPanelVisible(true);
-      const updatedConfig = layoutManager.updatePanelVisibility('testRunner', true);
-      setLayoutConfig(updatedConfig);
-    }
-  }, [layoutManager]);
-
-  const restoreAllPanels = useCallback(() => {
-    setCollectionsPanelVisible(true);
-    setTestExplorerPanelVisible(true);
-    let updatedConfig = layoutManager.updatePanelVisibility('sidebar', true);
-    updatedConfig = layoutManager.updatePanelVisibility('testRunner', true);
-    setLayoutConfig(updatedConfig);
-  }, [layoutManager]);
-
-  // Listen for menu events to show/hide panels
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.electron) {
-      const handleShowPanel = (_event: any, panelId: string) => {
-        showPanel(panelId);
-      };
-
-      const handleRestoreAllPanels = () => {
-        restoreAllPanels();
-      };
-
-      window.electron.on('menu-show-panel', handleShowPanel);
-      window.electron.on('menu-restore-all-panels', handleRestoreAllPanels);
-
-      return () => {
-        window.electron.removeListener('menu-show-panel', handleShowPanel);
-        window.electron.removeListener('menu-restore-all-panels', handleRestoreAllPanels);
-      };
-    }
-  }, [showPanel, restoreAllPanels]);
-
-  // Get all requests for test explorer
-  const allRequests = collections.flatMap(c => c.requests || []);
-
-  // Convert testSuites array to Map for TestExplorer
+  // flattened requests not needed in this simplified toolbar implementation
   const testSuitesMap = new Map<number, TestSuite>();
-  testSuites.forEach(suite => {
-    if (suite.requestId) {
-      testSuitesMap.set(suite.requestId, suite);
-    }
-  });
+  testSuites.forEach(s => { if (s.requestId) testSuitesMap.set(s.requestId, s); });
 
-  // Mobile layout - optimized for touch and different orientations
-  if (isResponsive.mobile) {
-    const isTouchDevice = 'ontouchstart' in window;
-    const isPortrait = window.innerHeight > window.innerWidth;
-    
-    return (
-      <div className={`dockable-layout mobile ${isPortrait ? 'portrait' : 'landscape'} ${isTouchDevice ? 'touch' : ''}`}>
-        <div className="mobile-header">
-          <div className="mobile-nav-buttons">
-            <button 
-              className={`panel-toggle ${layoutConfig.panels.sidebar.visible ? 'active' : ''}`}
-              onClick={() => togglePanel('sidebar')}
-              aria-label="Toggle Collections Panel"
-            >
-              📁 Collections {layoutConfig.panels.sidebar.visible ? '▼' : '▶'}
-            </button>
-            <button 
-              className={`panel-toggle ${layoutConfig.panels.testRunner.visible ? 'active' : ''}`}
-              onClick={() => togglePanel('testRunner')}
-              aria-label="Toggle Test Explorer Panel"
-            >
-              🧪 Tests {layoutConfig.panels.testRunner.visible ? '▼' : '▶'}
-            </button>
-          </div>
-          <button className="layout-options" onClick={resetLayout} aria-label="Reset Layout">
-            🔄
-          </button>
-        </div>
-        
-        <div className="mobile-panels">
-          {layoutConfig.panels.sidebar.visible && (
-            <div className="mobile-panel collections-panel">
-              <div className="panel-header">
-                <span className="panel-title">📁 Collections</span>
-                <button 
-                  className="panel-close"
-                  onClick={() => togglePanel('sidebar')}
-                  aria-label="Close Collections Panel"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="panel-content">
-                <EnhancedSidebar
-                  user={user}
-                  collections={collections}
-                  onRequestSelect={onRequestSelect}
-                  onNewRequest={onNewRequest}
-                  onNewCollection={onNewCollection}
-                  onEditRequest={onEditRequest}
-                  onDeleteRequest={onDeleteRequest}
-                  onDeleteCollection={onDeleteCollection}
-                  activeRequest={activeRequest}
-                  testResults={testResults}
-                  testSuites={testSuitesMap}
-                  uiTestSuites={uiTestSuites}
-                  testExecutionResults={testExecutionResults}
-                  uiTestExecutionResults={uiTestExecutionResults}
-                  onRunTest={onRunTest}
-                  onRunAllTests={onRunAllTests}
-                  onRunTestSuite={onRunTestSuite}
-                  onRunUITestSuite={onRunUITestSuite}
-                  onRunAllUITests={onRunAllUITests}
-                  onNewTestSuite={onNewTestSuite}
-                  onEditTestSuite={onEditTestSuite}
-                  onDeleteTestSuite={onDeleteTestSuite}
-                  onNewUITestSuite={onNewUITestSuite}
-                  onEditUITestSuite={onEditUITestSuite}
-                  onDeleteUITestSuite={onDeleteUITestSuite}
-                  onUserProfile={onUserProfile}
-                  onSettings={onSettings}
-                  onTeamManager={onTeamManager}
-                  enableTestExplorer={false} // Separate panel on mobile
-                />
-              </div>
-            </div>
-          )}
+  const runSelected = () => {
+    if (activeRequest) onRunTest?.(activeRequest.id).catch(err => console.error('Run selected failed', err));
+  };
 
-          {layoutConfig.panels.testRunner.visible && (
-            <div className="mobile-panel test-panel">
-              <div className="panel-header">
-                <span className="panel-title">🧪 Test Explorer</span>
-                <button 
-                  className="panel-close"
-                  onClick={() => togglePanel('testRunner')}
-                  aria-label="Close Test Explorer Panel"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="panel-content">
-                <TestExplorer
-                  requests={allRequests}
-                  testSuites={testSuitesMap}
-                  onRunTest={onRunTest}
-                  onRunAllTests={onRunAllTests}
-                  onRunTestSuite={onRunTestSuite}
-                  testResults={testResults}
-                  testExecutionResults={testExecutionResults}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+  const debugSelected = () => {
+    if (activeRequest) onRunTest?.(activeRequest.id).catch(err => console.error('Debug selected failed', err)); // placeholder: same handler
+  };
 
-        {activeRequest && (
-          <div className="mobile-content">
-            <Allotment 
-              vertical={isPortrait}
-              snap={true} // Enable snap points
-              className={isPortrait ? 'allotment-vertical' : 'allotment-horizontal'}
-            >
-              <Allotment.Pane 
-                minSize={isPortrait ? 200 : 300}
-                preferredSize={isPortrait ? "50%" : "60%"}
-                snap
-              >
-                <div className="mobile-panel-wrapper">
-                  <div className="panel-header">
-                    <span className="panel-title">📝 Request</span>
-                  </div>
-                  <EnhancedRequestPanel
-                    request={activeRequest}
-                    onRequestChange={onRequestChange}
-                    onSendRequest={onSendRequest}
-                    isLoading={isLoading}
-                    enableSyntaxHighlighting={enableSyntaxHighlighting}
-                    theme={theme}
-                  />
-                </div>
-              </Allotment.Pane>
-              <Allotment.Pane 
-                minSize={isPortrait ? 150 : 250}
-                snap
-              >
-                <div className="mobile-panel-wrapper">
-                  <div className="panel-header">
-                    <span className="panel-title">📄 Response</span>
-                  </div>
-                  <ResponsePanel
-                    response={response}
-                    isLoading={isLoading}
-                  />
-                </div>
-              </Allotment.Pane>
-            </Allotment>
-          </div>
-        )}
-        
-        {!activeRequest && (
-          <div className="mobile-welcome">
-            <div className="welcome-content">
-              <h2>VerifyApi</h2>
-              <p>Professional API testing on mobile</p>
-              <div className="welcome-actions">
-                <button className="btn btn-primary" onClick={onNewRequest}>
-                  ➕ New Request
-                </button>
-                <button className="btn btn-secondary" onClick={onNewCollection}>
-                  📁 New Collection
-                </button>
-              </div>
-              <div className="mobile-tips">
-                <p>💡 Tap headers to show/hide panels</p>
-                <p>📱 Rotate device for different layouts</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Desktop/Tablet layout with dockable panels
-  const isTablet = isResponsive.tablet;
-  const isPortraitTablet = isTablet && window.innerHeight > window.innerWidth;
-  
   return (
-    <div className={`dockable-layout ${isTablet ? 'tablet' : 'desktop'} ${isPortraitTablet ? 'portrait' : 'landscape'}`}>
+    <div className={`dockable-layout ${theme === 'light' ? 'light-theme' : ''}`}>
       <div className="layout-toolbar">
-        <div className="panel-controls">
-          <button 
-            className={`panel-toggle ${collectionsPanelVisible ? 'active' : ''}`}
-            onClick={() => togglePanel('sidebar')}
-            title="Toggle Collections Panel"
-            aria-label="Toggle Collections Panel"
-          >
-            📁 {!isTablet && 'Collections'}
-          </button>
-          <button 
-            className={`panel-toggle ${testExplorerPanelVisible ? 'active' : ''}`}
-            onClick={() => togglePanel('testRunner')}
-            title="Toggle Test Explorer Panel"
-            aria-label="Toggle Test Explorer Panel"
-          >
-            🧪 {!isTablet && 'Tests'}
-          </button>
-          <div className="toolbar-separator"></div>
-          <button 
-            className={`layout-mode-toggle ${contentLayoutMode === 'tabbed' ? 'active' : ''}`}
-            onClick={() => setContentLayoutMode(contentLayoutMode === 'stacked' ? 'tabbed' : 'stacked')}
-            title={`Switch to ${contentLayoutMode === 'stacked' ? 'Tabbed' : 'Stacked'} Layout`}
-            aria-label="Toggle Layout Mode"
-          >
-            {contentLayoutMode === 'stacked' ? '📑' : '📚'} {!isTablet && (contentLayoutMode === 'stacked' ? 'Tabs' : 'Stack')}
-          </button>
-          <div className="toolbar-spacer"></div>
-          <div className="help-menu-container">
-            <button 
-              className={`help-menu-toggle ${showHelpMenu ? 'active' : ''}`}
-              onClick={() => setShowHelpMenu(!showHelpMenu)}
-              title="Help Menu"
-              aria-label="Help Menu"
-            >
-              ❓ {!isTablet && 'Help'}
-            </button>
+        <div className="toolbar-left">
+          <ModernButton className={`toolbar-button ${collectionsVisible ? 'active' : ''}`} variant="secondary" size="small" onClick={() => setCollectionsVisible(v => !v)} title="Toggle Collections" icon={<CollectionIcon />} />
+
+          <ModernButton className={`toolbar-button ${testsVisible ? 'active' : ''}`} variant="secondary" size="small" onClick={() => setTestsVisible(v => !v)} title="Toggle Test Explorer" icon={<TestIcon />} />
+
+          <div className="toolbar-sep" />
+
+          <div className="toolbar-group" onClick={e => e.stopPropagation()}>
+            <ModernButton variant="primary" size="small" onClick={() => onRunAllTests?.()} title="Run" icon={<span>▶️</span>}>Run</ModernButton>
+            <ModernButton variant="secondary" size="small" onClick={() => debugSelected()} title="Debug" icon={<span>🐞</span>}>Debug</ModernButton>
+            <ModernButton variant="secondary" size="small" className="toolbar-button small" title="Run options" onClick={() => setRunGroupOpen(o => !o)}>▾</ModernButton>
+            {runGroupOpen && (
+              <div className="run-dropdown" onClick={e => e.stopPropagation()}>
+                <button className="run-item" onClick={() => { setRunGroupOpen(false); onRunAllTests?.(); }}>Run All Tests</button>
+                <button className="run-item" onClick={() => { setRunGroupOpen(false); runSelected(); }}>Run Selected</button>
+                <button className="run-item" onClick={() => { setRunGroupOpen(false); if (activeRequest) {
+                    const suite = testSuitesMap.get(activeRequest.id);
+                    if (suite && response) {
+                      onRunTestSuite?.(activeRequest.id, suite, response, activeRequest).catch(err => console.error('Run test suite failed', err));
+                    }
+                  } }}>Run Test Suite</button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="toolbar-right">
+          <div className="help-container">
+            <ModernButton className={`toolbar-button ${showHelpMenu ? 'active' : ''}`} variant="secondary" size="small" onClick={(e?: React.MouseEvent) => { e?.stopPropagation(); setShowHelpMenu(s => !s); }} title="Help" icon={<span>❓</span>} />
             {showHelpMenu && (
               <div className="help-dropdown">
-                <button 
-                  className="help-menu-item"
-                  onClick={() => {
-                    setShowHelpMenu(false);
-                    onShowAbout?.();
-                  }}
-                >
-                  ℹ️ About VerifyApi
-                </button>
-                <button 
-                  className="help-menu-item"
-                  onClick={() => {
-                    setShowHelpMenu(false);
-                    onReportProblem?.();
-                  }}
-                >
-                  🐛 Report a Problem
-                </button>
-                <div className="help-menu-separator"></div>
-                <button 
-                  className="help-menu-item"
-                    onClick={() => {
-                    setShowHelpMenu(false);
-                    if (typeof window !== 'undefined' && (window as any).electronAPI?.openExternal) {
-                      (window as any).electronAPI.openExternal('https://github.com/dotnetappdev/apitester3').catch((e: any) => console.warn('openExternal failed', e));
-                    } else {
-                      window.open('https://github.com/dotnetappdev/apitester3', '_blank', 'noopener,noreferrer');
-                    }
-                  }}
-                >
-                  🔗 GitHub Repository
-                </button>
-                <button 
-                  className="help-menu-item"
-                    onClick={() => {
-                    setShowHelpMenu(false);
-                    if (typeof window !== 'undefined' && (window as any).electronAPI?.openExternal) {
-                      (window as any).electronAPI.openExternal('https://github.com/dotnetappdev/apitester3#readme').catch((e: any) => console.warn('openExternal failed', e));
-                    } else {
-                      window.open('https://github.com/dotnetappdev/apitester3#readme', '_blank', 'noopener,noreferrer');
-                    }
-                  }}
-                >
-                  📖 Documentation
-                </button>
+                <button onClick={() => { setShowHelpMenu(false); onShowAbout?.(); }}>About</button>
+                <button onClick={() => { setShowHelpMenu(false); onReportProblem?.(); }}>Report Problem</button>
+                <button onClick={() => { setShowHelpMenu(false); window.open('https://github.com/dotnetappdev/apitester3', '_blank'); }}>GitHub</button>
               </div>
             )}
           </div>
-          <button 
-            className="reset-layout"
-            onClick={resetLayout}
-            title="Reset Layout to Default"
-            aria-label="Reset Layout"
-          >
-            🔄 {!isTablet && 'Reset'}
-          </button>
-        </div>
-        {isTablet && (
-          <div className="tablet-orientation-indicator">
-            {isPortraitTablet ? '📱' : '💻'} {window.innerWidth}×{window.innerHeight}
+
+          <ModernButton className="toolbar-button" variant="secondary" size="small" title="Reset Layout" onClick={() => { /* placeholder */ }} icon={<span>🔄</span>} />
+
+          <div className={`toolbar-avatar-container ${showProfileDropdown ? 'open' : ''}`} onClick={e => e.stopPropagation()}>
+            <button className={`toolbar-avatar ${user?.profilePicture ? 'has-image' : ''}`} onClick={() => setShowProfileDropdown(s => !s)} title={user?.username || 'Profile'}>
+              {user?.profilePicture ? <img src={user.profilePicture} alt={user.username} /> : <span className="avatar-initial">{user?.username?.charAt(0).toUpperCase() || '?'}</span>}
+            </button>
+            {showProfileDropdown && (
+              <div className="profile-dropdown">
+                <button className="profile-dropdown-item" onClick={() => { setShowProfileDropdown(false); onUserProfile?.(); }}>Profile</button>
+                <button className="profile-dropdown-item" onClick={() => { setShowProfileDropdown(false); onTeamManager?.(); }}>Teams</button>
+                <button className="profile-dropdown-item" onClick={() => { setShowProfileDropdown(false); onSettings?.(); }}>Settings</button>
+                <div className="profile-dropdown-sep" />
+                <button className="profile-dropdown-item" onClick={() => { setShowProfileDropdown(false); onShowAbout?.(); }}>About</button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
-      <Allotment
-        snap={true}
-        defaultSizes={[layoutConfig.splitterSizes.main, 1000 - layoutConfig.splitterSizes.main]}
-        onChange={(sizes) => handleSplitterChange(sizes, 'main')}
-        className="main-allotment"
-      >
-        {/* Left Panel - Sidebar + Test Runner - Stackable */}
-        <Allotment.Pane 
-          minSize={layoutConfig.panels.sidebar.minSize}
-          maxSize={layoutConfig.panels.sidebar.maxSize}
-          visible={(collectionsPanelMode === 'left' && collectionsPanelVisible) || (testExplorerPanelMode === 'left' && testExplorerPanelVisible)}
-        >
-          <div className="stacked-panels-container">
-            {/* Collections Panel */}
-            {collectionsPanelMode === 'left' && collectionsPanelVisible && (
-              <DockablePanel
-                id="collections-panel"
-                title="Collections"
-                defaultDock="left"
-                stackable={true}
-                hideDockingControls={true}
-                onDockChange={(mode) => setCollectionsPanelMode(mode)}
-                onClose={() => setCollectionsPanelVisible(false)}
-              >
-                <EnhancedSidebar
-                  user={user}
-                  collections={collections}
-                  onRequestSelect={onRequestSelect}
-                  onNewRequest={onNewRequest}
-                  onNewCollection={onNewCollection}
-                  onEditRequest={onEditRequest}
-                  onDeleteRequest={onDeleteRequest}
-                  onDeleteCollection={onDeleteCollection}
-                  activeRequest={activeRequest}
-                  testResults={testResults}
-                  testSuites={testSuitesMap}
-                  uiTestSuites={uiTestSuites}
-                  testExecutionResults={testExecutionResults}
-                  uiTestExecutionResults={uiTestExecutionResults}
-                  onRunTest={onRunTest}
-                  onRunAllTests={onRunAllTests}
-                  onRunTestSuite={onRunTestSuite}
-                  onRunUITestSuite={onRunUITestSuite}
-                  onRunAllUITests={onRunAllUITests}
-                  onNewTestSuite={onNewTestSuite}
-                  onEditTestSuite={onEditTestSuite}
-                  onDeleteTestSuite={onDeleteTestSuite}
-                  onNewUITestSuite={onNewUITestSuite}
-                  onEditUITestSuite={onEditUITestSuite}
-                  onDeleteUITestSuite={onDeleteUITestSuite}
-                  onUserProfile={onUserProfile}
-                  onSettings={onSettings}
-                  onTeamManager={onTeamManager}
-                  enableTestExplorer={false}
-                />
-              </DockablePanel>
-            )}
-
-            {/* Test Explorer Panel */}
-            {testExplorerPanelMode === 'left' && testExplorerPanelVisible && (
-              <DockablePanel
-                id="test-explorer-panel"
-                title="Test Explorer"
-                defaultDock="left"
-                stackable={true}
-                hideDockingControls={true}
-                onDockChange={(mode) => setTestExplorerPanelMode(mode)}
-                onClose={() => setTestExplorerPanelVisible(false)}
-              >
-                <TestExplorer
-                  requests={allRequests}
-                  testSuites={testSuitesMap}
-                  onRunTest={onRunTest}
-                  onRunAllTests={onRunAllTests}
-                  onRunTestSuite={onRunTestSuite}
-                  onNewTestSuite={onNewTestSuite}
-                  onEditTestSuite={onEditTestSuite}
-                  onDeleteTestSuite={onDeleteTestSuite}
-                  testResults={testResults}
-                  testExecutionResults={testExecutionResults}
-                />
-              </DockablePanel>
-            )}
-          </div>
-        </Allotment.Pane>
-
-        {/* Main Content Area */}
-        <Allotment.Pane minSize={isTablet ? 350 : 400} snap>
-          {activeRequest ? (
-            contentLayoutMode === 'stacked' ? (
-              // Stacked Layout (default)
-              <Allotment 
-                vertical={true}
-                snap={true}
-                defaultSizes={[60, 40]}
-                onChange={(sizes) => handleSplitterChange(sizes, 'content')}
-                className="content-allotment"
-              >
-                <Allotment.Pane 
-                  minSize={isTablet ? 250 : 300}
-                  preferredSize="60%"
-                  snap
-                >
-                  <div className="panel-container request-panel">
-                    <div className="panel-header">
-                      <span className="panel-title">📝 Request</span>
-                      {isLoading && <span className="loading-indicator">⏳</span>}
-                    </div>
-                    <div className="panel-content">
-                      <EnhancedRequestPanel
-                        request={activeRequest}
-                        onRequestChange={onRequestChange}
-                        onSendRequest={onSendRequest}
-                        isLoading={isLoading}
-                        enableSyntaxHighlighting={enableSyntaxHighlighting}
-                        theme={theme}
-                      />
-                    </div>
-                  </div>
-                </Allotment.Pane>
-                
-                <Allotment.Pane 
-                  minSize={isTablet ? 200 : 250}
-                  snap
-                >
-                  <div className="panel-container response-panel">
-                    <div className="panel-header">
-                      <span className="panel-title">📄 Response</span>
-                      {response && (
-                        <span className="response-status">
-                          {response.status} • {response.responseTime}ms
-                        </span>
-                      )}
-                    </div>
-                    <div className="panel-content">
-                      <ResponsePanel
-                        response={response}
-                        isLoading={isLoading}
-                      />
-                    </div>
-                  </div>
-                </Allotment.Pane>
-              </Allotment>
-            ) : (
-              // Tabbed Layout
-              <div className="tabbed-content-container">
-                <div className="content-tabs">
-                  <button
-                    className={`content-tab ${activeContentTab === 'request' ? 'active' : ''}`}
-                    onClick={() => setActiveContentTab('request')}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                      <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
-                      <path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8zm0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/>
-                    </svg>
-                    <span>Request Editor</span>
-                    {isLoading && <span className="tab-loading-indicator">⏳</span>}
-                  </button>
-                  <button
-                    className={`content-tab ${activeContentTab === 'response' ? 'active' : ''}`}
-                    onClick={() => setActiveContentTab('response')}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                      <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
-                      <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
-                    </svg>
-                    <span>Response</span>
-                    {response && (
-                      <span className="tab-status-badge">
-                        {response.status} • {response.responseTime}ms
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    className={`content-tab ${activeContentTab === 'testcode' ? 'active' : ''}`}
-                    onClick={() => setActiveContentTab('testcode')}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                      <path d="M8.5 5.5a.5.5 0 0 0-1 0v2h-2a.5.5 0 0 0 0 1h2v2a.5.5 0 0 0 1 0v-2h2a.5.5 0 0 0 0-1h-2v-2z"/>
-                      <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
-                      <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
-                    </svg>
-                    <span>Test Code</span>
-                    {activeRequest && (
-                      <span className="tab-status-badge">
-                        {(testSuitesMap.get(activeRequest.id)?.testCases || []).length} tests
-                      </span>
-                    )}
-                  </button>
-                </div>
-                <div className="content-tab-panel">
-                  {activeContentTab === 'request' ? (
-                    <div className="panel-container request-panel full-height">
-                      <div className="panel-content">
-                        <EnhancedRequestPanel
-                          request={activeRequest}
-                          onRequestChange={onRequestChange}
-                          onSendRequest={onSendRequest}
-                          isLoading={isLoading}
-                          enableSyntaxHighlighting={enableSyntaxHighlighting}
-                          theme={theme}
-                        />
-                      </div>
-                    </div>
-                  ) : activeContentTab === 'response' ? (
-                    <div className="panel-container response-panel full-height">
-                      <div className="panel-content">
-                        <ResponsePanel
-                          response={response}
-                          isLoading={isLoading}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="panel-container test-code-panel full-height">
-                      <div className="panel-content">
-                        {activeRequest ? (
-                          <TestScriptEditor
-                            requestId={activeRequest.id}
-                            requestName={activeRequest.name}
-                            onTestSuiteChange={(testSuite) => onEditTestSuite(testSuite)}
-                            onRunTests={onRunTestSuite}
-                            testResults={testExecutionResults.get(activeRequest.id)}
-                          />
-                        ) : (
-                          <div className="empty-state">
-                            <div className="empty-state-icon">🧪</div>
-                            <h3>No Request Selected</h3>
-                            <p>Select a request from the Collections panel to write test code</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )
-          ) : (
-            <div className="welcome-screen">
-              <div className="welcome-content">
-                <h1>Welcome to VerifyApi</h1>
-                <p>Professional API testing tool with Visual Studio-style dockable layout</p>
-                <div className="welcome-actions">
-                  <button className="btn btn-primary" onClick={onNewRequest}>
-                    Create New Request
-                  </button>
-                  <button className="btn btn-secondary" onClick={onNewCollection}>
-                    Create Collection
-                  </button>
-                </div>
-                <div className="layout-info">
-                  <p>💡 Drag panel borders to resize • Toggle panels with toolbar buttons • Right-click for more options</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </Allotment.Pane>
-      </Allotment>
-
-      {/* Floating Panels Overlay */}
-      {collectionsPanelMode === 'floating' && collectionsPanelVisible && (
-        <DockablePanel
-          id="collections-panel-floating"
-          title="Collections"
-          floating={true}
-          defaultDock="left"
-          hideDockingControls={true}
-          onDockChange={(mode) => setCollectionsPanelMode(mode)}
-          onClose={() => setCollectionsPanelVisible(false)}
-        >
-          <EnhancedSidebar
-            user={user}
+      <div className="main-area">
+        <div className={`sidebar-column ${collectionsVisible ? 'visible' : 'hidden'}`}>
+            <EnhancedSidebar
+            user={user!}
             collections={collections}
             onRequestSelect={onRequestSelect}
             onNewRequest={onNewRequest}
@@ -798,7 +198,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
             onRunTestSuite={onRunTestSuite}
             onRunUITestSuite={onRunUITestSuite}
             onRunAllUITests={onRunAllUITests}
-            onNewTestSuite={onNewTestSuite}
+            onNewTestSuite={() => onNewTestSuite?.(activeRequest ? activeRequest.id : 0)}
             onEditTestSuite={onEditTestSuite}
             onDeleteTestSuite={onDeleteTestSuite}
             onNewUITestSuite={onNewUITestSuite}
@@ -806,585 +206,65 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
             onDeleteUITestSuite={onDeleteUITestSuite}
             onUserProfile={onUserProfile}
             onSettings={onSettings}
-            onTeamManager={onTeamManager}
-            enableTestExplorer={false}
+            enableTestExplorer={true}
           />
-        </DockablePanel>
-      )}
+        </div>
 
-      {testExplorerPanelMode === 'floating' && testExplorerPanelVisible && (
-        <DockablePanel
-          id="test-explorer-panel-floating"
-          title="Test Explorer"
-          floating={true}
-          defaultDock="left"
-          hideDockingControls={true}
-          onDockChange={(mode) => setTestExplorerPanelMode(mode)}
-          onClose={() => setTestExplorerPanelVisible(false)}
-        >
-          <TestExplorer
-            requests={allRequests}
-            testSuites={testSuitesMap}
-            onRunTest={onRunTest}
-            onRunAllTests={onRunAllTests}
-            onRunTestSuite={onRunTestSuite}
-            onNewTestSuite={onNewTestSuite}
-            onEditTestSuite={onEditTestSuite}
-            onDeleteTestSuite={onDeleteTestSuite}
-            testResults={testResults}
-            testExecutionResults={testExecutionResults}
-          />
-        </DockablePanel>
-      )}
+        <div className="content-column">
+          {activeRequest ? (
+            <div className="content-area">
+              <EnhancedRequestPanel
+                request={activeRequest}
+                onRequestChange={onRequestChange}
+                onSendRequest={onSendRequest}
+                isLoading={isLoading}
+                enableSyntaxHighlighting={enableSyntaxHighlighting}
+                theme={theme}
+              />
+
+              <ResponsePanel response={response} isLoading={isLoading} />
+            </div>
+          ) : (
+            <div className="empty-state">
+              <h2>Welcome to VerifyApi</h2>
+              <p>Select a request to get started.</p>
+            </div>
+          )}
+        </div>
+      </div>
 
       <style>{`
-        .stacked-panels-container {
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          gap: 4px;
-        }
-
-        .stacked-panels-container > * {
-          flex: 1;
-          min-height: 200px;
-        }
-
-        .dockable-layout {
-          height: 100vh;
-          display: flex;
-          flex-direction: column;
-          background: var(--bg-primary);
-        }
-
-        .layout-toolbar {
-          height: 40px;
-          background: var(--bg-primary);
-          border-bottom: 1px solid var(--border-color);
-          display: flex;
-          align-items: center;
-          padding: 0 12px;
-          flex-shrink: 0;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-        }
-
-        .panel-controls {
-          display: flex;
-          gap: 6px;
-          align-items: center;
-        }
-
-        .panel-toggle {
-          background: transparent;
-          border: 1px solid transparent;
-          color: var(--text-primary);
-          padding: 6px 14px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 13px;
-          font-weight: 500;
-          transition: all 0.15s ease;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          height: 32px;
-        }
-
-        .panel-toggle:hover {
-          background: var(--bg-hover);
-          border-color: transparent;
-        }
-
-        .panel-toggle.active {
-          background: var(--bg-tertiary);
-          color: var(--accent-color);
-          border-color: transparent;
-        }
-
-        .layout-mode-toggle {
-          background: transparent;
-          border: 1px solid transparent;
-          color: var(--text-primary);
-          padding: 6px 14px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 13px;
-          font-weight: 500;
-          transition: all 0.15s ease;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          height: 32px;
-        }
-
-        .layout-mode-toggle:hover {
-          background: var(--bg-hover);
-          border-color: transparent;
-        }
-
-        .layout-mode-toggle.active {
-          background: var(--bg-tertiary);
-          color: var(--accent-color);
-          border-color: transparent;
-        }
-
-        .reset-layout {
-          background: transparent;
-          border: 1px solid transparent;
-          color: var(--text-muted);
-          padding: 4px 8px;
-          border-radius: 3px;
-          cursor: pointer;
-          font-size: 12px;
-          margin-left: auto;
-          transition: all 0.2s ease;
-        }
-
-        .reset-layout:hover {
-          background: var(--bg-hover);
-          border-color: var(--border-color);
-          color: var(--text-primary);
-        }
-
-        /* Help Menu */
-        .help-menu-container {
-          position: relative;
-        }
-
-        .help-menu-toggle {
-          background: transparent;
-          border: 1px solid transparent;
-          color: var(--text-primary);
-          padding: 6px 14px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 13px;
-          font-weight: 500;
-          transition: all 0.15s ease;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          height: 32px;
-        }
-
-        .help-menu-toggle:hover {
-          background: var(--bg-hover);
-          border-color: transparent;
-        }
-        
-        .help-menu-toggle.active {
-          background: var(--bg-tertiary);
-          color: var(--accent-color);
-          border-color: transparent;
-        }
-
-        .help-dropdown {
-          position: absolute;
-          top: 100%;
-          right: 0;
-          margin-top: 4px;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          border-radius: 4px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-          min-width: 200px;
-          z-index: 1000;
-          padding: 4px 0;
-        }
-
-        .help-menu-item {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          width: 100%;
-          padding: 8px 12px;
-          background: transparent;
-          border: none;
-          color: var(--text-primary);
-          cursor: pointer;
-          font-size: 13px;
-          text-align: left;
-          transition: background-color 0.15s ease;
-        }
-
-        .help-menu-item:hover {
-          background: var(--bg-hover);
-        }
-
-        .help-menu-separator {
-          height: 1px;
-          background: var(--border-color);
-          margin: 4px 0;
-        }
-
-        .panel-container {
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-        }
-
-        .panel-header {
-          height: 28px;
-          background: var(--bg-tertiary);
-          border-bottom: 1px solid var(--border-color);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 8px;
-          flex-shrink: 0;
-        }
-
-        .panel-title {
-          font-size: 11px;
-          font-weight: 600;
-          color: var(--text-primary);
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .panel-close {
-          background: transparent;
-          border: none;
-          color: var(--text-muted);
-          cursor: pointer;
-          padding: 2px 4px;
-          border-radius: 2px;
-          font-size: 10px;
-          line-height: 1;
-          transition: all 0.2s ease;
-        }
-
-        .panel-close:hover {
-          background: var(--bg-hover);
-          color: var(--text-primary);
-        }
-
-        .panel-content {
-          flex: 1;
-          overflow: hidden;
-        }
-
-        /* Mobile layout styles */
-        .dockable-layout.mobile {
-          height: 100vh;
-          overflow: hidden;
-          position: relative;
-        }
-
-        .dockable-layout.mobile.touch {
-          -webkit-overflow-scrolling: touch;
-          scroll-behavior: smooth;
-        }
-
-        .mobile-header {
-          height: 48px;
-          background: var(--bg-secondary);
-          border-bottom: 1px solid var(--border-color);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 12px;
-          flex-shrink: 0;
-          position: sticky;
-          top: 0;
-          z-index: 100;
-        }
-
-        .mobile-nav-buttons {
-          display: flex;
-          gap: 8px;
-        }
-
-        .mobile-header .panel-toggle {
-          padding: 8px 12px;
-          font-size: 14px;
-          border-radius: 6px;
-          min-height: 44px; /* Touch-friendly */
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .layout-options {
-          background: transparent;
-          border: 1px solid var(--border-color);
-          color: var(--text-muted);
-          padding: 8px;
-          border-radius: 6px;
-          font-size: 16px;
-          min-height: 44px;
-          min-width: 44px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .mobile-panels {
-          display: flex;
-          flex-direction: column;
-          overflow-y: auto;
-          max-height: 40vh;
-        }
-
-        .mobile-panel {
-          border-bottom: 1px solid var(--border-color);
-          background: var(--bg-secondary);
-        }
-
-        .mobile-panel .panel-header {
-          height: 40px;
-          padding: 0 16px;
-          background: var(--bg-tertiary);
-          border-bottom: 1px solid var(--border-color);
-        }
-
-        .mobile-panel .panel-title {
-          font-size: 14px;
-          font-weight: 600;
-        }
-
-        .mobile-panel .panel-content {
-          max-height: 300px;
-          overflow-y: auto;
-        }
-
-        .mobile-content {
-          flex: 1;
-          min-height: 400px;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .mobile-panel-wrapper {
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          background: var(--bg-secondary);
-        }
-
-        .mobile-welcome {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
-          text-align: center;
-        }
-
-        .mobile-welcome .welcome-content h2 {
-          font-size: 24px;
-          margin-bottom: 8px;
-          color: var(--text-primary);
-        }
-
-        .mobile-welcome .welcome-content p {
-          font-size: 16px;
-          color: var(--text-muted);
-          margin-bottom: 20px;
-        }
-
-        .mobile-welcome .welcome-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          margin-bottom: 20px;
-        }
-
-        .mobile-welcome .btn {
-          padding: 12px 20px;
-          font-size: 16px;
-          border-radius: 8px;
-          min-height: 48px;
-        }
-
-        .mobile-tips {
-          padding: 16px;
-          background: var(--bg-tertiary);
-          border-radius: 8px;
-          border: 1px solid var(--border-color);
-        }
-
-        .mobile-tips p {
-          font-size: 12px;
-          color: var(--text-muted);
-          margin: 4px 0;
-        }
-
-        /* Tablet layout styles */
-        .dockable-layout.tablet {
-          height: 100vh;
-        }
-
-        .dockable-layout.tablet .layout-toolbar {
-          height: 40px;
-          padding: 0 12px;
-        }
-
-        .dockable-layout.tablet .panel-toggle {
-          padding: 6px 12px;
-          font-size: 13px;
-          min-height: 36px;
-        }
-
-        .tablet-orientation-indicator {
-          font-size: 12px;
-          color: var(--text-muted);
-          padding: 4px 8px;
-          background: var(--bg-tertiary);
-          border-radius: 4px;
-          border: 1px solid var(--border-color);
-        }
-
-        .toolbar-spacer {
-          flex: 1;
-        }
-
-        .toolbar-separator {
-          width: 1px;
-          height: 24px;
-          background: var(--border-color);
-          margin: 0 8px;
-        }
-
-        /* Enhanced panel headers with status indicators */
-        .panel-header .loading-indicator {
-          font-size: 12px;
-          animation: pulse 1s infinite;
-        }
-
-        .panel-header .response-status {
-          font-size: 10px;
-          color: var(--text-muted);
-          font-family: 'Consolas', Monaco, monospace;
-        }
-
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-
-        /* Touch-friendly improvements */
-        @media (pointer: coarse) {
-          .panel-toggle,
-          .panel-close,
-          .reset-layout {
-            min-height: 44px;
-            min-width: 44px;
-            padding: 8px;
-          }
-          
-          .panel-header {
-            height: 44px;
-          }
-          
-          .mobile-header {
-            height: 56px;
-          }
-        }
-
-        /* Responsive breakpoints */
-        @media (max-width: 479px) {
-          .dockable-layout.mobile .mobile-header .panel-toggle {
-            font-size: 12px;
-            padding: 6px 8px;
-          }
-          
-          .mobile-welcome .welcome-content h2 {
-            font-size: 20px;
-          }
-        }
-
-        @media (min-width: 480px) and (max-width: 767px) {
-          .mobile-panels {
-            max-height: 50vh;
-          }
-          
-          .dockable-layout.mobile.landscape .mobile-panels {
-            max-height: 35vh;
-          }
-        }
-
-        @media (min-width: 768px) and (max-width: 1023px) {
-          .dockable-layout.tablet.portrait .layout-toolbar {
-            height: 48px;
-          }
-          
-          .dockable-layout.tablet.portrait .panel-toggle {
-            padding: 8px 16px;
-            font-size: 14px;
-          }
-        }
-
-        /* Welcome screen enhancements */
-        .welcome-screen {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          padding: 20px;
-        }
-
-        .welcome-content {
-          text-align: center;
-          max-width: 500px;
-        }
-
-        .welcome-content h1 {
-          font-size: 32px;
-          margin-bottom: 12px;
-          color: var(--text-primary);
-        }
-
-        .welcome-content p {
-          font-size: 16px;
-          color: var(--text-muted);
-          margin-bottom: 24px;
-        }
-
-        .welcome-actions {
-          display: flex;
-          gap: 12px;
-          justify-content: center;
-          margin-bottom: 24px;
-        }
-
-        .layout-info {
-          padding: 16px;
-          background: var(--bg-tertiary);
-          border-radius: 6px;
-          border: 1px solid var(--border-color);
-        }
-
-        .layout-info p {
-          font-size: 12px;
-          color: var(--text-muted);
-          margin: 0;
-        }
-
-        /* Responsive breakpoints */
-        @media (max-width: 767px) {
-          .panel-toggle {
-            padding: 6px 12px;
-            font-size: 14px;
-          }
-          
-          .mobile-header {
-            height: 48px;
-          }
-        }
-
-        @media (min-width: 768px) and (max-width: 1023px) {
-          .layout-toolbar {
-            height: 36px;
-          }
-          
-          .panel-toggle {
-            padding: 6px 10px;
-            font-size: 13px;
-          }
-        }
+        /* Windows 11 - inspired toolbar visuals */
+        .layout-toolbar { height:48px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; background:var(--bg-primary); border-bottom:1px solid rgba(0,0,0,0.06); }
+        .toolbar-left { display:flex; align-items:center; gap:8px; }
+        .toolbar-right { display:flex; align-items:center; gap:8px; }
+        .toolbar-button { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:10px; background:transparent; border:1px solid transparent; color:var(--text-primary); cursor:pointer; font-size:13px; transition:box-shadow 0.18s ease, transform 0.12s ease; }
+        .toolbar-button .icon { font-size:14px; }
+        .toolbar-button .label { display:inline-block; }
+        .toolbar-button:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.08); transform: translateY(-2px); background: rgba(255,255,255,0.02); }
+        .toolbar-button.primary { background: linear-gradient(180deg, rgba(0,120,215,0.14), rgba(0,120,215,0.08)); color: #fff; }
+        .toolbar-group { position:relative; display:inline-flex; align-items:center; gap:6px; }
+        .toolbar-button.small { padding:6px 8px; min-width:36px; border-radius:8px; }
+        .run-dropdown { position:absolute; top:100%; left:0; margin-top:8px; background:var(--bg-secondary); border:1px solid rgba(0,0,0,0.06); border-radius:10px; box-shadow:0 12px 30px rgba(0,0,0,0.12); z-index:1200; }
+        .run-item { display:block; padding:10px 14px; background:transparent; border:none; width:240px; text-align:left; cursor:pointer; font-size:13px; }
+        .run-item:hover { background:rgba(255,255,255,0.02); }
+        .toolbar-avatar { width:36px; height:36px; border-radius:50%; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(0,0,0,0.06); background:var(--bg-secondary); cursor:pointer; }
+        .toolbar-avatar.has-image img { width:100%; height:100%; object-fit:cover; }
+        .profile-dropdown { position:absolute; right:12px; margin-top:8px; background:var(--bg-secondary); border:1px solid rgba(0,0,0,0.06); padding:6px 0; border-radius:10px; box-shadow:0 12px 28px rgba(0,0,0,0.15); z-index:1200; }
+        .profile-dropdown-item { display:block; padding:10px 16px; background:transparent; border:none; width:220px; text-align:left; cursor:pointer; font-size:13px; }
+        .profile-dropdown-item:hover { background:rgba(255,255,255,0.02); }
+        .profile-dropdown-sep { height:1px; background:rgba(0,0,0,0.06); margin:6px 0; }
+        .main-area { display:flex; flex:1; min-height:0; }
+        .sidebar-column { width:320px; border-right:1px solid rgba(0,0,0,0.06); overflow:auto; }
+        .sidebar-column.hidden { display:none; }
+        .content-column { flex:1; display:flex; overflow:auto; }
+        .content-area { display:flex; flex-direction:column; width:100%; }
+        .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; }
+        .toolbar-sep { width:1px; height:28px; background:rgba(0,0,0,0.06); margin:0 8px; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
 };
+
+export default DockableLayout;
