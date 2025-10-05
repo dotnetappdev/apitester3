@@ -253,19 +253,19 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
         .layout-toolbar { height:48px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; background:var(--bg-primary); border-bottom:1px solid rgba(0,0,0,0.06); }
         .toolbar-left { display:flex; align-items:center; gap:8px; }
         .toolbar-right { display:flex; align-items:center; gap:8px; }
-        .toolbar-button { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:10px; background:transparent; border:1px solid transparent; color:var(--text-primary); cursor:pointer; font-size:13px; transition:box-shadow 0.18s ease, transform 0.12s ease; }
+        .toolbar-button { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:4px; background:transparent; border:1px solid transparent; color:var(--text-primary); cursor:pointer; font-size:13px; transition:box-shadow 0.18s ease, transform 0.12s ease; }
         .toolbar-button .icon { font-size:14px; }
         .toolbar-button .label { display:inline-block; }
         .toolbar-button:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.08); transform: translateY(-2px); background: rgba(255,255,255,0.02); }
         .toolbar-button.primary { background: linear-gradient(180deg, rgba(0,120,215,0.14), rgba(0,120,215,0.08)); color: #fff; }
         .toolbar-group { position:relative; display:inline-flex; align-items:center; gap:6px; }
-        .toolbar-button.small { padding:6px 8px; min-width:36px; border-radius:8px; }
-        .run-dropdown { position:absolute; top:100%; left:0; margin-top:8px; background:var(--bg-secondary); border:1px solid rgba(0,0,0,0.06); border-radius:10px; box-shadow:0 12px 30px rgba(0,0,0,0.12); z-index:1200; }
+        .toolbar-button.small { padding:6px 8px; min-width:36px; border-radius:4px; }
+        .run-dropdown { position:absolute; top:100%; left:0; margin-top:8px; background:var(--bg-secondary); border:1px solid rgba(0,0,0,0.06); border-radius:4px; box-shadow:0 12px 30px rgba(0,0,0,0.12); z-index:1200; }
         .run-item { display:block; padding:10px 14px; background:transparent; border:none; width:240px; text-align:left; cursor:pointer; font-size:13px; }
         .run-item:hover { background:rgba(255,255,255,0.02); }
         .toolbar-avatar { width:36px; height:36px; border-radius:50%; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(0,0,0,0.06); background:var(--bg-secondary); cursor:pointer; }
         .toolbar-avatar.has-image img { width:100%; height:100%; object-fit:cover; }
-        .profile-dropdown { position:absolute; right:12px; margin-top:8px; background:var(--bg-secondary); border:1px solid rgba(0,0,0,0.06); padding:6px 0; border-radius:10px; box-shadow:0 12px 28px rgba(0,0,0,0.15); z-index:1200; }
+        .profile-dropdown { position:absolute; right:12px; margin-top:8px; background:var(--bg-secondary); border:1px solid rgba(0,0,0,0.06); padding:6px 0; border-radius:4px; box-shadow:0 12px 28px rgba(0,0,0,0.15); z-index:1200; }
         .profile-dropdown-item { display:block; padding:10px 16px; background:transparent; border:none; width:220px; text-align:left; cursor:pointer; font-size:13px; }
         .profile-dropdown-item:hover { background:rgba(255,255,255,0.02); }
         .profile-dropdown-sep { height:1px; background:rgba(0,0,0,0.06); margin:6px 0; }
