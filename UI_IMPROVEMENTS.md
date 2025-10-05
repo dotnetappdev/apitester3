@@ -1,6 +1,6 @@
 # UI Improvements Summary
 
-This document summarizes all the UI improvements made to VerifyApi to enhance its professional appearance and user experience.
+This document summarizes all the UI improvements made to Palis to enhance its professional appearance and user experience.
 
 ## Features Implemented
 
@@ -18,7 +18,7 @@ This document summarizes all the UI improvements made to VerifyApi to enhance it
 - **Location**: DockableLayout toolbar (top of the application)
 - **Features**:
   - Dropdown menu accessible from the Help (❓) button
-  - "About VerifyApi" option - opens the About dialog
+  - "About Palis" option - opens the About dialog
   - "Report a Problem" option - opens the Report Problem dialog
   - "GitHub Repository" link - opens the repository in browser
   - "Documentation" link - opens README in browser

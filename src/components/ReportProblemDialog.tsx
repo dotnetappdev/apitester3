@@ -33,7 +33,7 @@ ${expectedBehavior}
 ${actualBehavior}
 
 **Environment:**
-- VerifyApi Version: ${APP_INFO.version}
+- Palis Version: ${APP_INFO.version}
 - OS: ${navigator.platform}
 - User Agent: ${navigator.userAgent}
 
@@ -71,7 +71,7 @@ ${stepsToReproduce}
 ${expectedBehavior}
 
 **Environment:**
-- VerifyApi Version: ${APP_INFO.version}
+- Palis Version: ${APP_INFO.version}
 `;
     }
   };

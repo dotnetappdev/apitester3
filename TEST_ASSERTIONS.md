@@ -1,4 +1,4 @@
-# 🧪 Test Assertions Guide - VerifyApi
+# 🧪 Test Assertions Guide - Palis
 
 ## Table of Contents
 - [Overview](#overview)
@@ -12,7 +12,7 @@
 
 ## Overview
 
-VerifyApi provides a comprehensive testing framework similar to Visual Studio Test Explorer. Tests can be discovered, organized, and executed with detailed assertion capabilities.
+Palis provides a comprehensive testing framework similar to Visual Studio Test Explorer. Tests can be discovered, organized, and executed with detailed assertion capabilities.
 
 ### Key Features
 - **Test Discovery**: Automatically discover tests before running

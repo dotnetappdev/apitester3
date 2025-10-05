@@ -1,7 +1,7 @@
-# Debugging Guide for VerifyApi
+# Debugging Guide for Palis
 
 ## Overview
-VerifyApi provides comprehensive debugging capabilities for both Unit Tests (API tests) and UI Tests (Playwright tests). This guide will help you understand how to use the debugging features effectively.
+Palis provides comprehensive debugging capabilities for both Unit Tests (API tests) and UI Tests (Playwright tests). This guide will help you understand how to use the debugging features effectively.
 
 ## Table of Contents
 1. [Accessing Test Editors](#accessing-test-editors)
@@ -83,7 +83,7 @@ describe('API Test: Get Users', () => {
 
 ### Available Assertions
 
-VerifyApi provides built-in assertion functions:
+Palis provides built-in assertion functions:
 
 | Assertion | Description | Example |
 |-----------|-------------|---------|

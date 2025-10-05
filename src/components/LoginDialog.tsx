@@ -436,7 +436,7 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ authManager, onLogin }
     <div className="login-overlay">
       <div className="login-container">
         <div className="login-header">
-          <h1>VerifyApi</h1>
+          <h1>Palis</h1>
           <p>Who's testing APIs today?</p>
         </div>
 

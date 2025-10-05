@@ -9,7 +9,7 @@
 
 ## 🎯 Mission Accomplished
 
-This document provides a complete overview of the HTTP Monitoring feature implementation in VerifyApi.
+This document provides a complete overview of the HTTP Monitoring feature implementation in Palis.
 
 ### Original Request
 > "can u add http monitoring tools in the same way http toolkit does being able to intercept http traffic on local machines add a new icon for this call it monitoring and a new tab beside requests. Have it to be able to list requests happening on local host end points provide a way for example to give an api and client urls be allow to see the headers in real time and also modify them if need be. Intercept, view & edit any HTTP traffic. can u also polish are ui make it all buttons look more like postman buttons and menus and icons"
@@ -348,7 +348,7 @@ electronAPI.proxyRespond(data)      → Send modified response
 
 ### Basic Usage (5 steps)
 ```bash
-1. Open VerifyApi
+1. Open Palis
 2. Click "📡 Monitor" in toolbar
 3. Configure proxy (port 8888, target http://localhost:3000)
 4. Click "▶ Start Proxy"
@@ -364,7 +364,7 @@ axios.defaults.proxy = false;
 // Make requests as normal
 const response = await axios.get('/api/users');
 
-// View in VerifyApi monitoring panel
+// View in Palis monitoring panel
 // Modify responses in real-time
 // Debug authentication issues
 // Test error scenarios
@@ -594,7 +594,7 @@ See GitHub Issues for additional feature requests and bug reports.
 ### Contributors
 - **Implementation:** Copilot AI Assistant
 - **Review & Testing:** @dotnetappdev
-- **Project:** VerifyApi by @dotnetappdev
+- **Project:** Palis by @dotnetappdev
 
 ---
 
@@ -649,12 +649,12 @@ A complete HTTP monitoring feature that:
 
 **Thank you for this exciting feature request!** 🚀
 
-This has been a comprehensive implementation that adds significant value to VerifyApi. The HTTP monitoring feature is production-ready and awaits your testing and feedback.
+This has been a comprehensive implementation that adds significant value to Palis. The HTTP monitoring feature is production-ready and awaits your testing and feedback.
 
 ---
 
 *Made with ❤️ by Copilot for the developer community*  
-*VerifyApi - Professional API Testing Tool*  
+*Palis - Professional API Testing Tool*  
 *Version 1.0.0 | October 2024*
 
 ---

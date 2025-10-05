@@ -61,7 +61,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   },
   recentCollections: [],
   defaultHeaders: {
-    'User-Agent': 'VerifyApi'
+    'User-Agent': 'Palis'
   }
 };
 
