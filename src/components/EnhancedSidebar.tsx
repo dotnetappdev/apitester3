@@ -71,7 +71,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
   enableTestExplorer
 }) => {
   const [expandedCollections, setExpandedCollections] = useState<Set<number>>(new Set());
-  const [activeView, setActiveView] = useState<'collections' | 'environments' | 'history' | 'ui-tests' | 'tests'>('collections');
+  const [activeView, setActiveView] = useState<'collections' | 'environments' | 'history' | 'monitoring' | 'ui-tests' | 'tests'>('collections');
   const [activeTab, setActiveTab] = useState<'collections' | 'tests'>('collections');
   const [contextMenu, setContextMenu] = useState<{type: 'collection' | 'request', id: number, x: number, y: number} | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -276,6 +276,15 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
         >
           <span className="icon-nav-icon">📜</span>
           <span className="icon-nav-label">History</span>
+        </button>
+        
+        <button
+          className={`icon-nav-button ${activeView === 'monitoring' ? 'active' : ''}`}
+          onClick={() => setActiveView('monitoring')}
+          title="HTTP Monitor"
+        >
+          <span className="icon-nav-icon">📡</span>
+          <span className="icon-nav-label">Monitoring</span>
         </button>
         
         {enableTestExplorer && (
@@ -489,6 +498,43 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                   <span>Result capture</span>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {activeView === 'monitoring' && (
+          <div className="monitoring-panel-sidebar">
+            <div className="panel-header">
+              <h3>HTTP Monitoring</h3>
+              <p className="panel-description">Intercept and inspect HTTP traffic</p>
+            </div>
+            <div className="empty-state">
+              <div className="empty-icon">📡</div>
+              <p>HTTP Traffic Monitor</p>
+              <p className="text-small text-muted">
+                Intercept, view, and modify HTTP requests and responses in real-time
+              </p>
+              <div className="monitoring-info">
+                <div className="monitoring-info-item">
+                  <span className="monitoring-info-icon">🔍</span>
+                  <span>Intercept traffic</span>
+                </div>
+                <div className="monitoring-info-item">
+                  <span className="monitoring-info-icon">👁️</span>
+                  <span>View headers & body</span>
+                </div>
+                <div className="monitoring-info-item">
+                  <span className="monitoring-info-icon">✏️</span>
+                  <span>Modify requests/responses</span>
+                </div>
+                <div className="monitoring-info-item">
+                  <span className="monitoring-info-icon">⚡</span>
+                  <span>Real-time inspection</span>
+                </div>
+              </div>
+              <p className="text-small text-muted" style={{ marginTop: '16px' }}>
+                Click a request in the main panel to start monitoring HTTP traffic
+              </p>
             </div>
           </div>
         )}

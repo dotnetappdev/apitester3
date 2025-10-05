@@ -6,6 +6,7 @@ import { ElectronSoapClient } from './soapClient';
 import { ElectronGrpcClient } from './grpcClient';
 import { SqliteDatabaseManager } from './sqliteManager';
 import { configureSendGrid, sendEmail } from './email';
+import { ProxyServer } from './proxyServer';
 // exceljs is optional; dynamically require to avoid install failures for users who don't need it
 let ExcelJS: any = null;
 try {
@@ -18,6 +19,7 @@ try {
 class AppManager {
   private mainWindow: BrowserWindow | null = null;
   private dbManager: SqliteDatabaseManager;
+  private proxyServer: ProxyServer | null = null;
 
   constructor() {
     this.dbManager = new SqliteDatabaseManager();
@@ -926,6 +928,63 @@ class AppManager {
         return result;
       } catch (error) {
         console.error('Failed to send email:', error);
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
+      }
+    });
+
+    // HTTP Proxy Server - Start proxy
+    ipcMain.handle('proxy-start', async (event, config) => {
+      try {
+        if (this.proxyServer) {
+          await this.proxyServer.stop();
+        }
+        
+        this.proxyServer = new ProxyServer(config, this.mainWindow);
+        await this.proxyServer.start();
+        
+        return { success: true, port: config.port };
+      } catch (error) {
+        console.error('Failed to start proxy server:', error);
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
+      }
+    });
+
+    // HTTP Proxy Server - Stop proxy
+    ipcMain.handle('proxy-stop', async () => {
+      try {
+        if (this.proxyServer) {
+          await this.proxyServer.stop();
+          this.proxyServer = null;
+        }
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to stop proxy server:', error);
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
+      }
+    });
+
+    // HTTP Proxy Server - Update config
+    ipcMain.handle('proxy-update-config', async (event, config) => {
+      try {
+        if (this.proxyServer) {
+          this.proxyServer.updateConfig(config);
+        }
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to update proxy config:', error);
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
+      }
+    });
+
+    // HTTP Proxy Server - Respond to intercepted request
+    ipcMain.handle('proxy-respond', async (event, { requestId, response }) => {
+      try {
+        if (this.proxyServer) {
+          this.proxyServer.respondToInterceptedRequest(requestId, response);
+        }
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to respond to intercepted request:', error);
         return { success: false, error: error instanceof Error ? error.message : String(error) };
       }
     });

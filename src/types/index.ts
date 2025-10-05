@@ -85,3 +85,41 @@ export interface AppState {
   sidebarWidth: number;
   requestHistory: RequestHistory[];
 }
+
+export interface InterceptedRequest {
+  id: string;
+  timestamp: string;
+  method: string;
+  url: string;
+  headers: Record<string, string>;
+  body?: string;
+  queryParams?: Record<string, string>;
+  clientAddress?: string;
+  protocol?: string;
+}
+
+export interface InterceptedResponse {
+  id: string;
+  requestId: string;
+  timestamp: string;
+  statusCode: number;
+  statusText: string;
+  headers: Record<string, string>;
+  body?: string;
+  responseTime: number;
+  size: number;
+}
+
+export interface InterceptedTraffic {
+  request: InterceptedRequest;
+  response?: InterceptedResponse;
+  modified?: boolean;
+}
+
+export interface ProxyConfig {
+  enabled: boolean;
+  port: number;
+  targetEndpoints: string[];
+  interceptEnabled: boolean;
+  autoRespond: boolean;
+}
