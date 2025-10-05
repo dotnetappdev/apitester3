@@ -17,7 +17,6 @@ import { CodeGenerationDialog } from './CodeGenerationDialog';
 import { RequestDialog } from './RequestDialog';
 import { TestSuiteDialog } from './TestSuiteDialog';
 import { ConfirmDialog } from './ConfirmDialog';
-import { TeamManager } from './TeamManager';
 import { CollectionIcon } from './ModernButton';
 import { Splitter } from './Splitter';
 import { DockableLayout } from './DockableLayout';
@@ -49,7 +48,7 @@ export const EnhancedApp: React.FC = () => {
   const [showNewCollectionDialog, setShowNewCollectionDialog] = useState(false);
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false); // New project dialog
   const [showCodeGeneration, setShowCodeGeneration] = useState(false);
-  const [showTeamManager, setShowTeamManager] = useState(false);
+  // Team manager removed from main UI
   const [documentationType, setDocumentationType] = useState<'overview' | 'unit-testing' | null>(null);
   
   // Request and Test CRUD dialogs
@@ -923,28 +922,10 @@ console.log('Homepage test completed successfully');`,
         onRunAllUITests={handleRunAllUITests}
         onUserProfile={() => {/* TODO: Profile dialog */}}
         onSettings={() => setShowSettings(true)}
-        onTeamManager={() => setShowTeamManager(true)}
         onShowAbout={() => setShowAbout(true)}
         onReportProblem={() => setShowReportProblem(true)}
       />
-
-      {showTeamManager && currentUser && (
-        <TeamManager
-          teams={teams}
-          users={users}
-          collections={collections}
-          currentUser={currentUser}
-          onCreateTeam={handleCreateTeam}
-          onUpdateTeam={handleUpdateTeam}
-          onDeleteTeam={handleDeleteTeam}
-          onAddMember={handleAddTeamMember}
-          onRemoveMember={handleRemoveTeamMember}
-          onUpdateMemberRole={handleUpdateTeamMemberRole}
-          onAssignCollection={handleAssignCollectionToTeam}
-          onRemoveCollection={handleRemoveCollectionFromTeam}
-          onClose={() => setShowTeamManager(false)}
-        />
-      )}
+      
 
       {showSettings && (
         <SettingsDialog

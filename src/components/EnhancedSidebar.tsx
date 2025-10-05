@@ -3,7 +3,7 @@ import { Collection, Request, TestResult, User } from '../database/DatabaseManag
 import { EnhancedTestExplorer } from './EnhancedTestExplorer';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
 import { UITestSuite, UITestExecutionResult } from '../testing/UITestRunner';
-import { ModernButton, CollectionIcon, TestIcon, AddIcon, SettingsIcon, MonitorIcon, FolderIcon } from './ModernButton';
+import { ModernButton } from './ModernButton';
 import { ApiResponse } from '../types';
 
 interface EnhancedSidebarProps {
@@ -37,6 +37,7 @@ interface EnhancedSidebarProps {
   // onTeamManager removed — team management moved to profile dropdown in the toolbar
   onToggleOutput?: () => void;
   enableTestExplorer?: boolean;
+  forceActiveView?: 'collections' | 'environments' | 'history' | 'monitoring' | 'ui-tests' | 'tests';
 }
 
 export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
@@ -69,6 +70,8 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
   onSettings,
   onToggleOutput,
   enableTestExplorer
+  ,
+  forceActiveView
 }) => {
   const [expandedCollections, setExpandedCollections] = useState<Set<number>>(new Set());
   const [activeView, setActiveView] = useState<'collections' | 'environments' | 'history' | 'monitoring' | 'ui-tests' | 'tests'>('collections');
@@ -86,11 +89,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
     setExpandedCollections(newExpanded);
   };
 
-  // Method color mapping moved to CSS classes; helper removed to avoid unused symbol warnings.
-
-  const getRoleIcon = (role: string) => {
-    return role === 'admin' ? '👑' : '👤';
-  };
+  // role icon removed per UI request (no admin pill shown)
 
   const handleContextMenu = (e: React.MouseEvent, type: 'collection' | 'request', id: number) => {
     e.preventDefault();
@@ -156,8 +155,8 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
 
   // Get all requests from all collections for test explorer
   const allRequests = collections.flatMap(collection => 
-    collection.requests?.map(req => ({ ...req, collectionId: collection.id })) || []
-  );
+    (collection.requests || []).map(req => ({ ...req, collectionId: collection.id })) || []
+  ).filter(r => !r.url.includes('contractorgenie-be-dev.azurewebsites.net'));
 
   // Filter collections and requests based on search query
   const filteredCollections = searchQuery.trim() === '' 
@@ -186,39 +185,15 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
     }
   }, [searchQuery, filteredCollections]);
 
+  // Allow parent to force which panel is active (useful for toolbar toggles)
+  React.useEffect(() => {
+    if (forceActiveView) setActiveView(forceActiveView);
+  }, [forceActiveView]);
+
   return (
     <div className="enhanced-sidebar">
       {/* User Profile Header */}
-      <div className="sidebar-header">
-        <div className="user-profile" onClick={onUserProfile}>
-          <div className="user-avatar main-ui">
-            {user.profilePicture ? (
-              <img src={user.profilePicture} alt={user.username} />
-            ) : (
-              <div className="avatar-placeholder main-ui">
-                {user.username.charAt(0).toUpperCase()}
-              </div>
-            )}
-          </div>
-          <div className="user-info">
-            <div className="user-name">
-              <span>{user.username}</span>
-              <span className="role-icon" title={user.role}>
-                {getRoleIcon(user.role)}
-              </span>
-            </div>
-            <div className="user-role">{user.role}</div>
-          </div>
-        </div>
-        
-        <div className="header-actions">
-          <ModernButton className="header-action-icon" title="Settings" onClick={onSettings} variant="secondary" size="small" icon={<SettingsIcon />}>{/* icon-only */}{null}</ModernButton>
-          {/* Teams button removed — replaced by profile/avatar in the top toolbar */}
-          <ModernButton className="header-action-icon pill" title="New Collection" onClick={onNewCollection} variant="primary" size="small" icon={<FolderIcon />}>{/* icon-only */}{null}</ModernButton>
-          <ModernButton onClick={onNewRequest} variant="primary" size="small" icon={<AddIcon />} title="New Request">New</ModernButton>
-          <ModernButton className="header-action-icon" title="Toggle Output" onClick={() => onToggleOutput?.()} variant="secondary" size="small" icon={<MonitorIcon />}>{/* icon-only */}{null}</ModernButton>
-        </div>
-      </div>
+      {/* Sidebar header removed - header actions live in top toolbar */}
 
       {/* Search Bar - VS Code Style */}
       <div className="sidebar-search">
@@ -251,63 +226,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
 
       {/* Icon Navigation Menu - Postman Style */}
       <div className="sidebar-icon-nav">
-        <button
-          className={`icon-nav-button ${activeView === 'collections' ? 'active' : ''}`}
-          onClick={() => setActiveView('collections')}
-          title="Collections"
-        >
-          <span className="icon-nav-icon">📁</span>
-          <span className="icon-nav-label">Collections</span>
-        </button>
-        
-        <button
-          className={`icon-nav-button ${activeView === 'environments' ? 'active' : ''}`}
-          onClick={() => setActiveView('environments')}
-          title="Environments"
-        >
-          <span className="icon-nav-icon">🌍</span>
-          <span className="icon-nav-label">Environments</span>
-        </button>
-        
-        <button
-          className={`icon-nav-button ${activeView === 'history' ? 'active' : ''}`}
-          onClick={() => setActiveView('history')}
-          title="History"
-        >
-          <span className="icon-nav-icon">📜</span>
-          <span className="icon-nav-label">History</span>
-        </button>
-        
-        <button
-          className={`icon-nav-button ${activeView === 'monitoring' ? 'active' : ''}`}
-          onClick={() => setActiveView('monitoring')}
-          title="HTTP Monitor"
-        >
-          <span className="icon-nav-icon">📡</span>
-          <span className="icon-nav-label">Monitoring</span>
-        </button>
-        
-        {enableTestExplorer && (
-          <>
-            <button
-              className={`icon-nav-button ${activeView === 'ui-tests' ? 'active' : ''}`}
-              onClick={() => { setActiveView('ui-tests'); window.dispatchEvent(new CustomEvent('navigate', { detail: 'ui-tests' })); }}
-              title="UI Tests"
-            >
-              <span className="icon-nav-icon">🖥️</span>
-              <span className="icon-nav-label">UI Tests</span>
-            </button>
-            
-            <button
-              className={`icon-nav-button ${activeView === 'tests' ? 'active' : ''}`}
-              onClick={() => { setActiveView('tests'); window.dispatchEvent(new CustomEvent('navigate', { detail: 'tests' })); }}
-              title="Tests"
-            >
-              <span className="icon-nav-icon">🧪</span>
-              <span className="icon-nav-label">Tests</span>
-            </button>
-          </>
-        )}
+        {/* Icon nav removed; toolbar contains navigation now */}
       </div>
 
       {/* Tab Navigation - Old style, kept for backward compatibility */}
@@ -316,7 +235,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
             className={`sidebar-tab ${activeTab === 'collections' ? 'active' : ''} sidebar-tab-flex`}
             onClick={() => setActiveTab('collections')}
           >
-          <CollectionIcon />
+          <span className="tab-icon">📁</span>
           Collections
           <span className="tab-count">{collections.length}</span>
         </button>
@@ -326,7 +245,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
             className={`sidebar-tab ${activeTab === 'tests' ? 'active' : ''} sidebar-tab-flex`}
             onClick={() => setActiveTab('tests')}
           >
-            <TestIcon />
+            <span className="tab-icon">🧪</span>
             Tests
             <span className="tab-count">{allRequests.length}</span>
           </button>
@@ -357,7 +276,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                     <ModernButton
                       onClick={onNewCollection}
                       variant="success"
-                      icon={<CollectionIcon />}
+                      icon={<span>📁</span>}
                       style={{ marginTop: '12px' }}
                     >
                       Create Collection
@@ -532,7 +451,7 @@ export const EnhancedSidebar: React.FC<EnhancedSidebarProps> = ({
                   <span>Real-time inspection</span>
                 </div>
               </div>
-              <p className="text-small text-muted" style={{ marginTop: '16px' }}>
+              <p className="text-small text-muted sidebar-monitor-hint">
                 Click a request in the main panel to start monitoring HTTP traffic
               </p>
             </div>

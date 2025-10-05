@@ -194,6 +194,14 @@ export class SqliteDatabaseManager {
     console.log('\n🌱 Initializing seed data...');
     
     try {
+      // Sanitize any legacy or accidental test data that references private/dev URLs
+      // Remove known contractor genie dev URL occurrences from requests to avoid leaking or using them
+      try {
+        await this.db.run("DELETE FROM requests WHERE url LIKE '%contractorgenie-be-dev.azurewebsites.net%'");
+        console.log('   🧹 Sanitized legacy contractor genie URLs from requests (if any)');
+      } catch (cleanupErr) {
+        console.warn('   ⚠️  Failed to run cleanup for legacy URLs:', cleanupErr);
+      }
       // Check if users already exist
       const userCount = await this.db.get('SELECT COUNT(*) as count FROM users');
       console.log(`   📊 Current user count: ${userCount.count}`);

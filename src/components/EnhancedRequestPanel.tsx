@@ -30,6 +30,38 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
   onRunTests,
   testResults = []
 }) => {
+  // splitter state: height of the top area in pixels
+  const [topHeight, setTopHeight] = useState<number>(220);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const startDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  React.useEffect(() => {
+    const onMove = (ev: MouseEvent) => {
+      if (!isDragging) return;
+      // find the panel container offsetTop to calculate relative height
+      const container = document.querySelector('.enhanced-request-panel') as HTMLElement | null;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const newTop = ev.clientY - rect.top;
+      // clamp min/max
+      const min = 120;
+      const max = Math.max(200, rect.height - 120);
+      setTopHeight(Math.max(min, Math.min(max, newTop)));
+    };
+
+    const onUp = () => setIsDragging(false);
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [isDragging]);
   const [activeTab, setActiveTab] = useState<'params' | 'headers' | 'body' | 'auth' | 'tests' | 'soap' | 'grpc'>('params');
   const [bodyMode, setBodyMode] = useState<'raw' | 'json' | 'form'>('raw');
   const [headersMode, setHeadersMode] = useState<'kv' | 'raw'>('kv');
@@ -243,75 +275,86 @@ export const EnhancedRequestPanel: React.FC<EnhancedRequestPanelProps> = ({
 
   return (
     <div className="enhanced-request-panel">
-      {/* Request Header */}
-      <div className="request-header">
-        <div className="request-title-section">
-          <input
-            type="text"
-            className="request-name-input"
-            value={request.name}
-            onChange={(e) => updateRequest({ name: e.target.value })}
-            placeholder="Request Name"
-            title="Request Name"
-          />
-        </div>
+      <div className="request-top" style={{ height: topHeight }}>
+        {/* Request Header */}
+        <div className="request-header">
+          <div className="request-title-section">
+            <input
+              type="text"
+              className="request-name-input"
+              value={request.name}
+              onChange={(e) => updateRequest({ name: e.target.value })}
+              placeholder="Request Name"
+              title="Request Name"
+            />
+          </div>
 
-        <div className="url-section">
-          <select
-            className={`method-selector method-${(request.method || '').toLowerCase()}`}
-            value={request.method}
-            onChange={(e) => updateRequest({ method: e.target.value })}
-            aria-label="HTTP Method"
-            disabled={!request.url}
-          >
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="DELETE">DELETE</option>
-            <option value="PATCH">PATCH</option>
-            <option value="HEAD">HEAD</option>
-            <option value="OPTIONS">OPTIONS</option>
-            <option value="SOAP">SOAP</option>
-            <option value="GRPC">gRPC</option>
-          </select>
-          
-          <input
-            type="text"
-            className="url-input"
-            value={request.url}
-            onChange={(e) => {
-              const newUrl = e.target.value;
-              const urlParams = parseUrlParams(newUrl);
-              
-              // Merge URL params with existing params (URL params take precedence)
-              const existingParams = request.params ? JSON.parse(request.params) : {};
-              const mergedParams = { ...existingParams, ...urlParams };
-              
-              updateRequest({ 
-                url: newUrl,
-                params: JSON.stringify(mergedParams)
-              });
-            }}
-            placeholder="{{baseUrl}}/endpoint or https://api.example.com/endpoint"
-            title="Request URL - Use {{variableName}} for environment variables"
-          />
-          
-          <button
-            className="send-button"
-            onClick={onSendRequest}
-            disabled={isLoading || !request.url}
-          >
-            {isLoading ? (
-              <>
-                <div className="spinner small"></div>
-                <span>Sending</span>
-              </>
-            ) : (
-              <span>Send</span>
-            )}
-          </button>
+          <div className="url-section">
+            <select
+              className={`method-selector method-${(request.method || '').toLowerCase()}`}
+              value={request.method}
+              onChange={(e) => updateRequest({ method: e.target.value })}
+              aria-label="HTTP Method"
+              disabled={!request.url}
+            >
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+              <option value="PATCH">PATCH</option>
+              <option value="HEAD">HEAD</option>
+              <option value="OPTIONS">OPTIONS</option>
+              <option value="SOAP">SOAP</option>
+              <option value="GRPC">gRPC</option>
+            </select>
+
+            <input
+              type="text"
+              className="url-input"
+              value={request.url}
+              onChange={(e) => {
+                const newUrl = e.target.value;
+                const urlParams = parseUrlParams(newUrl);
+                const existingParams = request.params ? JSON.parse(request.params) : {};
+                const mergedParams = { ...existingParams, ...urlParams };
+                updateRequest({ 
+                  url: newUrl,
+                  params: JSON.stringify(mergedParams)
+                });
+              }}
+              placeholder="{{baseUrl}}/endpoint or https://api.example.com/endpoint"
+              title="Request URL - Use {{variableName}} for environment variables"
+            />
+
+            <button
+              className="send-button"
+              onClick={onSendRequest}
+              disabled={isLoading || !request.url}
+            >
+              {isLoading ? (
+                <>
+                  <div className="spinner small"></div>
+                  <span>Sending</span>
+                </>
+              ) : (
+                <span>Send</span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Splitter bar - draggable */}
+      <div
+        className={`request-splitter ${isDragging ? 'dragging' : ''}`}
+        onMouseDown={startDrag}
+        role="separator"
+        aria-orientation="horizontal"
+        title="Drag to resize request / body area"
+      />
+
+      <div className="request-bottom" style={{ flex: 1 }}>
+      {/* end request-header moved into top area */}
 
       {/* Request Tabs */}
       <div className="request-tabs">
@@ -960,7 +1003,15 @@ message SampleResponse {
           background: var(--bg-secondary);
           border-bottom: 1px solid var(--border-color);
         }
+
+        /* Splitter/layout styles */
+        .enhanced-request-panel { display: flex; flex-direction: column; height: 100%; }
+        .request-top { overflow: hidden; padding: 8px 12px; background: var(--bg-primary); border-bottom: 1px solid var(--border-color); }
+        .request-splitter { height: 6px; cursor: row-resize; background: linear-gradient(90deg, rgba(0,0,0,0.02), rgba(255,255,255,0.02)); }
+        .request-splitter.dragging { background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(255,255,255,0.04)); }
+        .request-bottom { display: flex; flex-direction: column; overflow: auto; }
       `}</style>
+    </div>
     </div>
   );
 };

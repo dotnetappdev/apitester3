@@ -48,6 +48,7 @@ body {
   --panel-bg: #252526;
   --header-bg: #2d2d30;
   --sidebar-bg: #252526;
+  --sidebar-width: 420px;
   --overlay-bg: rgba(0, 0, 0, 0.8);
   
   /* Light theme variables */
@@ -1040,39 +1041,20 @@ body.light-theme :root {
 }
 
 /* Enhanced Teams Button Styling */
+/* Teams button removed — render as normal action button if referenced */
 .header-action-button.teams-button {
-  background: linear-gradient(135deg, #6c63ff 0%, #8b5cf6 100%);
-  color: white;
-  padding: 6px 12px;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 6px 8px;
   font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 6px 18px rgba(108,99,255,0.12);
+  border: 1px solid transparent;
+  box-shadow: none;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border-radius: 8px;
-}
-
-.header-action-button.teams-button:hover {
-  background: linear-gradient(135deg, #7c8ff0 0%, #9b6df0 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(108,99,255,0.16);
-  color: white;
-}
-
-.header-action-button.teams-button:active {
-.header-action-button.teams-button {
-  /* Teams button removed — keep empty to avoid layout regressions if referenced */
-  background: transparent;
-  color: var(--text-primary);
-  padding: 6px 8px;
   border-radius: 6px;
-  box-shadow: none;
-  border: 1px solid transparent;
 }
-.header-action-button.teams-button:hover {
-  background: var(--bg-hover);
-}
+
 .teams-button-text {
   font-size: 13px;
   font-weight: 600;
@@ -1086,17 +1068,18 @@ body.light-theme :root {
 }
 
 .toolbar-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
   border: 1px solid var(--border-color);
-  background: var(--bg-tertiary);
+  background: rgba(255,255,255,0.03);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  padding: 0;
+  padding: 4px;
   overflow: hidden;
+  transition: all 0.12s ease;
 }
 
 .toolbar-avatar img {
@@ -1145,9 +1128,7 @@ body.light-theme :root {
   background: var(--border-color);
   margin: 6px 0;
 }
-  align-items: center;
-  justify-content: center;
-}
+/* cleaned up stray lines removed */
 
 .modern-button-spinner {
   width: 16px;
@@ -1168,6 +1149,7 @@ body.light-theme :root {
   background: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
   box-shadow: none;
+  -webkit-backdrop-filter: none;
   backdrop-filter: none;
   z-index: 80;
 }
