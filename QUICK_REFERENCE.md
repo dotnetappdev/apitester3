@@ -56,6 +56,8 @@ npm run package:all      # All platforms
 - `VerifyApi Setup 1.0.0-ia32.exe` - NSIS installer (32-bit)
 - `VerifyApi 1.0.0.exe` - Portable (no installation)
 - `VerifyApi-1.0.0-win.zip` - ZIP archive
+- `VerifyApi-1.0.0.appx` - MSIX for Windows Store (64-bit)
+- `VerifyApi-1.0.0-ia32.appx` - MSIX for Windows Store (32-bit)
 
 ### macOS (release/mac/)
 - `VerifyApi-1.0.0-universal.dmg` - DMG installer ⭐ **Recommended**
@@ -177,7 +179,7 @@ cd verifyapi-1.0.0
 ✅ Workflow file created
 ✅ Builds all 3 platforms
 ✅ Platform-specific subfolders
-✅ 10 installer formats
+✅ 12 installer formats (Windows: 6, macOS: 2, Linux: 4)
 ✅ Documentation updated with "verifyapi"
 
 **Bonus Features:**

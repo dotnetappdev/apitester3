@@ -21,7 +21,7 @@ npm run build
 npm run package
 
 # Build specific platform installers
-npm run package:win      # Windows (NSIS, Portable, ZIP)
+npm run package:win      # Windows (NSIS, Portable, ZIP, MSIX)
 npm run package:mac      # macOS (DMG, ZIP with Universal binary)
 npm run package:linux    # Linux (AppImage, DEB, RPM, TAR.GZ)
 
@@ -43,7 +43,9 @@ The project includes a GitHub Actions workflow (`.github/workflows/build.yml`) t
   │   ├── VerifyApi Setup 1.0.0.exe      # NSIS installer (x64)
   │   ├── VerifyApi Setup 1.0.0-ia32.exe # NSIS installer (32-bit)
   │   ├── VerifyApi 1.0.0.exe            # Portable executable
-  │   └── VerifyApi-1.0.0-win.zip        # Windows ZIP
+  │   ├── VerifyApi-1.0.0-win.zip        # Windows ZIP
+  │   ├── VerifyApi-1.0.0.appx           # MSIX/APPX for Windows Store (x64)
+  │   └── VerifyApi-1.0.0-ia32.appx      # MSIX/APPX for Windows Store (32-bit)
   ├── mac/
   │   ├── VerifyApi-1.0.0-universal.dmg  # Universal DMG (Intel + Apple Silicon)
   │   └── VerifyApi-1.0.0-mac.zip        # macOS ZIP
@@ -74,6 +76,7 @@ After a successful workflow run:
 - ✅ **NSIS Installer** - `VerifyApi Setup 1.0.0.exe` (x64 and ia32)
 - ✅ **Portable Executable** - `VerifyApi 1.0.0.exe` (x64)
 - ✅ **ZIP Archive** - `VerifyApi-1.0.0-win.zip` (x64)
+- ✅ **MSIX/APPX Package** - `VerifyApi-1.0.0.appx` (Windows Store - x64 and ia32)
 
 ### macOS (Fully Supported)
 - ✅ **DMG Disk Image** - `VerifyApi-1.0.0-universal.dmg` (Universal: Intel + Apple Silicon)
@@ -89,7 +92,9 @@ release/
 │   ├── VerifyApi Setup 1.0.0.exe      # NSIS installer (x64)
 │   ├── VerifyApi Setup 1.0.0-ia32.exe # NSIS installer (32-bit)
 │   ├── VerifyApi 1.0.0.exe            # Portable executable
-│   └── VerifyApi-1.0.0-win.zip        # Windows ZIP
+│   ├── VerifyApi-1.0.0-win.zip        # Windows ZIP
+│   ├── VerifyApi-1.0.0.appx           # MSIX/APPX for Windows Store (x64)
+│   └── VerifyApi-1.0.0-ia32.appx      # MSIX/APPX for Windows Store (32-bit)
 ├── mac/
 │   ├── VerifyApi-1.0.0-universal.dmg  # Universal DMG (Intel + Apple Silicon)
 │   └── VerifyApi-1.0.0-mac.zip        # macOS ZIP

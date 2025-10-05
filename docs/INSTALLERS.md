@@ -6,7 +6,7 @@ This document describes how to build and distribute installers for VerifyApi acr
 
 VerifyApi uses **electron-builder** as the primary packaging tool with platform-specific enhancements:
 
-- **Windows**: NSIS installer + Inno Setup script + Portable executable + ZIP archive
+- **Windows**: NSIS installer + Portable executable + ZIP archive + MSIX/APPX for Windows Store
 - **macOS**: DMG disk image + ZIP archive (with universal binaries for Intel/Apple Silicon)
 - **Linux**: AppImage + DEB package + RPM package + Snap package + TAR.GZ archive
 
@@ -59,6 +59,18 @@ npm run installer:all     # All platforms (requires proper setup)
 - **Features**: 
   - Compressed application bundle
   - Manual extraction and execution
+
+#### MSIX/APPX Package (Windows Store)
+- **Built by**: electron-builder with appx target (generates MSIX packages)
+- **Output**: `VerifyApi-{version}.appx` (x64) and `VerifyApi-{version}-ia32.appx` (32-bit)
+- **Architecture**: Both x64 and ia32 (32-bit) support
+- **Features**: 
+  - Windows Store distribution ready
+  - Modern MSIX packaging format
+  - Automatic updates through Microsoft Store
+  - Sandboxed execution for security
+  - Digital signature validation
+  - Universal Windows Platform (UWP) integration
 
 ### macOS Installers
 
@@ -195,7 +207,9 @@ artifacts/
 │   ├── VerifyApi Setup 1.0.0.exe
 │   ├── VerifyApi Setup 1.0.0-ia32.exe
 │   ├── VerifyApi 1.0.0.exe (portable)
-│   └── VerifyApi-1.0.0-win.zip
+│   ├── VerifyApi-1.0.0-win.zip
+│   ├── VerifyApi-1.0.0.appx (MSIX x64)
+│   └── VerifyApi-1.0.0-ia32.appx (MSIX 32-bit)
 ├── mac-artifacts/
 │   ├── VerifyApi-1.0.0-universal.dmg
 │   └── VerifyApi-1.0.0-mac.zip
@@ -241,7 +255,7 @@ jobs:
 
 ### GitHub Releases
 The GitHub Actions workflow automatically uploads installer files to GitHub Releases when a release is published:
-- **Windows**: NSIS installers (x64, ia32), portable `.exe`, `.zip`
+- **Windows**: NSIS installers (x64, ia32), portable `.exe`, `.zip`, MSIX/APPX for Windows Store (x64, ia32)
 - **macOS**: Universal `.dmg`, `.zip`
 - **Linux**: `.AppImage`, `.deb`, `.rpm`, `.tar.gz`
 

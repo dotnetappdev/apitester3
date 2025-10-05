@@ -89,12 +89,15 @@ A comprehensive CI/CD workflow that:
 - NSIS Setup (32-bit): `VerifyApi Setup 1.0.0-ia32.exe`
 - Portable (x64): `VerifyApi 1.0.0.exe`
 - ZIP (x64): `VerifyApi-1.0.0-win.zip`
+- MSIX/APPX (x64): `VerifyApi-1.0.0.appx`
+- MSIX/APPX (32-bit): `VerifyApi-1.0.0-ia32.appx`
 
 **Features:**
 - Standard Windows installation experience
 - Supports both 64-bit and 32-bit Windows
 - Desktop and Start Menu shortcuts
 - Uninstaller included
+- Windows Store distribution ready with MSIX packages
 
 ### macOS ✅
 **Formats:**
@@ -130,7 +133,9 @@ release/
 │   ├── VerifyApi Setup 1.0.0.exe
 │   ├── VerifyApi Setup 1.0.0-ia32.exe
 │   ├── VerifyApi 1.0.0.exe
-│   └── VerifyApi-1.0.0-win.zip
+│   ├── VerifyApi-1.0.0-win.zip
+│   ├── VerifyApi-1.0.0.appx
+│   └── VerifyApi-1.0.0-ia32.appx
 ├── mac/
 │   ├── VerifyApi-1.0.0-universal.dmg
 │   └── VerifyApi-1.0.0-mac.zip

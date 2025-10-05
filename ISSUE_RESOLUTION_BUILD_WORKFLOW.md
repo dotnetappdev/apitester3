@@ -63,11 +63,13 @@ release/
 
 ### 3. ✅ Installers Created for Each Platform
 
-#### Windows Installers (4 formats)
+#### Windows Installers (6 formats)
 - **NSIS Installer (x64)**: `VerifyApi Setup 1.0.0.exe`
 - **NSIS Installer (ia32)**: `VerifyApi Setup 1.0.0-ia32.exe` 
 - **Portable Executable**: `VerifyApi 1.0.0.exe`
 - **ZIP Archive**: `VerifyApi-1.0.0-win.zip`
+- **MSIX/APPX (x64)**: `VerifyApi-1.0.0.appx`
+- **MSIX/APPX (ia32)**: `VerifyApi-1.0.0-ia32.appx`
 
 #### macOS Installers (2 formats)
 - **Universal DMG**: `VerifyApi-1.0.0-universal.dmg` (Intel + Apple Silicon)
@@ -79,7 +81,7 @@ release/
 - **RPM Package**: `verifyapi-1.0.0.x86_64.rpm`
 - **TAR.GZ Archive**: `verifyapi-1.0.0.tar.gz`
 
-**Total: 10 installer formats across 3 platforms**
+**Total: 12 installer formats across 3 platforms**
 
 ### 4. ✅ Documentation Updated with "verifyapi" Name
 
@@ -170,7 +172,7 @@ Beyond the original requirements, also created:
 | Build workflow file | ✅ Complete | `.github/workflows/build.yml` created |
 | All 3 platforms | ✅ Complete | Windows, macOS, Linux all configured |
 | Platform subfolders | ✅ Complete | `release/{windows,mac,linux}/` |
-| Installers created | ✅ Complete | 10 installer formats total |
+| Installers created | ✅ Complete | 12 installer formats total (Win: 6, macOS: 2, Linux: 4) |
 | Documentation updated | ✅ Complete | 4 docs updated with "verifyapi" |
 | Code naming | ✅ Complete | All references updated |
 

@@ -43,6 +43,8 @@
 │ NSIS ia32 .exe   │    │ Universal .zip   │    │ .deb package     │
 │ Portable .exe    │    │                  │    │ .rpm package     │
 │ .zip archive     │    │                  │    │ .tar.gz          │
+│ MSIX x64 .appx   │    │                  │    │                  │
+│ MSIX ia32 .appx  │    │                  │    │                  │
 └────────┬─────────┘    └────────┬─────────┘    └────────┬─────────┘
          │                       │                       │
          │                       │                       │
@@ -80,7 +82,9 @@ release/
 │   ├── VerifyApi Setup 1.0.0.exe         # NSIS installer (64-bit)
 │   ├── VerifyApi Setup 1.0.0-ia32.exe    # NSIS installer (32-bit)
 │   ├── VerifyApi 1.0.0.exe               # Portable executable
-│   └── VerifyApi-1.0.0-win.zip           # Windows ZIP archive
+│   ├── VerifyApi-1.0.0-win.zip           # Windows ZIP archive
+│   ├── VerifyApi-1.0.0.appx              # MSIX/APPX for Windows Store (64-bit)
+│   └── VerifyApi-1.0.0-ia32.appx         # MSIX/APPX for Windows Store (32-bit)
 │
 ├── mac/
 │   ├── VerifyApi-1.0.0-universal.dmg     # Universal DMG (Intel + M1/M2)
@@ -172,6 +176,8 @@ Installers → GitHub Release → Downloadable from release page
 | NSIS ia32 | ~110 MB | Standard install | 32-bit Windows |
 | Portable | ~115 MB | No install | USB/portable |
 | ZIP | ~110 MB | Extract & run | Manual install |
+| MSIX x64 | ~110 MB | Windows Store | Store users |
+| MSIX ia32 | ~110 MB | Windows Store | Store users (32-bit) |
 | **macOS** | | | | |
 | DMG Universal | ~125 MB | Drag to Apps | All Mac users |
 | ZIP Universal | ~120 MB | Extract & run | Advanced users |

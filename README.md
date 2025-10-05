@@ -126,7 +126,7 @@ npm run build
 npm run package
 
 # Or package for specific platforms
-npm run package:win      # Windows (NSIS, Portable, ZIP)
+npm run package:win      # Windows (NSIS, Portable, ZIP, MSIX)
 npm run package:mac      # macOS (DMG, ZIP - Universal binary)
 npm run package:linux    # Linux (AppImage, DEB, RPM, TAR.GZ)
 npm run package:all      # All platforms (requires proper setup)
@@ -144,6 +144,8 @@ npm run package:win
 # - VerifyApi Setup 1.0.0-ia32.exe (NSIS installer 32-bit)
 # - VerifyApi 1.0.0.exe (Portable)
 # - VerifyApi-1.0.0-win.zip (ZIP archive)
+# - VerifyApi-1.0.0.appx (MSIX for Windows Store x64)
+# - VerifyApi-1.0.0-ia32.appx (MSIX for Windows Store 32-bit)
 ```
 
 **macOS:**
@@ -185,13 +187,13 @@ npm run package:linux
 - **Linux**: Tested on Ubuntu 18.04+, CentOS 7+, Debian 10+, Fedora 32+.
 
 **Package Formats by Platform:**
-- **Windows**: NSIS installer (x64 and ia32), portable executable, ZIP archive
+- **Windows**: NSIS installer (x64 and ia32), portable executable, ZIP archive, MSIX/APPX for Windows Store (x64 and ia32)
 - **macOS**: DMG disk image, ZIP application bundle (Universal: Intel + Apple Silicon)
 - **Linux**: AppImage (universal), DEB (Debian/Ubuntu), RPM (Red Hat/CentOS), TAR.GZ (generic)
 
 **Verified Working Packages:**
 - ✅ **Linux**: AppImage, DEB, RPM, TAR.GZ
-- ✅ **Windows**: NSIS Installer (x64, ia32), Portable, ZIP
+- ✅ **Windows**: NSIS Installer (x64, ia32), Portable, ZIP, MSIX/APPX (Windows Store)
 - ✅ **macOS**: DMG (Universal), ZIP (Universal)
 
 📋 **For detailed build instructions and installer configuration, see [docs/INSTALLERS.md](docs/INSTALLERS.md) and [docs/BUILD.md](docs/BUILD.md)**
