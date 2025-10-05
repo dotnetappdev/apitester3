@@ -326,7 +326,7 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
             disabled={isRunning || isDiscovering}
             title="Discover All Tests"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
               <path d="M7 3.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM1.5 7a5.5 5.5 0 1 1 9.77 3.44l3.64 3.65a1 1 0 0 1-1.41 1.42l-3.65-3.65A5.5 5.5 0 0 1 1.5 7z"/>
             </svg>
           </button>
@@ -337,7 +337,7 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                 onClick={() => {/* TODO: Implement pause */}}
                 title="Pause Tests"
               >
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M5 3h2v10H5V3zm4 0h2v10H9V3z"/>
                 </svg>
               </button>
@@ -346,7 +346,7 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
                 onClick={() => setIsRunning(false)}
                 title="Stop Tests"
               >
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
                   <rect x="3" y="3" width="10" height="10" rx="1"/>
                 </svg>
               </button>
@@ -358,7 +358,7 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
               disabled={requests.length === 0 && uiTestSuites.size === 0}
               title="Run All Tests (F5)"
             >
-              <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+              <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
                 <path d="M3 2l10 6-10 6V2z"/>
               </svg>
             </button>
@@ -369,7 +369,7 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
             disabled={isRunning || (requests.length === 0 && uiTestSuites.size === 0)}
             title="Debug Tests (F6)"
           >
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+            <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
               <path d="M8 1a3.5 3.5 0 0 1 3.5 3.5v1.088A5.002 5.002 0 0 1 13 10v3H3v-3a5.002 5.002 0 0 1 1.5-4.412V4.5A3.5 3.5 0 0 1 8 1zm0 1a2.5 2.5 0 0 0-2.5 2.5v1.336a1 1 0 0 1-.26.67A4 4 0 0 0 4 10v2h8v-2a4 4 0 0 0-1.24-2.894 1 1 0 0 1-.26-.67V4.5A2.5 2.5 0 0 0 8 2z"/>
             </svg>
           </button>
@@ -378,7 +378,7 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
             onClick={() => {/* TODO: Refresh tests */}}
             title="Refresh Tests"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
               <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
               <path fillRule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
             </svg>
@@ -832,7 +832,8 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
 
         .test-actions {
           display: flex;
-          gap: 4px;
+          gap: 6px;
+          align-items: center;
         }
 
         .test-action-button {
@@ -840,50 +841,68 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
           border: 1px solid var(--border-color);
           color: var(--text-muted);
           cursor: pointer;
-          padding: 6px 10px;
+          padding: 8px 14px;
           border-radius: 4px;
-          font-size: 14px;
+          font-size: 16px;
           transition: all 0.2s ease;
           font-weight: 500;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 42px;
+          min-height: 36px;
         }
 
         .test-action-button.play {
           background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
           color: white;
           border: 1px solid #45a049;
-          box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+          box-shadow: 0 2px 6px rgba(76, 175, 80, 0.4);
         }
 
         .test-action-button.play:hover:not(:disabled) {
           background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
-          box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
-          transform: translateY(-1px);
+          box-shadow: 0 4px 10px rgba(76, 175, 80, 0.5);
+          transform: translateY(-2px);
         }
 
         .test-action-button.stop {
           background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
           color: white;
           border: 1px solid #d32f2f;
-          box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
+          box-shadow: 0 2px 6px rgba(244, 67, 54, 0.4);
         }
 
         .test-action-button.stop:hover {
           background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
-          box-shadow: 0 4px 8px rgba(244, 67, 54, 0.4);
-          transform: translateY(-1px);
+          box-shadow: 0 4px 10px rgba(244, 67, 54, 0.5);
+          transform: translateY(-2px);
+        }
+
+        .test-action-button.pause {
+          background: linear-gradient(135deg, #FFC107 0%, #FFA000 100%);
+          color: white;
+          border: 1px solid #FFA000;
+          box-shadow: 0 2px 6px rgba(255, 193, 7, 0.4);
+        }
+
+        .test-action-button.pause:hover {
+          background: linear-gradient(135deg, #FFA000 0%, #FF8F00 100%);
+          box-shadow: 0 4px 10px rgba(255, 193, 7, 0.5);
+          transform: translateY(-2px);
         }
 
         .test-action-button.debug {
           background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
           color: white;
           border: 1px solid #F57C00;
-          box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+          box-shadow: 0 2px 6px rgba(255, 152, 0, 0.4);
         }
 
         .test-action-button.debug:hover:not(:disabled) {
           background: linear-gradient(135deg, #F57C00 0%, #E65100 100%);
-          box-shadow: 0 4px 8px rgba(255, 152, 0, 0.4);
-          transform: translateY(-1px);
+          box-shadow: 0 4px 10px rgba(255, 152, 0, 0.5);
+          transform: translateY(-2px);
         }
 
         .test-action-button.discover {

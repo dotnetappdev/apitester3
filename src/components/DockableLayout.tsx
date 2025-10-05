@@ -526,6 +526,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                 title="Collections"
                 defaultDock="left"
                 stackable={true}
+                hideDockingControls={true}
                 onDockChange={(mode) => setCollectionsPanelMode(mode)}
                 onClose={() => setCollectionsPanelVisible(false)}
               >
@@ -570,7 +571,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                 title="Test Explorer"
                 defaultDock="left"
                 stackable={true}
-                hideDockingControls={false}
+                hideDockingControls={true}
                 onDockChange={(mode) => setTestExplorerPanelMode(mode)}
                 onClose={() => setTestExplorerPanelVisible(false)}
               >
@@ -735,6 +736,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
           title="Collections"
           floating={true}
           defaultDock="left"
+          hideDockingControls={true}
           onDockChange={(mode) => setCollectionsPanelMode(mode)}
           onClose={() => setCollectionsPanelVisible(false)}
         >
@@ -778,7 +780,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
           title="Test Explorer"
           floating={true}
           defaultDock="left"
-          hideDockingControls={false}
+          hideDockingControls={true}
           onDockChange={(mode) => setTestExplorerPanelMode(mode)}
           onClose={() => setTestExplorerPanelVisible(false)}
         >
@@ -833,24 +835,61 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         }
 
         .panel-toggle {
-          background: transparent;
-          border: 1px solid transparent;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-color);
           color: var(--text-primary);
-          padding: 4px 8px;
-          border-radius: 3px;
+          padding: 6px 12px;
+          border-radius: 4px;
           cursor: pointer;
-          font-size: 12px;
+          font-size: 13px;
+          font-weight: 500;
           transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          gap: 6px;
         }
 
         .panel-toggle:hover {
           background: var(--bg-hover);
-          border-color: var(--border-color);
+          border-color: var(--accent-color);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .panel-toggle.active {
           background: var(--accent-color);
           color: white;
+          border-color: var(--accent-color);
+          box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+        }
+
+        .layout-mode-toggle {
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-color);
+          color: var(--text-primary);
+          padding: 6px 12px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 500;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .layout-mode-toggle:hover {
+          background: var(--bg-hover);
+          border-color: var(--accent-color);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .layout-mode-toggle.active {
+          background: var(--accent-color);
+          color: white;
+          border-color: var(--accent-color);
+          box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
         }
 
         .reset-layout {
@@ -877,21 +916,32 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         }
 
         .help-menu-toggle {
-          background: transparent;
-          border: 1px solid transparent;
-          color: var(--text-muted);
-          padding: 4px 8px;
-          border-radius: 3px;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-color);
+          color: var(--text-primary);
+          padding: 6px 12px;
+          border-radius: 4px;
           cursor: pointer;
-          font-size: 12px;
+          font-size: 13px;
+          font-weight: 500;
           transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          gap: 6px;
         }
 
-        .help-menu-toggle:hover,
-        .help-menu-toggle.active {
+        .help-menu-toggle:hover {
           background: var(--bg-hover);
-          border-color: var(--border-color);
-          color: var(--text-primary);
+          border-color: var(--accent-color);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .help-menu-toggle.active {
+          background: var(--accent-color);
+          color: white;
+          border-color: var(--accent-color);
+          box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
         }
 
         .help-dropdown {
