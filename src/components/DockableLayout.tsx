@@ -95,12 +95,14 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
   const [runGroupOpen, setRunGroupOpen] = useState(false);
   const [showMonitoring, setShowMonitoring] = useState(false);
   const [sidebarView, setSidebarView] = useState<'collections' | 'environments' | 'history' | 'monitoring' | 'ui-tests' | 'tests'>('collections');
+  const [showViewMenu, setShowViewMenu] = useState(false);
 
   useEffect(() => {
     const onDocClick = () => {
       setShowHelpMenu(false);
       setShowProfileDropdown(false);
       setRunGroupOpen(false);
+      setShowViewMenu(false);
     };
     window.addEventListener('click', onDocClick);
     return () => window.removeEventListener('click', onDocClick);
@@ -211,10 +213,41 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
                     <span className="ribbon-button-icon">🧪</span>
                     <span className="ribbon-button-label">Tests</span>
                   </button>
-                  <button className="ribbon-button" onClick={() => onSettings?.()} title="Settings">
-                    <span className="ribbon-button-icon">⚙️</span>
-                    <span className="ribbon-button-label">Settings</span>
-                  </button>
+                  <div className="ribbon-button-with-menu" onClick={e => e.stopPropagation()}>
+                    <button className="ribbon-button" onClick={() => setShowViewMenu(v => !v)} title="View Options">
+                      <span className="ribbon-button-icon">👁️</span>
+                      <span className="ribbon-button-label">View ▾</span>
+                    </button>
+                    {showViewMenu && (
+                      <div className="ribbon-dropdown">
+                        <button className="ribbon-dropdown-item" onClick={() => { setCollectionsVisible(true); setSidebarView('collections'); setShowViewMenu(false); }}>
+                          <span className="ribbon-dropdown-check">{collectionsVisible && sidebarView === 'collections' ? '✓' : ''}</span>
+                          Collections Panel
+                        </button>
+                        <button className="ribbon-dropdown-item" onClick={() => { setCollectionsVisible(true); setSidebarView('tests'); setShowViewMenu(false); }}>
+                          <span className="ribbon-dropdown-check">{sidebarView === 'tests' ? '✓' : ''}</span>
+                          Tests Panel
+                        </button>
+                        <button className="ribbon-dropdown-item" onClick={() => { setCollectionsVisible(true); setSidebarView('ui-tests'); setShowViewMenu(false); }}>
+                          <span className="ribbon-dropdown-check">{sidebarView === 'ui-tests' ? '✓' : ''}</span>
+                          UI Tests Panel
+                        </button>
+                        <button className="ribbon-dropdown-item" onClick={() => { setCollectionsVisible(true); setSidebarView('environments'); setShowViewMenu(false); }}>
+                          <span className="ribbon-dropdown-check">{sidebarView === 'environments' ? '✓' : ''}</span>
+                          Environments Panel
+                        </button>
+                        <button className="ribbon-dropdown-item" onClick={() => { setCollectionsVisible(true); setSidebarView('history'); setShowViewMenu(false); }}>
+                          <span className="ribbon-dropdown-check">{sidebarView === 'history' ? '✓' : ''}</span>
+                          History Panel
+                        </button>
+                        <div className="ribbon-dropdown-sep" />
+                        <button className="ribbon-dropdown-item" onClick={() => { setCollectionsVisible(v => !v); setShowViewMenu(false); }}>
+                          <span className="ribbon-dropdown-check">{collectionsVisible ? '✓' : ''}</span>
+                          Show Sidebar
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="ribbon-group-label">View</div>
               </div>
@@ -250,6 +283,17 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
                   </button>
                 </div>
                 <div className="ribbon-group-label">Monitor</div>
+              </div>
+
+              {/* Settings Group */}
+              <div className="ribbon-group">
+                <div className="ribbon-group-buttons">
+                  <button className="ribbon-button" onClick={() => onSettings?.()} title="Settings">
+                    <span className="ribbon-button-icon">⚙️</span>
+                    <span className="ribbon-button-label">Settings</span>
+                  </button>
+                </div>
+                <div className="ribbon-group-label">Options</div>
               </div>
             </div>
           </div>
@@ -501,6 +545,60 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
           line-height: 1.2;
           font-weight: 500;
           white-space: nowrap;
+        }
+        
+        /* Ribbon Button with Menu */
+        .ribbon-button-with-menu {
+          position: relative;
+          display: inline-block;
+        }
+        
+        .ribbon-dropdown {
+          position: absolute;
+          top: calc(100% + 4px);
+          left: 0;
+          background: #2d2d2d;
+          border: 1px solid #3e3e42;
+          border-radius: 4px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+          z-index: 1300;
+          min-width: 220px;
+          overflow: hidden;
+        }
+        
+        .ribbon-dropdown-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 16px;
+          background: transparent;
+          border: none;
+          width: 100%;
+          text-align: left;
+          cursor: pointer;
+          font-size: 13px;
+          color: #cccccc;
+          transition: all 0.12s ease;
+        }
+        
+        .ribbon-dropdown-item:hover {
+          background: rgba(255, 255, 255, 0.08);
+          color: #ffffff;
+        }
+        
+        .ribbon-dropdown-check {
+          width: 16px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          color: #0078d4;
+        }
+        
+        .ribbon-dropdown-sep {
+          height: 1px;
+          background: #3e3e42;
+          margin: 4px 0;
         }
         
         /* Icon Button (for Help, etc.) */
