@@ -6,6 +6,7 @@ import { EnhancedSidebar } from './EnhancedSidebar';
 import { TestExplorer } from './TestExplorer';
 import { EnhancedRequestPanel } from './EnhancedRequestPanel';
 import { ResponsePanel } from './ResponsePanel';
+import { TestScriptEditor } from './TestScriptEditor';
 import { DockablePanel } from './DockablePanel';
 import { Collection, Request, TestResult, User } from '../database/DatabaseManager';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
@@ -99,7 +100,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
   const [collectionsPanelMode, setCollectionsPanelMode] = useState<'left' | 'right' | 'top' | 'bottom' | 'floating'>('left');
   const [testExplorerPanelMode, setTestExplorerPanelMode] = useState<'left' | 'right' | 'top' | 'bottom' | 'floating'>('left');
   const [contentLayoutMode, setContentLayoutMode] = useState<'stacked' | 'tabbed'>('stacked');
-  const [activeContentTab, setActiveContentTab] = useState<'request' | 'response'>('request');
+  const [activeContentTab, setActiveContentTab] = useState<'request' | 'response' | 'testcode'>('request');
   const [collectionsPanelVisible, setCollectionsPanelVisible] = useState(true);
   const [testExplorerPanelVisible, setTestExplorerPanelVisible] = useState(true);
 
@@ -422,6 +423,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
           >
             🧪 {!isTablet && 'Tests'}
           </button>
+          <div className="toolbar-separator"></div>
           <button 
             className={`layout-mode-toggle ${contentLayoutMode === 'tabbed' ? 'active' : ''}`}
             onClick={() => setContentLayoutMode(contentLayoutMode === 'stacked' ? 'tabbed' : 'stacked')}
@@ -526,6 +528,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                 title="Collections"
                 defaultDock="left"
                 stackable={true}
+                hideDockingControls={true}
                 onDockChange={(mode) => setCollectionsPanelMode(mode)}
                 onClose={() => setCollectionsPanelVisible(false)}
               >
@@ -570,7 +573,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                 title="Test Explorer"
                 defaultDock="left"
                 stackable={true}
-                hideDockingControls={false}
+                hideDockingControls={true}
                 onDockChange={(mode) => setTestExplorerPanelMode(mode)}
                 onClose={() => setTestExplorerPanelVisible(false)}
               >
@@ -678,6 +681,22 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                       </span>
                     )}
                   </button>
+                  <button
+                    className={`content-tab ${activeContentTab === 'testcode' ? 'active' : ''}`}
+                    onClick={() => setActiveContentTab('testcode')}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8.5 5.5a.5.5 0 0 0-1 0v2h-2a.5.5 0 0 0 0 1h2v2a.5.5 0 0 0 1 0v-2h2a.5.5 0 0 0 0-1h-2v-2z"/>
+                      <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
+                      <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
+                    </svg>
+                    <span>Test Code</span>
+                    {activeRequest && (
+                      <span className="tab-status-badge">
+                        {(testSuitesMap.get(activeRequest.id)?.testCases || []).length} tests
+                      </span>
+                    )}
+                  </button>
                 </div>
                 <div className="content-tab-panel">
                   {activeContentTab === 'request' ? (
@@ -693,13 +712,33 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
                         />
                       </div>
                     </div>
-                  ) : (
+                  ) : activeContentTab === 'response' ? (
                     <div className="panel-container response-panel full-height">
                       <div className="panel-content">
                         <ResponsePanel
                           response={response}
                           isLoading={isLoading}
                         />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="panel-container test-code-panel full-height">
+                      <div className="panel-content">
+                        {activeRequest ? (
+                          <TestScriptEditor
+                            requestId={activeRequest.id}
+                            requestName={activeRequest.name}
+                            onTestSuiteChange={(testSuite) => onEditTestSuite(testSuite)}
+                            onRunTests={onRunTestSuite}
+                            testResults={testExecutionResults.get(activeRequest.id)}
+                          />
+                        ) : (
+                          <div className="empty-state">
+                            <div className="empty-state-icon">🧪</div>
+                            <h3>No Request Selected</h3>
+                            <p>Select a request from the Collections panel to write test code</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -735,6 +774,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
           title="Collections"
           floating={true}
           defaultDock="left"
+          hideDockingControls={true}
           onDockChange={(mode) => setCollectionsPanelMode(mode)}
           onClose={() => setCollectionsPanelVisible(false)}
         >
@@ -778,7 +818,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
           title="Test Explorer"
           floating={true}
           defaultDock="left"
-          hideDockingControls={false}
+          hideDockingControls={true}
           onDockChange={(mode) => setTestExplorerPanelMode(mode)}
           onClose={() => setTestExplorerPanelVisible(false)}
         >
@@ -818,39 +858,74 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         }
 
         .layout-toolbar {
-          height: 32px;
-          background: var(--bg-secondary);
+          height: 40px;
+          background: var(--bg-primary);
           border-bottom: 1px solid var(--border-color);
           display: flex;
           align-items: center;
-          padding: 0 8px;
+          padding: 0 12px;
           flex-shrink: 0;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
         }
 
         .panel-controls {
           display: flex;
-          gap: 4px;
+          gap: 6px;
+          align-items: center;
         }
 
         .panel-toggle {
           background: transparent;
           border: 1px solid transparent;
           color: var(--text-primary);
-          padding: 4px 8px;
-          border-radius: 3px;
+          padding: 6px 14px;
+          border-radius: 4px;
           cursor: pointer;
-          font-size: 12px;
-          transition: all 0.2s ease;
+          font-size: 13px;
+          font-weight: 500;
+          transition: all 0.15s ease;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          height: 32px;
         }
 
         .panel-toggle:hover {
           background: var(--bg-hover);
-          border-color: var(--border-color);
+          border-color: transparent;
         }
 
         .panel-toggle.active {
-          background: var(--accent-color);
-          color: white;
+          background: var(--bg-tertiary);
+          color: var(--accent-color);
+          border-color: transparent;
+        }
+
+        .layout-mode-toggle {
+          background: transparent;
+          border: 1px solid transparent;
+          color: var(--text-primary);
+          padding: 6px 14px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 500;
+          transition: all 0.15s ease;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          height: 32px;
+        }
+
+        .layout-mode-toggle:hover {
+          background: var(--bg-hover);
+          border-color: transparent;
+        }
+
+        .layout-mode-toggle.active {
+          background: var(--bg-tertiary);
+          color: var(--accent-color);
+          border-color: transparent;
         }
 
         .reset-layout {
@@ -879,19 +954,28 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
         .help-menu-toggle {
           background: transparent;
           border: 1px solid transparent;
-          color: var(--text-muted);
-          padding: 4px 8px;
-          border-radius: 3px;
+          color: var(--text-primary);
+          padding: 6px 14px;
+          border-radius: 4px;
           cursor: pointer;
-          font-size: 12px;
-          transition: all 0.2s ease;
+          font-size: 13px;
+          font-weight: 500;
+          transition: all 0.15s ease;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          height: 32px;
         }
 
-        .help-menu-toggle:hover,
-        .help-menu-toggle.active {
+        .help-menu-toggle:hover {
           background: var(--bg-hover);
-          border-color: var(--border-color);
-          color: var(--text-primary);
+          border-color: transparent;
+        }
+        
+        .help-menu-toggle.active {
+          background: var(--bg-tertiary);
+          color: var(--accent-color);
+          border-color: transparent;
         }
 
         .help-dropdown {
@@ -1154,6 +1238,13 @@ export const DockableLayout: React.FC<DockableLayoutProps> = ({
 
         .toolbar-spacer {
           flex: 1;
+        }
+
+        .toolbar-separator {
+          width: 1px;
+          height: 24px;
+          background: var(--border-color);
+          margin: 0 8px;
         }
 
         /* Enhanced panel headers with status indicators */
