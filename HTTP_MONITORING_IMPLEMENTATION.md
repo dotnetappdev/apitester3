@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the HTTP monitoring feature implementation in VerifyApi, which allows users to intercept, inspect, and modify HTTP traffic in real-time, similar to HTTP Toolkit.
+This document describes the HTTP monitoring feature implementation in Palis, which allows users to intercept, inspect, and modify HTTP traffic in real-time, similar to HTTP Toolkit.
 
 ## Architecture
 
@@ -320,7 +320,7 @@ Comprehensive styling for monitoring panel:
 - User interface design patterns
 - Feature set and capabilities
 
-**Implementation:** VerifyApi Development Team
+**Implementation:** Palis Development Team
 - Custom proxy server implementation
 - React-based UI components
 - Electron integration
@@ -328,10 +328,10 @@ Comprehensive styling for monitoring panel:
 
 ## License
 
-MIT License - Same as VerifyApi project
+MIT License - Same as Palis project
 
 ---
 
 **Version:** 1.0.0  
 **Date:** 2024  
-**Author:** VerifyApi Development Team
+**Author:** Palis Development Team

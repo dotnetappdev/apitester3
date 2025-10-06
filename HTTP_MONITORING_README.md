@@ -9,7 +9,7 @@
 ## 🚀 Quick Start
 
 ```bash
-# 1. Open VerifyApi
+# 1. Open Palis
 # 2. Click 📡 Monitor button in toolbar
 # 3. Configure proxy settings
 # 4. Click ▶ Start Proxy
@@ -102,7 +102,7 @@
 1. Start proxy on port 8888
 2. Configure app: axios.defaults.baseURL = 'http://localhost:8888'
 3. Make requests normally
-4. View intercepted traffic in VerifyApi
+4. View intercepted traffic in Palis
 ```
 
 ### Response Modification
@@ -288,7 +288,7 @@ npm run dev
 
 ## 📄 License
 
-MIT License - Same as VerifyApi project
+MIT License - Same as Palis project
 
 ## 📞 Support
 
@@ -309,4 +309,4 @@ MIT License - Same as VerifyApi project
 
 **Made with ❤️ for the developer community**
 
-*VerifyApi - Professional API Testing Tool*
+*Palis - Professional API Testing Tool*

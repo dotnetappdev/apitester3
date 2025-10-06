@@ -1,12 +1,12 @@
 # Login Screen - Visual Guide and Verification
 
 ## Overview
-This document provides a visual guide to the VerifyApi login screen and helps verify that all seed data is properly loaded and displayed.
+This document provides a visual guide to the Palis login screen and helps verify that all seed data is properly loaded and displayed.
 
 ## Expected Login Screen Layout
 
 The login screen should display:
-1. **Title**: "VerifyApi" with subtitle "Who's testing APIs today?"
+1. **Title**: "Palis" with subtitle "Who's testing APIs today?"
 2. **5 User Profile Cards**: Each with a colored avatar and "Switch Account" button
 3. **3 Action Cards**: Add Profile, Reset Password, Delete Account
 4. **Password Field**: Appears below when a profile is selected
@@ -16,7 +16,7 @@ The login screen should display:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                        VerifyApi                              │
+│                        Palis                              │
 │                  Who's testing APIs today?                    │
 ├──────────────────────────────────────────────────────────────┤
 │                                                               │
@@ -126,7 +126,7 @@ When clicking "Switch Account" button, a modal displays:
 Use this checklist when verifying the login screen:
 
 ### Visual Elements
-- [ ] Application title "VerifyApi" is visible
+- [ ] Application title "Palis" is visible
 - [ ] Subtitle "Who's testing APIs today?" is visible
 - [ ] 5 user profile cards are displayed in a grid
 - [ ] Each profile has a colored avatar with the first letter

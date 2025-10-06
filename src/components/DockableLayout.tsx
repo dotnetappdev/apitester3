@@ -449,7 +449,7 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
             </div>
           ) : (
             <div className="empty-state">
-              <h2>Welcome to VerifyApi</h2>
+              <h2>Welcome to Palis</h2>
               <p>Select a request to get started.</p>
             </div>
           )}

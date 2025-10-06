@@ -1,10 +1,10 @@
-# Installer Setup for VerifyApi
+# Installer Setup for Palis
 
-This document describes how to build and distribute installers for VerifyApi across Windows, macOS, and Linux platforms.
+This document describes how to build and distribute installers for Palis across Windows, macOS, and Linux platforms.
 
 ## Overview
 
-VerifyApi uses **electron-builder** as the primary packaging tool with platform-specific enhancements:
+Palis uses **electron-builder** as the primary packaging tool with platform-specific enhancements:
 
 - **Windows**: NSIS installer + Inno Setup script + Portable executable + ZIP archive
 - **macOS**: DMG disk image + ZIP archive (with universal binaries for Intel/Apple Silicon)
@@ -36,7 +36,7 @@ npm run installer:all     # All platforms (requires proper setup)
 
 #### APPX/MSIX Package (Primary - Windows Store)
 - **Built by**: electron-builder with APPX target (generates MSIX packages)
-- **Output**: `VerifyApi-{version}.appx` (MSIX format)
+- **Output**: `Palis-{version}.appx` (MSIX format)
 - **Architecture**: Both x64 and x86 (32-bit) support
 - **Features**: 
   - Windows Store distribution ready
@@ -49,7 +49,7 @@ npm run installer:all     # All platforms (requires proper setup)
 ### macOS Installers
 
 #### DMG Disk Image (Primary)
-- **Output**: `VerifyApi-{version}.dmg`
+- **Output**: `Palis-{version}.dmg`
 - **Features**:
   - Custom background image
   - Drag-to-Applications layout
@@ -64,7 +64,7 @@ npm run installer:all     # All platforms (requires proper setup)
 ### Linux Installers
 
 #### AppImage (Universal)
-- **Output**: `VerifyApi-{version}.AppImage`
+- **Output**: `Palis-{version}.AppImage`
 - **Features**: 
   - Runs on any Linux distribution
   - No installation required

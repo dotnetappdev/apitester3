@@ -1,6 +1,6 @@
 # Window Management & Test Debugging Features
 
-This document describes the new window management and test debugging features implemented for VerifyApi.
+This document describes the new window management and test debugging features implemented for Palis.
 
 ## View Menu
 
@@ -22,7 +22,7 @@ The application now includes a **View** menu in the main menu bar with the follo
 
 ### Panel Features
 
-All panels in VerifyApi support:
+All panels in Palis support:
 
 1. **Docking**: Panels can be docked to the left, right, top, or bottom of the window
 2. **Floating**: Panels can float as independent windows, perfect for multi-monitor setups

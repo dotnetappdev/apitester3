@@ -41,7 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <div className="sidebar">
       <div className="p-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
         <h2 style={{ fontSize: '16px', marginBottom: '12px', color: 'var(--text-primary)' }}>
-          VerifyApi
+          Palis
         </h2>
         <button
           className="btn btn-primary"

@@ -265,7 +265,7 @@ class AppManager {
           },
           { type: 'separator' },
           {
-            label: 'About VerifyApi',
+            label: 'About Palis',
             click: () => {
               this.mainWindow?.webContents.send('menu-about');
             }

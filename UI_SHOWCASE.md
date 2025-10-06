@@ -1,7 +1,7 @@
-# VerifyApi - UI Improvements Showcase
+# Palis - UI Improvements Showcase
 
 ## Overview
-This document showcases the UI improvements made to VerifyApi to enhance its professional appearance and user experience.
+This document showcases the UI improvements made to Palis to enhance its professional appearance and user experience.
 
 ## Statistics
 - **Files Created**: 5 (2 components, 1 constants file, 2 documentation files)
@@ -54,17 +54,17 @@ Top-right corner of the application toolbar, next to the Reset button.
 ## Feature 2: About Dialog
 
 ### Trigger
-Help Menu → "ℹ️ About VerifyApi"
+Help Menu → "ℹ️ About Palis"
 
 ### Visual Layout
 
 ```
 ╔════════════════════════════════════════════════╗
-║ About VerifyApi                          ✕ ║
+║ About Palis                          ✕ ║
 ╠════════════════════════════════════════════════╣
 ║                                                ║
 ║                    🚀                          ║
-║              VerifyApi                      ║
+║              Palis                      ║
 ║              Version 1.0.0                     ║
 ║                                                ║
 ║  Professional API testing tool with Visual     ║

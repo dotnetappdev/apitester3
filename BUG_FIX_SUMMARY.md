@@ -6,7 +6,7 @@ The user reported seeing an empty login screen with no user profiles:
 
 ```
 ┌─────────────────────────────────────────────┐
-│            VerifyApi                        │
+│            Palis                        │
 │       Who's testing APIs today?             │
 │                                             │
 │  ┌─────────────┐  ┌──────────────┐  ┌─────┐│
@@ -136,7 +136,7 @@ class SqliteDatabaseManager {
 ### Login Screen:
 ```
 ┌─────────────────────────────────────────────┐
-│            VerifyApi                        │
+│            Palis                        │
 │       Who's testing APIs today?             │
 │                                             │
 │  ┌─────────────────────────────────────┐   │

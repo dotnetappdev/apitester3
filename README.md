@@ -1,4 +1,4 @@
-# VerifyApi
+# Palis
 
 A professional, local-first desktop API testing tool inspired by Postman, built with Electron, React, and TypeScript.
 
@@ -72,7 +72,7 @@ npm run dev
 
 ## Email Notifications (SendGrid)
 
-VerifyApi can send test run notifications via SendGrid. To enable email notifications:
+Palis can send test run notifications via SendGrid. To enable email notifications:
 
 1. In the app open Settings → Advanced → Email Notifications and enable the feature.
 2. Enter your SendGrid API key and default From/To addresses.
@@ -131,7 +131,7 @@ npm run build
 npm run package
 
 # The built application will be in release/ directory
-# Look for VerifyApi.dmg or VerifyApi.app
+# Look for Palis.dmg or Palis.app
 ```
 
 **Linux:**
@@ -149,7 +149,7 @@ npm run build
 npm run package
 
 # The built application will be in release/ directory
-# Look for VerifyApi.AppImage or .deb/.rpm files
+# Look for Palis.AppImage or .deb/.rpm files
 ```
 
 **Build for Specific Platforms (Cross-compilation):**
@@ -218,7 +218,7 @@ docs/
 
 ## Import/Export Collections
 
-VerifyApi includes a powerful import/export system for sharing collections and tests between team members:
+Palis includes a powerful import/export system for sharing collections and tests between team members:
 
 ### Key Features
 - **Binary Format (.apit)**: Secure, encrypted binary files for portability
@@ -237,7 +237,7 @@ For detailed documentation, see [docs/IMPORT_EXPORT.md](docs/IMPORT_EXPORT.md)
 
 ## Code Generation
 
-VerifyApi includes a powerful code generation feature that creates client and server code from Swagger/OpenAPI specifications:
+Palis includes a powerful code generation feature that creates client and server code from Swagger/OpenAPI specifications:
 
 ### How to Use
 
@@ -370,7 +370,7 @@ If profiles are not showing up in the login screen, see **[SEED_DATA_VERIFICATIO
 
 ### Testing Documentation
 
-VerifyApi includes comprehensive testing documentation:
+Palis includes comprehensive testing documentation:
 
 - **[TEST_ASSERTIONS.md](TEST_ASSERTIONS.md)** - Complete reference guide for all test assertions
   - Test Discovery workflow

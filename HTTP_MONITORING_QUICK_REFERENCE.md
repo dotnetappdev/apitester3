@@ -227,5 +227,5 @@ After setup:
 
 ---
 
-*VerifyApi v1.0.0 | HTTP Monitoring Feature*
+*Palis v1.0.0 | HTTP Monitoring Feature*
 *Inspired by HTTP Toolkit | Styled like Postman*

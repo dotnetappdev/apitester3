@@ -1,11 +1,11 @@
 # Seed Data Verification and Troubleshooting Guide
 
 ## Overview
-This guide helps you verify that the seed data is properly loaded in your VerifyApi installation and provides troubleshooting steps if the login profiles are not showing up.
+This guide helps you verify that the seed data is properly loaded in your Palis installation and provides troubleshooting steps if the login profiles are not showing up.
 
 ## Expected Seed Data
 
-When you first run VerifyApi, the application should automatically create:
+When you first run Palis, the application should automatically create:
 
 ### 5 User Profiles
 1. **admin** (admin role) - Password: `admin123`
@@ -27,7 +27,7 @@ When you first run VerifyApi, the application should automatically create:
 ## Verifying Seed Data
 
 ### Method 1: Visual Verification
-1. Launch the VerifyApi application
+1. Launch the Palis application
 2. The login screen should display all 5 user profiles with colored avatars
 3. Click "Switch Account" to see the full list of profiles with their roles
 4. Log in with any of the default accounts (e.g., admin/admin123)
@@ -118,9 +118,9 @@ C:\Users\<YourUsername>\AppData\Roaming\verifyapi\apitester3.db
 ### Step 2: Reset the Database
 To force the seed data to be recreated:
 
-1. **Close the VerifyApi application** (make sure it's not running)
+1. **Close the Palis application** (make sure it's not running)
 2. **Delete the database file** at the location identified in Step 1
-3. **Restart the VerifyApi application**
+3. **Restart the Palis application**
 4. The seed data will be automatically created on first launch
 
 ### Step 3: Verify Console Output

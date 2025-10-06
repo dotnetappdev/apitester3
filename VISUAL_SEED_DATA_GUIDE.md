@@ -86,7 +86,7 @@ Content-Type: application/json
 
 {
   "title": "Test Post",
-  "body": "This is a test post created via VerifyApi",
+  "body": "This is a test post created via Palis",
   "userId": 1
 }
 ```
@@ -96,7 +96,7 @@ Content-Type: application/json
 // Validate post creation
 assert.assertStatusCode(201, response);
 assert.assertJsonPath('$.title', 'Test Post', response.data);
-assert.assertJsonPath('$.body', 'This is a test post created via VerifyApi', response.data);
+assert.assertJsonPath('$.body', 'This is a test post created via Palis', response.data);
 assert.assertJsonPath('$.userId', 1, response.data);
 assert.assertType('number', response.data.id);
 console.log('✓ Post created with ID:', response.data.id);
@@ -209,7 +209,7 @@ console.log('✓ Object validation tests passed');
 ### Step 1: Application Launches
 ```
 ┌─────────────────────────────────────────┐
-│          VerifyApi Login                │
+│          Palis Login                │
 │     Who's testing APIs today?           │
 ├─────────────────────────────────────────┤
 │                                         │
@@ -229,7 +229,7 @@ console.log('✓ Object validation tests passed');
 ### Step 2: Select Profile
 ```
 ┌─────────────────────────────────────────┐
-│          VerifyApi Login                │
+│          Palis Login                │
 ├─────────────────────────────────────────┤
 │                                         │
 │  Selected: developer                    │
@@ -246,7 +246,7 @@ console.log('✓ Object validation tests passed');
 ### Step 3: After Login
 ```
 ┌─────────────────────────────────────────┐
-│ VerifyApi                    developer  │
+│ Palis                    developer  │
 ├─────────────────────────────────────────┤
 │ Collections               │ Request     │
 ├───────────────────────────┼─────────────┤

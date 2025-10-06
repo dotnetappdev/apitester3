@@ -1,5 +1,5 @@
 /**
- * Dynamic Variables System for VerifyApi
+ * Dynamic Variables System for Palis
  * Provides built-in dynamic variables similar to Postman
  * Supports variables like {{$timestamp}}, {{$randomInt}}, {{$guid}}, etc.
  */

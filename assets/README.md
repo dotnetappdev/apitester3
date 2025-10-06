@@ -1,4 +1,4 @@
-# Icon Assets for VerifyApi
+# Icon Assets for Palis
 
 This directory contains icon assets for different platforms:
 
