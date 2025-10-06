@@ -93,15 +93,13 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [collectionsVisible, setCollectionsVisible] = useState(true);
   const [ribbonTab, setRibbonTab] = useState<'home' | 'features'>('home');
-  // testsVisible removed - ribbon replaces test visibility toggle
-  const [runGroupOpen, setRunGroupOpen] = useState(false);
   const [showMonitoring, setShowMonitoring] = useState(false);
   const [sidebarView, setSidebarView] = useState<'collections' | 'environments' | 'history' | 'monitoring' | 'ui-tests' | 'tests'>('collections');
   const [showViewMenu, setShowViewMenu] = useState(false);
   const [showDebugMenu, setShowDebugMenu] = useState(false);
-  const [showUnitTestEditor, setShowUnitTestEditor] = useState(false);
-  const [showUITestEditor, setShowUITestEditor] = useState(false);
   const [testEditorView, setTestEditorView] = useState<'none' | 'unit' | 'ui'>('none');
+  const [editingTestSuite, setEditingTestSuite] = useState<TestSuite | undefined>(undefined);
+  const [editingUITestSuite, setEditingUITestSuite] = useState<UITestSuite | undefined>(undefined);
 
   useEffect(() => {
     const onDocClick = () => {
@@ -125,6 +123,18 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
 
   const debugSelected = () => {
     if (activeRequest) onRunTest?.(activeRequest.id).catch(err => console.error('Debug selected failed', err)); // placeholder: same handler
+  };
+
+  // Handler to open unit test editor panel for a specific test suite
+  const handleOpenUnitTestEditor = (testSuite?: TestSuite) => {
+    setEditingTestSuite(testSuite);
+    setTestEditorView('unit');
+  };
+
+  // Handler to open UI test editor panel for a specific test suite
+  const handleOpenUITestEditor = (uiTestSuite?: UITestSuite) => {
+    setEditingUITestSuite(uiTestSuite);
+    setTestEditorView('ui');
   };
 
   return (
@@ -354,10 +364,16 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
             onRunUITestSuite={onRunUITestSuite}
             onRunAllUITests={onRunAllUITests}
             onNewTestSuite={() => onNewTestSuite?.(activeRequest ? activeRequest.id : 0)}
-            onEditTestSuite={onEditTestSuite}
+            onEditTestSuite={(testSuite) => {
+              handleOpenUnitTestEditor(testSuite);
+            }}
             onDeleteTestSuite={onDeleteTestSuite}
-            onNewUITestSuite={onNewUITestSuite}
-            onEditUITestSuite={onEditUITestSuite}
+            onNewUITestSuite={() => {
+              handleOpenUITestEditor(undefined);
+            }}
+            onEditUITestSuite={(uiTestSuite) => {
+              handleOpenUITestEditor(uiTestSuite);
+            }}
             onDeleteUITestSuite={onDeleteUITestSuite}
             onUserProfile={onUserProfile}
             onSettings={onSettings}
@@ -369,33 +385,53 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
         <div className="content-column">
           {showMonitoring ? (
             <MonitoringPanel theme={theme} />
-          ) : testEditorView !== 'none' && activeRequest ? (
+          ) : testEditorView !== 'none' ? (
             <div className="test-editor-panel">
               <div className="test-editor-header">
                 <h3>
-                  {testEditorView === 'unit' ? '🧪 Unit Test Editor' : '🖥️ UI Test Editor'} - {activeRequest.name}
+                  {testEditorView === 'unit' 
+                    ? `🧪 Unit Test Editor${activeRequest ? ` - ${activeRequest.name}` : ''}` 
+                    : `🖥️ UI Test Editor${editingUITestSuite ? ` - ${editingUITestSuite.name}` : ''}`}
                 </h3>
-                <button className="panel-close-btn" onClick={() => setTestEditorView('none')}>✕</button>
+                <button className="panel-close-btn" onClick={() => {
+                  setTestEditorView('none');
+                  setEditingTestSuite(undefined);
+                  setEditingUITestSuite(undefined);
+                }}>✕</button>
               </div>
               <div className="test-editor-content">
-                {testEditorView === 'unit' ? (
+                {testEditorView === 'unit' && activeRequest ? (
                   <TestScriptEditor
                     requestId={activeRequest.id}
                     requestName={activeRequest.name}
-                    onTestSuiteChange={onEditTestSuite}
-                    onRunTests={onRunTestSuite}
+                    onTestSuiteChange={(testSuite) => {
+                      onEditTestSuite(testSuite);
+                      setEditingTestSuite(testSuite);
+                    }}
+                    onRunTests={(testSuite, response, request) => onRunTestSuite(activeRequest.id, testSuite, response, request)}
                     testResults={testExecutionResults.get(activeRequest.id)}
                   />
-                ) : (
+                ) : testEditorView === 'ui' ? (
                   <UITestDialog
                     isOpen={true}
-                    onClose={() => setTestEditorView('none')}
+                    onClose={() => {
+                      setTestEditorView('none');
+                      setEditingUITestSuite(undefined);
+                    }}
                     onSave={(suite) => {
                       onEditUITestSuite(suite);
                       setTestEditorView('none');
+                      setEditingUITestSuite(undefined);
                     }}
-                    title="UI Test Editor"
+                    existingTestSuite={editingUITestSuite}
+                    title={editingUITestSuite ? `Edit UI Test Suite - ${editingUITestSuite.name}` : 'Create UI Test Suite'}
+                    isPanel={true}
                   />
+                ) : (
+                  <div className="empty-state">
+                    <h2>Select a Request</h2>
+                    <p>Select a request to edit its unit tests.</p>
+                  </div>
                 )}
               </div>
             </div>

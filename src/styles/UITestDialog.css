@@ -395,3 +395,14 @@
     gap: 8px;
   }
 }
+
+/* Panel mode styles - when rendered as panel instead of modal */
+.ui-test-panel {
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+}

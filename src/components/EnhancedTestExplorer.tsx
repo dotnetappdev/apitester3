@@ -3,7 +3,6 @@ import { Request, TestResult } from '../database/DatabaseManager';
 import { TestSuite, TestExecutionResult } from '../testing/TestRunner';
 import { UITestSuite, UITestExecutionResult } from '../testing/UITestRunner';
 import { ApiResponse } from '../types';
-import UITestDialog from './UITestDialog';
 import TestDebugger from './TestDebugger';
 
 interface EnhancedTestExplorerProps {
@@ -50,8 +49,6 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
   const [isRunning, setIsRunning] = useState(false);
   const [expandedRequests, setExpandedRequests] = useState<Set<number>>(new Set());
   const [expandedUITestSuites, setExpandedUITestSuites] = useState<Set<string>>(new Set());
-  const [showUITestDialog, setShowUITestDialog] = useState(false);
-  const [editingUITestSuite, setEditingUITestSuite] = useState<UITestSuite | undefined>();
   const [isDiscovering, setIsDiscovering] = useState(false);
   const [discoveredTests, setDiscoveredTests] = useState<Map<string, 'discovered' | 'not-discovered'>>(new Map());
   const [showTestTypeSelector, setShowTestTypeSelector] = useState(false);
@@ -261,27 +258,15 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
   };
 
   const handleCreateUITestSuite = () => {
-    setEditingUITestSuite(undefined);
-    setShowUITestDialog(true);
+    // Just call the callback to create a new UI test suite
+    // The panel will be opened by the parent component
+    onNewUITestSuite?.();
   };
 
   const handleEditUITestSuite = (testSuite: UITestSuite) => {
-    setEditingUITestSuite(testSuite);
-    setShowUITestDialog(true);
-  };
-
-  const handleSaveUITestSuite = (updatedTestSuite: UITestSuite) => {
-    if (editingUITestSuite) {
-      onEditUITestSuite?.(updatedTestSuite);
-    } else {
-      // For new test suites, we need a way to save them
-      if (onNewUITestSuite) {
-        // Pass the test suite data to the parent handler
-        (onNewUITestSuite as any)(updatedTestSuite);
-      }
-    }
-    setShowUITestDialog(false);
-    setEditingUITestSuite(undefined);
+    // Just call the callback to edit the UI test suite
+    // The panel will be opened by the parent component
+    onEditUITestSuite?.(testSuite);
   };
 
   const handleOpenDebugger = () => {
@@ -769,19 +754,6 @@ export const EnhancedTestExplorer: React.FC<EnhancedTestExplorerProps> = ({
             </div>
           </div>
         </div>
-      )}
-
-      {showUITestDialog && (
-        <UITestDialog
-          isOpen={showUITestDialog}
-          onClose={() => {
-            setShowUITestDialog(false);
-            setEditingUITestSuite(undefined);
-          }}
-          onSave={handleSaveUITestSuite}
-          existingTestSuite={editingUITestSuite}
-          title={editingUITestSuite ? 'Edit UI Test Suite' : 'Create UI Test Suite'}
-        />
       )}
 
       <TestDebugger
