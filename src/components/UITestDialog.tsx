@@ -9,6 +9,7 @@ interface UITestDialogProps {
   onSave: (testSuite: UITestSuite) => void;
   existingTestSuite?: UITestSuite;
   title?: string;
+  isPanel?: boolean; // New prop to indicate panel mode
 }
 
 export const UITestDialog: React.FC<UITestDialogProps> = ({
@@ -16,7 +17,8 @@ export const UITestDialog: React.FC<UITestDialogProps> = ({
   onClose,
   onSave,
   existingTestSuite,
-  title = 'Create UI Test Suite'
+  title = 'Create UI Test Suite',
+  isPanel = false
 }) => {
   const [suiteName, setSuiteName] = useState(existingTestSuite?.name || '');
   const [testCases, setTestCases] = useState<UITestCase[]>(
@@ -212,15 +214,14 @@ assert.assertUrlContains('/login', 'Should redirect to login after logout');`;
 
   if (!isOpen) return null;
 
-  return (
-    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && handleCancel()}>
-      <div className="ui-test-dialog" ref={dialogRef}>
-        <div className="dialog-header">
-          <h2>{title}</h2>
-          <button className="close-btn" onClick={handleCancel}>×</button>
-        </div>
-        
-        <div className="dialog-content">
+  const dialogContent = (
+    <div className={isPanel ? "ui-test-dialog ui-test-panel" : "ui-test-dialog"} ref={dialogRef}>
+      <div className="dialog-header">
+        <h2>{title}</h2>
+        <button className="close-btn" onClick={handleCancel}>×</button>
+      </div>
+      
+      <div className="dialog-content">
           <div className="dialog-left">
             <div className="form-group">
               <label htmlFor="suiteName">Test Suite Name *</label>
@@ -450,6 +451,12 @@ assert.assertUrlContains('/login', 'Should redirect to login after logout');`;
           </button>
         </div>
       </div>
+  );
+
+  // Return with or without modal overlay based on isPanel prop
+  return isPanel ? dialogContent : (
+    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && handleCancel()}>
+      {dialogContent}
     </div>
   );
 };
