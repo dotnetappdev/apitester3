@@ -105,7 +105,6 @@ export const DockableLayout: React.FC<DockableLayoutProps> = (props) => {
     const onDocClick = () => {
       setShowHelpMenu(false);
       setShowProfileDropdown(false);
-      setRunGroupOpen(false);
       setShowViewMenu(false);
       setShowDebugMenu(false);
     };
