@@ -21,39 +21,90 @@ npm run build
 npm run package
 
 # Build specific platform installers
-npm run package:win      # Windows (APPX/MSIX for Windows Store)
-npm run package:mac      # macOS (DMG, ZIP)
+npm run package:win      # Windows (NSIS, Portable, ZIP, MSIX)
+npm run package:mac      # macOS (DMG, ZIP with Universal binary)
 npm run package:linux    # Linux (AppImage, DEB, RPM, TAR.GZ)
 
 # Build for all platforms (requires proper setup)
 npm run package:all
 ```
 
+## GitHub Actions CI/CD
+
+The project includes a GitHub Actions workflow (`.github/workflows/build.yml`) that automatically builds VerifyApi for all three platforms:
+
+- **Triggered on**: Push to main/develop, Pull Requests, Releases, or manually
+- **Platforms**: Windows, macOS, Linux
+- **Artifacts**: Automatically organized into platform-specific folders in `release/`
+- **Output structure**:
+  ```
+  release/
+  ├── windows/
+  │   ├── VerifyApi Setup 1.0.0.exe      # NSIS installer (x64)
+  │   ├── VerifyApi Setup 1.0.0-ia32.exe # NSIS installer (32-bit)
+  │   ├── VerifyApi 1.0.0.exe            # Portable executable
+  │   ├── VerifyApi-1.0.0-win.zip        # Windows ZIP
+  │   ├── VerifyApi-1.0.0.appx           # MSIX/APPX for Windows Store (x64)
+  │   └── VerifyApi-1.0.0-ia32.appx      # MSIX/APPX for Windows Store (32-bit)
+  ├── mac/
+  │   ├── VerifyApi-1.0.0-universal.dmg  # Universal DMG (Intel + Apple Silicon)
+  │   └── VerifyApi-1.0.0-mac.zip        # macOS ZIP
+  └── linux/
+      ├── VerifyApi-1.0.0.AppImage       # Linux AppImage (universal)
+      ├── verifyapi_1.0.0_amd64.deb      # Debian/Ubuntu package
+      ├── verifyapi-1.0.0.x86_64.rpm     # Red Hat/Fedora package
+      └── verifyapi-1.0.0.tar.gz         # Generic TAR.GZ
+  ```
+
+### Using Artifacts
+
+After a successful workflow run:
+1. Go to the Actions tab in GitHub
+2. Click on the latest workflow run
+3. Download artifacts for your platform from the Artifacts section
+4. On release, installers are automatically attached to the GitHub release
+
 ## Successful Package Types Tested
 
 ### Linux (Confirmed Working)
-- ✅ **TAR.GZ** - `apitester3-1.0.0.tar.gz` (~107MB)
+- ✅ **TAR.GZ** - `verifyapi-1.0.0.tar.gz` (~107MB)
 - ✅ **AppImage** - `VerifyApi-1.0.0.AppImage` (~113MB)
-- ✅ **DEB Package** - `apitester3_1.0.0_amd64.deb` (~77MB)
+- ✅ **DEB Package** - `verifyapi_1.0.0_amd64.deb` (~77MB)
+- ✅ **RPM Package** - `verifyapi-1.0.0.x86_64.rpm` (~77MB)
 
-### Windows (Configuration Ready)
-- 🔧 **APPX/MSIX Package** - `.appx` for Windows Store (x64 and x86/32-bit support)
+### Windows (Fully Supported)
+- ✅ **NSIS Installer** - `VerifyApi Setup 1.0.0.exe` (x64 and ia32)
+- ✅ **Portable Executable** - `VerifyApi 1.0.0.exe` (x64)
+- ✅ **ZIP Archive** - `VerifyApi-1.0.0-win.zip` (x64)
+- ✅ **MSIX/APPX Package** - `VerifyApi-1.0.0.appx` (Windows Store - x64 and ia32)
 
-### macOS (Configuration Ready)
-- 🔧 **DMG Disk Image** - Standard macOS installer
-- 🔧 **ZIP Archive** - Compressed .app bundle
+### macOS (Fully Supported)
+- ✅ **DMG Disk Image** - `VerifyApi-1.0.0-universal.dmg` (Universal: Intel + Apple Silicon)
+- ✅ **ZIP Archive** - `VerifyApi-1.0.0-mac.zip` (Universal)
 
 ## Package Outputs
 
-All packages are created in the `release/` directory:
+All packages are created in the `release/` directory, organized by platform:
 
 ```
 release/
-├── VerifyApi-1.0.0.AppImage          # Linux AppImage (universal)
-├── apitester3-1.0.0.tar.gz              # Linux TAR.GZ
-├── apitester3_1.0.0_amd64.deb           # Linux DEB package
-├── linux-unpacked/                      # Unpacked Linux build
-└── latest-linux.yml                     # Auto-updater metadata
+├── windows/
+│   ├── VerifyApi Setup 1.0.0.exe      # NSIS installer (x64)
+│   ├── VerifyApi Setup 1.0.0-ia32.exe # NSIS installer (32-bit)
+│   ├── VerifyApi 1.0.0.exe            # Portable executable
+│   ├── VerifyApi-1.0.0-win.zip        # Windows ZIP
+│   ├── VerifyApi-1.0.0.appx           # MSIX/APPX for Windows Store (x64)
+│   └── VerifyApi-1.0.0-ia32.appx      # MSIX/APPX for Windows Store (32-bit)
+├── mac/
+│   ├── VerifyApi-1.0.0-universal.dmg  # Universal DMG (Intel + Apple Silicon)
+│   └── VerifyApi-1.0.0-mac.zip        # macOS ZIP
+├── linux/
+│   ├── VerifyApi-1.0.0.AppImage       # Linux AppImage (universal)
+│   ├── verifyapi_1.0.0_amd64.deb      # Debian/Ubuntu package
+│   ├── verifyapi-1.0.0.x86_64.rpm     # Red Hat/Fedora package
+│   ├── verifyapi-1.0.0.tar.gz         # Generic TAR.GZ
+│   └── linux-unpacked/                # Unpacked Linux build
+└── latest-*.yml                        # Auto-updater metadata files
 ```
 
 ## Icon Requirements
@@ -115,7 +166,7 @@ DEBUG=electron-builder npm run package
 1. **Test on target platforms** - Verify packages work on intended systems
 2. **Replace placeholder icons** - Add proper application icons
 3. **Code signing setup** - Configure certificates for Windows/macOS
-4. **CI/CD integration** - Automate builds with GitHub Actions
+4. **GitHub Actions is ready** - The CI/CD workflow automatically builds all platforms
 5. **Package repository setup** - Configure APT/YUM repositories for Linux
 
 For detailed configuration and platform-specific setup, see `docs/INSTALLERS.md`.
